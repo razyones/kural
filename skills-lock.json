@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "use-gunshi-cli": {
+      "source": "ryoppippi/ccusage",
+      "sourceType": "github",
+      "computedHash": "1ce2e1df6e0ccfd2ddddcac8fcdd1ce4f6c030180f84decc1205679882eb0b65"
+    }
+  }
+}

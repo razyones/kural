@@ -1,0 +1,31 @@
+{
+  "name": "kural",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "kural": "./dist/cli.mjs"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "vp pack",
+    "prepare": "vp config"
+  },
+  "dependencies": {
+    "ai": "^6.0.116",
+    "gunshi": "^0.29.3"
+  },
+  "devDependencies": {
+    "@gunshi/docs": "^0.29.3",
+    "@types/node": "^25.5.0",
+    "typescript": "~5.9.3",
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vite-plus": "latest"
+  },
+  "packageManager": "pnpm@10.32.1",
+  "pnpm": {
+    "overrides": {
+      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+      "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
+    }
+  }
+}
