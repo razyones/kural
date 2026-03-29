@@ -5,7 +5,6 @@
  */
 
 import type { Post } from "./post.ts";
-// @ts-expect-error -- zod is not installed; fixture exercises external import extraction
 import { z } from "zod";
 
 /** Represents a registered user in the system */

@@ -89,7 +89,7 @@ export default defineConfig({
     format: "esm",
     platform: "node",
     deps: {
-      neverBundle: ["typescript"],
+      neverBundle: ["typescript", "better-sqlite3"],
     },
   },
 });
