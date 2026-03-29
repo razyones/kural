@@ -11,6 +11,10 @@
     "prepare": "vp config"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.41",
+    "@libsql/client": "^0.17.0",
+    "@poppinss/cliui": "^6.7.0",
+    "@saehrimnir/druidjs": "^0.8.0",
     "ai": "^6.0.116",
     "gunshi": "^0.29.3"
   },

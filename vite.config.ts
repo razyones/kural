@@ -55,7 +55,7 @@ export default defineConfig({
       "eslint/curly": "warn",
       "eslint/no-var": "error",
       "eslint/prefer-const": "warn",
-      "eslint/no-duplicate-imports": "warn",
+      "eslint/no-duplicate-imports": "off",
       "eslint/sort-imports": "warn",
     },
     options: {
@@ -68,5 +68,8 @@ export default defineConfig({
     entry: "src/cli.ts",
     format: "esm",
     platform: "node",
+    deps: {
+      neverBundle: ["typescript"],
+    },
   },
 });
