@@ -58,10 +58,30 @@ export default defineConfig({
       "eslint/no-duplicate-imports": "off",
       "eslint/sort-imports": "warn",
     },
+    overrides: [
+      {
+        files: ["**/*.test.ts", "tests/**"],
+        rules: {
+          "eslint/max-lines": "off",
+          "eslint/max-lines-per-function": "off",
+        },
+      },
+    ],
     options: {
       typeAware: true,
       typeCheck: true,
       denyWarnings: true,
+    },
+  },
+  test: {
+    coverage: {
+      provider: "v8",
+      thresholds: {
+        statements: 90,
+        branches: 90,
+        functions: 90,
+        lines: 90,
+      },
     },
   },
   pack: {

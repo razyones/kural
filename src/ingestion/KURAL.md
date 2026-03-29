@@ -1,0 +1,1 @@
+The reader and translator. Everything between raw source code on disk and the numerical representations that downstream scoring consumes. It is the only part of the system that reads, interprets, and encodes the codebase — no other module touches source files or crosses the network to produce vectors.

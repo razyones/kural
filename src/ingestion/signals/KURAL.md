@@ -1,0 +1,1 @@
+The voice. Translates code structures into semantic text strings — prose descriptions, structural signatures, path anchors, and causes labels. It is the only module that produces human-readable text from code — no other module turns structural data into descriptive language.

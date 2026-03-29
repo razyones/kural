@@ -21,6 +21,7 @@
   "devDependencies": {
     "@gunshi/docs": "^0.29.3",
     "@types/node": "^25.5.0",
+    "@vitest/coverage-v8": "^4.1.2",
     "typescript": "~5.9.3",
     "vite": "npm:@voidzero-dev/vite-plus-core@latest",
     "vite-plus": "latest"

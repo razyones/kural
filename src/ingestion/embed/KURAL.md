@@ -1,0 +1,1 @@
+The encoder. Turns descriptive inputs into numerical vectors through weighted blending and batched API calls. It is the only module that crosses the network to produce vectors — no other part of the system calls external model APIs or blends numerical representations.
