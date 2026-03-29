@@ -72,7 +72,7 @@ const scoreSchema = z.object({
   key: z.string(),
   kind: z.string(),
   name: z.string(),
-  labelFit: z.number(),
+  labelFit: z.number().optional(),
   labelUniqueness: z.number(),
   subtreeFit: z.number(),
   subtreeUniqueness: z.number(),

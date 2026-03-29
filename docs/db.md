@@ -101,21 +101,21 @@ Directory hierarchy with child references.
 
 Structural health metrics for files and directories.
 
-| Column                   | Type          | Notes                                                     |
-| ------------------------ | ------------- | --------------------------------------------------------- |
-| `key`                    | TEXT PK       | Unique identifier                                         |
-| `kind`                   | TEXT NOT NULL | `"file"` or `"directory"`                                 |
-| `name`                   | TEXT NOT NULL | Display name                                              |
-| `label_fit`              | REAL NOT NULL | How well declared name matches structure                  |
-| `label_uniqueness`       | REAL NOT NULL | How distinct children are from each other                 |
-| `subtree_fit`            | REAL NOT NULL | Mean fit across subtree                                   |
-| `subtree_uniqueness`     | REAL NOT NULL | Mean uniqueness across subtree                            |
-| `subtree_min_fit`        | REAL NOT NULL | Worst fit in subtree                                      |
-| `subtree_min_uniqueness` | REAL NOT NULL | Worst uniqueness in subtree                               |
-| `overall_score`          | REAL          | Harmonic mean of fit and uniqueness (null if no siblings) |
-| `worst_pair`             | TEXT          | JSON — least unique sibling pair                          |
-| `best_uncle_name`        | TEXT          | Uncle node where this unit fits better                    |
-| `best_uncle_score`       | REAL          | Uncle's fit score                                         |
+| Column                   | Type          | Notes                                                                     |
+| ------------------------ | ------------- | ------------------------------------------------------------------------- |
+| `key`                    | TEXT PK       | Unique identifier                                                         |
+| `kind`                   | TEXT NOT NULL | `"file"` or `"directory"`                                                 |
+| `name`                   | TEXT NOT NULL | Display name                                                              |
+| `label_fit`              | REAL          | How well declared name matches structure (null for capability containers) |
+| `label_uniqueness`       | REAL NOT NULL | How distinct children are from each other                                 |
+| `subtree_fit`            | REAL NOT NULL | Mean fit across subtree                                                   |
+| `subtree_uniqueness`     | REAL NOT NULL | Mean uniqueness across subtree                                            |
+| `subtree_min_fit`        | REAL NOT NULL | Worst fit in subtree                                                      |
+| `subtree_min_uniqueness` | REAL NOT NULL | Worst uniqueness in subtree                                               |
+| `overall_score`          | REAL          | Harmonic mean of fit and uniqueness (null if no siblings)                 |
+| `worst_pair`             | TEXT          | JSON — least unique sibling pair                                          |
+| `best_uncle_name`        | TEXT          | Uncle node where this unit fits better                                    |
+| `best_uncle_score`       | REAL          | Uncle's fit score                                                         |
 
 ### metadata
 
