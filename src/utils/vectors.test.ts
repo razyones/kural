@@ -1,4 +1,11 @@
-import { avg, centroid, cosineSimilarity, pruneOutliers, subtract } from "./vectors.ts";
+import {
+  avg,
+  centroid,
+  cosineSimilarity,
+  harmonicMean,
+  pruneOutliers,
+  subtract,
+} from "./vectors.ts";
 import { describe, expect, it } from "vite-plus/test";
 
 const ZERO = 0;
@@ -252,5 +259,33 @@ describe("pruneOutliers filtering", () => {
     const lenient = pruneOutliers(vectors, THREE, TEN);
     const strict = pruneOutliers(vectors, THREE, HALF);
     expect(lenient.length).toBeGreaterThanOrEqual(strict.length);
+  });
+});
+
+/** Harmonic mean test constants. */
+const HM_A = 0.9;
+const HM_B = 0.1;
+const HM_EQUAL = 0.6;
+const HM_HIGH = 0.8;
+const HM_LOW = 0.4;
+
+describe("harmonicMean", () => {
+  it("returns 0 when both inputs are 0", () => {
+    expect(harmonicMean(ZERO, ZERO)).toBe(ZERO);
+  });
+
+  it("returns correct harmonic mean for equal values", () => {
+    expect(harmonicMean(HM_EQUAL, HM_EQUAL)).toBeCloseTo(HM_EQUAL, TOLERANCE);
+  });
+
+  it("returns correct harmonic mean for different values", () => {
+    const expected = (TWO * HM_HIGH * HM_LOW) / (HM_HIGH + HM_LOW);
+    expect(harmonicMean(HM_HIGH, HM_LOW)).toBeCloseTo(expected, TOLERANCE);
+  });
+
+  it("penalizes imbalance below arithmetic mean", () => {
+    const hm = harmonicMean(HM_A, HM_B);
+    const arithmeticMean = (HM_A + HM_B) / TWO;
+    expect(hm).toBeLessThan(arithmeticMean);
   });
 });

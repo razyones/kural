@@ -159,5 +159,5 @@ function resolveCache(
   return { cachedLeaves, cachedContainerIds, cacheHits, uLeaf, uCont };
 }
 
-export { resolveCache };
+export { resolveCache, sha256 };
 export type { CacheResolution };

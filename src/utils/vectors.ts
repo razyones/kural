@@ -113,4 +113,21 @@ function pruneOutliers(vectors: number[][], minSize: number, stddevMultiplier: n
   return vectors.filter((_, i) => sims[i] >= threshold);
 }
 
-export { avg, centroid, cosineSimilarity, pruneOutliers, subtract };
+const TWO = 2;
+
+/**
+ * Computes the harmonic mean of two values.
+ * Penalizes imbalance — both values must be good to score well.
+ * @param a - First value
+ * @param b - Second value
+ * @returns Harmonic mean, or 0 if either value is 0
+ * @kuralPure
+ */
+function harmonicMean(a: number, b: number): number {
+  if (a + b === NONE) {
+    return NONE;
+  }
+  return (TWO * a * b) / (a + b);
+}
+
+export { avg, centroid, cosineSimilarity, harmonicMean, pruneOutliers, subtract };

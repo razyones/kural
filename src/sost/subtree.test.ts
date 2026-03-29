@@ -1,0 +1,259 @@
+import type { CodeNode, DirectoryNode, FileNode, FunctionNode, NodeMap } from "./tree.ts";
+import { collectSubtree, descendantScores } from "./subtree.ts";
+import { describe, expect, it } from "vite-plus/test";
+import { NO_SIBLINGS } from "./metrics.ts";
+
+/** Numeric constants. */
+const NONE = 0;
+const ONE = 1;
+const TWO = 2;
+const TOLERANCE = 10;
+
+/** Metric values for test nodes. */
+const FIT_A = 0.8;
+const FIT_B = 0.6;
+const FIT_C = 0.9;
+const UNIQ_A = 0.7;
+const UNIQ_B = 0.5;
+const UNIQ_C = 0.85;
+
+/** Embedding stub — non-empty to mark the node as valid. */
+const STUB_VEC = [ONE];
+
+/** Stub hash for test nodes. */
+const STUB_HASH = "abcd1234";
+
+/** Shared base properties for all test nodes. */
+function baseProps(
+  key: string,
+  name: string,
+  util: boolean,
+): {
+  key: string;
+  name: string;
+  identity: number[];
+  leaf: number[];
+  parentKey: null;
+  patterns: null;
+  companion: null;
+  util: boolean;
+  helper: boolean;
+  residuals: [];
+  hash: string;
+  exported: boolean;
+  description: undefined;
+} {
+  return {
+    key,
+    name,
+    identity: STUB_VEC,
+    leaf: STUB_VEC,
+    parentKey: null,
+    patterns: null,
+    companion: null,
+    util,
+    helper: false,
+    residuals: [],
+    hash: STUB_HASH,
+    exported: false,
+    description: undefined,
+  };
+}
+
+/** Builds a minimal leaf node (function kind). */
+function makeLeaf(key: string, name: string): [string, ReturnType<typeof makeLeafNode>] {
+  return [key, makeLeafNode(key, name)];
+}
+
+/** Creates the leaf node object. */
+function makeLeafNode(key: string, name: string): FunctionNode {
+  return {
+    ...baseProps(key, name, false),
+    kind: "function",
+    childKeys: [],
+    exported: true,
+    calls: [],
+    returnsType: "void",
+    documentedParams: NONE,
+    hasReturnDoc: false,
+    pure: true,
+    causes: undefined,
+    paramNames: [],
+    paramTypes: [],
+  };
+}
+
+/** Builds a minimal file (non-leaf) node entry. */
+function makeFile(
+  key: string,
+  name: string,
+  childKeys: string[],
+  util: boolean,
+): [string, ReturnType<typeof makeFileNode>] {
+  return [key, makeFileNode(key, name, childKeys, util)];
+}
+
+/** Creates the file node object. */
+function makeFileNode(key: string, name: string, childKeys: string[], util: boolean): FileNode {
+  return { ...baseProps(key, name, util), kind: "file", childKeys };
+}
+
+/** Builds a minimal directory (non-leaf) node entry. */
+function makeDir(
+  key: string,
+  name: string,
+  childKeys: string[],
+  util: boolean,
+): [string, ReturnType<typeof makeDirNode>] {
+  return [key, makeDirNode(key, name, childKeys, util)];
+}
+
+/** Creates the directory node object. */
+function makeDirNode(key: string, name: string, childKeys: string[], util: boolean): DirectoryNode {
+  return { ...baseProps(key, name, util), kind: "directory", childKeys };
+}
+
+/** Builds a NodeMap from entry tuples, widening to CodeNode union. */
+function toNodeMap(...entries: [string, CodeNode][]): NodeMap {
+  return new Map(entries);
+}
+
+describe("collectSubtree leaf and unknown", () => {
+  it("returns empty result for leaf nodes", () => {
+    const nodes = toNodeMap(makeLeaf("func:a", "a"));
+    const fitMap = new Map<string, number | null>();
+    const uniqMap = new Map<string, number>();
+    const result = collectSubtree("func:a", nodes, fitMap, uniqMap);
+    expect(result.fitValues).toEqual([]);
+    expect(result.uniqValues).toEqual([]);
+  });
+
+  it("returns empty result for unknown keys", () => {
+    const nodes = toNodeMap();
+    const fitMap = new Map<string, number | null>();
+    const uniqMap = new Map<string, number>();
+    const result = collectSubtree("missing", nodes, fitMap, uniqMap);
+    expect(result.fitValues).toEqual([]);
+    expect(result.uniqValues).toEqual([]);
+  });
+});
+
+describe("collectSubtree local values", () => {
+  it("collects local fit and uniqueness values", () => {
+    const nodes = toNodeMap(
+      makeFile("file:a", "a.ts", ["func:a1"], false),
+      makeLeaf("func:a1", "a1"),
+    );
+    const fitMap = new Map<string, number | null>([["file:a", FIT_A]]);
+    const uniqMap = new Map<string, number>([["file:a", UNIQ_A]]);
+    const result = collectSubtree("file:a", nodes, fitMap, uniqMap);
+    expect(result.fitValues).toEqual([FIT_A]);
+    expect(result.uniqValues).toEqual([UNIQ_A]);
+  });
+
+  it("skips util children", () => {
+    const nodes = toNodeMap(
+      makeDir("dir:root", "root", ["file:a", "file:util"], false),
+      makeFile("file:a", "a.ts", ["func:a1"], false),
+      makeFile("file:util", "util.ts", ["func:u1"], true),
+      makeLeaf("func:a1", "a1"),
+      makeLeaf("func:u1", "u1"),
+    );
+    const fitMap = new Map<string, number | null>([
+      ["dir:root", FIT_A],
+      ["file:a", FIT_B],
+      ["file:util", FIT_C],
+    ]);
+    const uniqMap = new Map<string, number>([
+      ["dir:root", UNIQ_A],
+      ["file:a", UNIQ_B],
+      ["file:util", UNIQ_C],
+    ]);
+    const result = collectSubtree("dir:root", nodes, fitMap, uniqMap);
+    expect(result.fitValues).toContain(FIT_A);
+    expect(result.fitValues).toContain(FIT_B);
+    expect(result.fitValues).not.toContain(FIT_C);
+  });
+});
+
+describe("collectSubtree multi-level", () => {
+  it("aggregates across multiple levels", () => {
+    const nodes = toNodeMap(
+      makeDir("dir:root", "root", ["file:a", "file:b"], false),
+      makeFile("file:a", "a.ts", ["func:a1"], false),
+      makeFile("file:b", "b.ts", ["func:b1"], false),
+      makeLeaf("func:a1", "a1"),
+      makeLeaf("func:b1", "b1"),
+    );
+    const fitMap = new Map<string, number | null>([
+      ["dir:root", FIT_A],
+      ["file:a", FIT_B],
+      ["file:b", FIT_C],
+    ]);
+    const uniqMap = new Map<string, number>([
+      ["dir:root", UNIQ_A],
+      ["file:a", UNIQ_B],
+      ["file:b", UNIQ_C],
+    ]);
+    const result = collectSubtree("dir:root", nodes, fitMap, uniqMap);
+    const EXPECTED_FIT_COUNT = 3;
+    const EXPECTED_UNIQ_COUNT = 3;
+    expect(result.fitValues).toHaveLength(EXPECTED_FIT_COUNT);
+    expect(result.uniqValues).toHaveLength(EXPECTED_UNIQ_COUNT);
+    expect(result.fitValues).toContain(FIT_A);
+    expect(result.fitValues).toContain(FIT_B);
+    expect(result.fitValues).toContain(FIT_C);
+  });
+});
+
+describe("descendantScores self exclusion", () => {
+  it("excludes self from subtree values", () => {
+    const sub = {
+      minFit: FIT_B,
+      minUniq: UNIQ_B,
+      fitValues: [FIT_A, FIT_B, FIT_C],
+      uniqValues: [UNIQ_A, UNIQ_B, UNIQ_C],
+    };
+    const result = descendantScores(sub, FIT_A, UNIQ_A);
+    const expectedFit = (FIT_B + FIT_C) / TWO;
+    const expectedUniq = (UNIQ_B + UNIQ_C) / TWO;
+    expect(result.subtreeFit).toBeCloseTo(expectedFit, TOLERANCE);
+    expect(result.subtreeUniqueness).toBeCloseTo(expectedUniq, TOLERANCE);
+  });
+
+  it("falls back to localFit when no descendants", () => {
+    const sub = {
+      minFit: FIT_A,
+      minUniq: UNIQ_A,
+      fitValues: [FIT_A],
+      uniqValues: [UNIQ_A],
+    };
+    const result = descendantScores(sub, FIT_A, UNIQ_A);
+    expect(result.subtreeFit).toBe(FIT_A);
+  });
+});
+
+describe("descendantScores no-siblings", () => {
+  it("returns NO_SIBLINGS when no uniqueness data", () => {
+    const sub = {
+      minFit: FIT_A,
+      minUniq: Infinity,
+      fitValues: [FIT_A],
+      uniqValues: [],
+    };
+    const result = descendantScores(sub, FIT_A, NO_SIBLINGS);
+    expect(result.subtreeUniqueness).toBe(NO_SIBLINGS);
+  });
+
+  it("falls back to zero when localFit is null", () => {
+    const sub = {
+      minFit: Infinity,
+      minUniq: Infinity,
+      fitValues: [],
+      uniqValues: [],
+    };
+    const result = descendantScores(sub, null, NO_SIBLINGS);
+    expect(result.subtreeFit).toBe(NONE);
+    expect(result.subtreeUniqueness).toBe(NO_SIBLINGS);
+  });
+});
