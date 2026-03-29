@@ -9,6 +9,7 @@ lerna-debug.log*
 
 .env
 .kural-db
+docs/architecture.md
 node_modules
 dist
 dist-ssr
