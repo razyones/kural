@@ -7,12 +7,23 @@
 
 import type { EmbedOptions, Embedder } from "../../ingestion/embed/pipeline.ts";
 import { createEmbeddingModel, embedSignatures } from "../../ingestion/embed/model.ts";
+import { logBanner, logger } from "../../ui/log.ts";
 import { relative, resolve } from "node:path";
 import type { GenerateCallbacks } from "./pipeline.ts";
+import { createStepTracker } from "../../ui/step-tracker.ts";
 import { define } from "gunshi";
 import { generate } from "./pipeline.ts";
 
 const NONE = 0;
+const FACET_NAMES = [
+  "names",
+  "descriptions",
+  "structures",
+  "paths",
+  "causes",
+  "calls",
+  "parent context",
+];
 
 /**
  * Builds progress callbacks that log each stage to stdout.
@@ -20,23 +31,23 @@ const NONE = 0;
 function buildCallbacks(): GenerateCallbacks {
   return {
     onParsed: (files, dirs) => {
-      console.log(`Parsed ${String(files)} files, ${String(dirs)} directories`);
+      logger.success(`Parsed ${String(files)} files, ${String(dirs)} directories`);
     },
     onEmbedded: (count, cacheHits) => {
       if (cacheHits > NONE) {
         const embedded = count - cacheHits;
-        console.log(
+        logger.success(
           `Embedded ${String(count)} items (${String(embedded)} new, ${String(cacheHits)} cached)`,
         );
       } else {
-        console.log(`Embedded ${String(count)} items`);
+        logger.success(`Embedded ${String(count)} items`);
       }
     },
     onScored: (count) => {
-      console.log(`Scored ${String(count)} nodes`);
+      logger.success(`Scored ${String(count)} nodes`);
     },
     onStored: (dbPath) => {
-      console.log(`Saved to ${relative(process.cwd(), dbPath)}`);
+      logger.success(`Saved to ${relative(process.cwd(), dbPath)}`);
     },
   };
 }
@@ -76,8 +87,18 @@ export default define({
       apiKey: ctx.values.apiKey,
     });
 
+    logBanner("generate", {
+      path: relative(process.cwd(), targetPath) || ".",
+      provider,
+      model: modelId,
+    });
+
+    const tracker = createStepTracker("Embedding", FACET_NAMES);
     const embedder: Embedder = async (sigs) => {
-      const vectors = await embedSignatures(sigs, embedFn);
+      const vectors = await tracker(async (onProgress) => {
+        const result = await embedSignatures(sigs, embedFn, { onProgress });
+        return result;
+      });
       return vectors;
     };
 
