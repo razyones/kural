@@ -1,8 +1,8 @@
 /**
- * The measurer. Computes the three core placement metrics — label-fit,
- * label-uniqueness (V2 CV-based), and uncle-fit. It is the only module
- * that evaluates a node against its immediate neighborhood — no other
- * module compares identity and leaf vectors to judge placement quality.
+ * The measurer. Computes placement metrics from two perspectives — as a
+ * child (fit, uniqueness) and as a parent (childrenFit, childrenUniqueness).
+ * It is the only module that evaluates a node against its neighborhood —
+ * no other module compares identity and leaf vectors.
  */
 
 import type { CodeNode, NodeMap } from "./tree.ts";
@@ -15,13 +15,37 @@ const NEXT = 1;
 const MIN_PAIR_COUNT = 2;
 
 /**
- * Computes label-fit: how well a node's declared identity matches its content.
- * Returns null for capability containers (util nodes).
- * @param node - The node to evaluate
- * @returns Cosine similarity between identity and leaf, or null for util containers
+ * Computes fit as a child: how well this node's content matches its
+ * parent's declared identity.
+ * @returns cosineSimilarity(parent.identity, N.leaf), or null if no parent or util container
  */
-function computeLabelFit(node: CodeNode): number | null {
+function computeFit(node: CodeNode, nodes: NodeMap): number | null {
   if (node.util && (node.kind === "file" || node.kind === "directory")) {
+    return null;
+  }
+  if (node.parentKey === null) {
+    return null;
+  }
+  const parent = nodes.get(node.parentKey);
+  if (parent === undefined) {
+    return null;
+  }
+  if (parent.identity.length === NONE || node.leaf.length === NONE) {
+    return NEXT;
+  }
+  return cosineSimilarity(parent.identity, node.leaf);
+}
+
+/**
+ * Computes childrenFit as a parent: how well this container's content
+ * matches its own declared identity.
+ * @returns cosineSimilarity(N.identity, N.leaf), or null for leaves/util containers
+ */
+function computeChildrenFit(node: CodeNode): number | null {
+  if (node.kind === "type" || node.kind === "function") {
+    return null;
+  }
+  if (node.util) {
     return null;
   }
   if (node.identity.length === NONE || node.leaf.length === NONE) {
@@ -35,10 +59,7 @@ type IdentityRef = { name: string; identity: number[] };
 
 /**
  * Deduplicates children by pattern or companion group, replacing groups
- * with their identity centroid. Returns lightweight projections to avoid
- * sharing mutable arrays from the original nodes.
- * @param children - Child nodes to deduplicate
- * @returns Representative projections (one per group, centroids for grouped)
+ * with their identity centroid.
  */
 function deduplicateByGroup(children: CodeNode[]): IdentityRef[] {
   const groups = new Map<string, CodeNode[]>();
@@ -71,37 +92,72 @@ function deduplicateByGroup(children: CodeNode[]): IdentityRef[] {
 }
 
 /**
- * Computes label-uniqueness using CV (Coefficient of Variation) of pairwise
- * distances after subtracting parent identity.
- *
- * V2 formula: uniqueness = mean == 0 ? 0 : 1 / (1 + cv)
- * where cv = stddev(distances) / mean(distances)
- *
- * @param parent - The parent node whose identity is subtracted
- * @param children - Child nodes to evaluate (pre-filtered for eligibility)
- * @returns Uniqueness score and the least-unique pair names
+ * Computes per-node uniqueness: mean cosine distance from this node to
+ * all siblings, after subtracting parent identity.
+ * @param parent - The parent node
+ * @param children - All eligible children of the parent
+ * @returns Map from child key to uniqueness score
  */
-function computeLabelUniqueness(
+function computeUniqueness(parent: CodeNode, children: CodeNode[]): Map<string, number> {
+  const result = new Map<string, number>();
+  const reps = deduplicateByGroup(children);
+  const validReps = reps.filter((r) => r.identity.length > NONE);
+
+  if (validReps.length < MIN_PAIR_COUNT) {
+    for (const child of children) {
+      result.set(child.key, NO_SIBLINGS);
+    }
+    return result;
+  }
+
+  const deltas = validReps.map((r) => subtract(r.identity, parent.identity));
+
+  for (let i = NONE; i < validReps.length; i++) {
+    const distances: number[] = [];
+    for (let j = NONE; j < deltas.length; j++) {
+      if (i !== j) {
+        distances.push(NEXT - cosineSimilarity(deltas[i], deltas[j]));
+      }
+    }
+    const child = children.find((c) => c.name === validReps[i].name);
+    if (child) {
+      result.set(child.key, distances.length > NONE ? avg(distances) : NO_SIBLINGS);
+    }
+  }
+
+  for (const child of children) {
+    if (!result.has(child.key)) {
+      result.set(child.key, NO_SIBLINGS);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Computes childrenUniqueness (CV) for a parent's children.
+ * Measures spread quality — how evenly distributed children are.
+ * @returns CV score and the closest child pair names
+ */
+function computeChildrenUniqueness(
   parent: CodeNode,
   children: CodeNode[],
 ): { score: number; worstPair: [string, string] | null } {
   const reps = deduplicateByGroup(children);
-
   const validReps = reps.filter((r) => r.identity.length > NONE);
+
   if (validReps.length < MIN_PAIR_COUNT) {
     return { score: NO_SIBLINGS, worstPair: null };
   }
 
   const deltas = validReps.map((r) => subtract(r.identity, parent.identity));
-
   const distances: number[] = [];
   let minDistance = Infinity;
   let worstPair: [string, string] | null = null;
 
   for (let i = NONE; i < deltas.length; i++) {
     for (let j = i + NEXT; j < deltas.length; j++) {
-      const similarity = cosineSimilarity(deltas[i], deltas[j]);
-      const distance = NEXT - similarity;
+      const distance = NEXT - cosineSimilarity(deltas[i], deltas[j]);
       distances.push(distance);
       if (distance < minDistance) {
         minDistance = distance;
@@ -124,17 +180,11 @@ function computeLabelUniqueness(
   const stddev =
     distances.length > NEXT ? Math.sqrt(sumSq / (distances.length - besselCorrection)) : NONE;
   const cv = stddev / meanDist;
-  const score = NEXT / (NEXT + cv);
-
-  return { score, worstPair };
+  return { score: NEXT / (NEXT + cv), worstPair };
 }
 
 /**
- * Finds the best-fitting uncle for a node: the uncle where this node's
- * content embedding has the highest similarity to the uncle's identity.
- * @param node - The node to evaluate for misplacement
- * @param nodes - The complete node map
- * @returns Best uncle name and score, or null if no valid uncles
+ * Finds the best-fitting uncle for a node.
  */
 function findBestUncle(node: CodeNode, nodes: NodeMap): { name: string; score: number } | null {
   if (node.parentKey === null) {
@@ -178,4 +228,11 @@ function findBestUncle(node: CodeNode, nodes: NodeMap): { name: string; score: n
   return { name: bestName, score: bestScore };
 }
 
-export { computeLabelFit, computeLabelUniqueness, findBestUncle, NO_SIBLINGS };
+export {
+  NO_SIBLINGS,
+  computeChildrenFit,
+  computeChildrenUniqueness,
+  computeFit,
+  computeUniqueness,
+  findBestUncle,
+};

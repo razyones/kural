@@ -1,5 +1,11 @@
 import type { CodeNode, DirectoryNode, FileNode, FunctionNode, NodeMap, TypeNode } from "./tree.ts";
-import { NO_SIBLINGS, computeLabelFit, computeLabelUniqueness, findBestUncle } from "./metrics.ts";
+import {
+  NO_SIBLINGS,
+  computeChildrenUniqueness,
+  computeFit,
+  computeUniqueness,
+  findBestUncle,
+} from "./metrics.ts";
 import { describe, expect, it } from "vite-plus/test";
 
 const NONE = 0;
@@ -100,73 +106,137 @@ function buildNodeMap(nodes: CodeNode[]): NodeMap {
   return map;
 }
 
-describe("computeLabelFit returns null for util containers", () => {
+describe("computeFit returns null for util containers", () => {
   it("returns null for a util file node", () => {
-    const node = makeFileNode({ key: "file:utils.ts", name: "utils", util: true });
-    expect(computeLabelFit(node)).toBeNull();
+    const parent = makeDirectoryNode({ key: "dir:root", name: "root" });
+    const node = makeFileNode({
+      key: "file:utils.ts",
+      name: "utils",
+      util: true,
+      parentKey: "dir:root",
+    });
+    const nodes = buildNodeMap([parent, node]);
+    expect(computeFit(node, nodes)).toBeNull();
   });
 
   it("returns null for a util directory node", () => {
-    const node = makeDirectoryNode({ key: "dir:utils", name: "utils", util: true });
-    expect(computeLabelFit(node)).toBeNull();
+    const parent = makeDirectoryNode({ key: "dir:root", name: "root" });
+    const node = makeDirectoryNode({
+      key: "dir:utils",
+      name: "utils",
+      util: true,
+      parentKey: "dir:root",
+    });
+    const nodes = buildNodeMap([parent, node]);
+    expect(computeFit(node, nodes)).toBeNull();
   });
 });
 
-describe("computeLabelFit does NOT return null for util leaves", () => {
+describe("computeFit does NOT return null for util leaves", () => {
   it("returns a number for a util function node", () => {
-    const node = makeFunctionNode({ key: "func:f", name: "f", util: true });
-    expect(computeLabelFit(node)).not.toBeNull();
+    const parent = makeFileNode({ key: "file:p", name: "p" });
+    const node = makeFunctionNode({ key: "func:f", name: "f", util: true, parentKey: "file:p" });
+    const nodes = buildNodeMap([parent, node]);
+    expect(computeFit(node, nodes)).not.toBeNull();
   });
 
   it("returns a number for a util type node", () => {
-    const node = makeTypeNode({ key: "type:T", name: "T", util: true });
-    expect(computeLabelFit(node)).not.toBeNull();
+    const parent = makeFileNode({ key: "file:p", name: "p" });
+    const node = makeTypeNode({ key: "type:T", name: "T", util: true, parentKey: "file:p" });
+    const nodes = buildNodeMap([parent, node]);
+    expect(computeFit(node, nodes)).not.toBeNull();
   });
 });
 
-describe("computeLabelFit with empty embeddings", () => {
-  it("returns 1 when identity is empty", () => {
-    const node = makeFunctionNode({ key: "func:f", name: "f", identity: V_EMPTY });
-    expect(computeLabelFit(node)).toBe(NEXT);
+describe("computeFit with empty embeddings", () => {
+  it("returns 1 when parent identity is empty", () => {
+    const parent = makeFileNode({ key: "file:p", name: "p", identity: V_EMPTY });
+    const node = makeFunctionNode({ key: "func:f", name: "f", parentKey: "file:p" });
+    const nodes = buildNodeMap([parent, node]);
+    expect(computeFit(node, nodes)).toBe(NEXT);
   });
 
-  it("returns 1 when leaf is empty", () => {
-    const node = makeFunctionNode({ key: "func:f", name: "f", leaf: V_EMPTY });
-    expect(computeLabelFit(node)).toBe(NEXT);
+  it("returns 1 when node leaf is empty", () => {
+    const parent = makeFileNode({ key: "file:p", name: "p" });
+    const node = makeFunctionNode({ key: "func:f", name: "f", leaf: V_EMPTY, parentKey: "file:p" });
+    const nodes = buildNodeMap([parent, node]);
+    expect(computeFit(node, nodes)).toBe(NEXT);
   });
 
   it("returns 1 when both embeddings are empty", () => {
-    const node = makeFunctionNode({ key: "func:f", name: "f", identity: V_EMPTY, leaf: V_EMPTY });
-    expect(computeLabelFit(node)).toBe(NEXT);
+    const parent = makeFileNode({ key: "file:p", name: "p", identity: V_EMPTY });
+    const node = makeFunctionNode({ key: "func:f", name: "f", leaf: V_EMPTY, parentKey: "file:p" });
+    const nodes = buildNodeMap([parent, node]);
+    expect(computeFit(node, nodes)).toBe(NEXT);
   });
 });
 
-describe("computeLabelFit cosine similarity", () => {
-  it("returns 1 for identical identity and leaf", () => {
-    const node = makeFunctionNode({ key: "func:f", name: "f", identity: V_UNIT_X, leaf: V_UNIT_X });
-    const result = computeLabelFit(node);
+describe("computeFit cosine similarity", () => {
+  it("returns 1 when parent identity matches node leaf", () => {
+    const parent = makeFileNode({ key: "file:p", name: "p", identity: V_UNIT_X });
+    const node = makeFunctionNode({
+      key: "func:f",
+      name: "f",
+      leaf: V_UNIT_X,
+      parentKey: "file:p",
+    });
+    const nodes = buildNodeMap([parent, node]);
+    const result = computeFit(node, nodes);
     expect(result).not.toBeNull();
     expect(result).toBeCloseTo(NEXT, TOLERANCE);
   });
 
   it("returns approximately 0 for orthogonal vectors", () => {
-    const node = makeFunctionNode({ key: "func:f", name: "f", identity: V_UNIT_X, leaf: V_UNIT_Y });
-    const result = computeLabelFit(node);
+    const parent = makeFileNode({ key: "file:p", name: "p", identity: V_UNIT_X });
+    const node = makeFunctionNode({
+      key: "func:f",
+      name: "f",
+      leaf: V_UNIT_Y,
+      parentKey: "file:p",
+    });
+    const nodes = buildNodeMap([parent, node]);
+    const result = computeFit(node, nodes);
     expect(result).not.toBeNull();
     expect(result).toBeCloseTo(NONE, TOLERANCE);
   });
 
-  it("works on non-util file nodes", () => {
-    const node = makeFileNode({ key: "file:a.ts", name: "a", identity: V_UNIT_X, leaf: V_UNIT_X });
-    const result = computeLabelFit(node);
+  it("works on non-util file nodes with parent", () => {
+    const parent = makeDirectoryNode({ key: "dir:d", name: "d", identity: V_UNIT_X });
+    const node = makeFileNode({ key: "file:a.ts", name: "a", leaf: V_UNIT_X, parentKey: "dir:d" });
+    const nodes = buildNodeMap([parent, node]);
+    const result = computeFit(node, nodes);
     expect(result).toBeCloseTo(NEXT, TOLERANCE);
   });
 });
 
-describe("computeLabelUniqueness with too few children", () => {
+describe("computeUniqueness with too few children", () => {
+  it("returns NO_SIBLINGS for all children when list is empty", () => {
+    const parent = makeFileNode({ key: "file:p", name: "p" });
+    const result = computeUniqueness(parent, []);
+    expect(result.size).toBe(NONE);
+  });
+
+  it("returns NO_SIBLINGS with one child", () => {
+    const parent = makeFileNode({ key: "file:p", name: "p" });
+    const child = makeFunctionNode({ key: "func:a", name: "a" });
+    const result = computeUniqueness(parent, [child]);
+    expect(result.get("func:a")).toBe(NO_SIBLINGS);
+  });
+
+  it("returns NO_SIBLINGS when children have empty identities", () => {
+    const parent = makeFileNode({ key: "file:p", name: "p" });
+    const childA = makeFunctionNode({ key: "func:a", name: "a", identity: V_EMPTY });
+    const childB = makeFunctionNode({ key: "func:b", name: "b", identity: V_EMPTY });
+    const result = computeUniqueness(parent, [childA, childB]);
+    expect(result.get("func:a")).toBe(NO_SIBLINGS);
+    expect(result.get("func:b")).toBe(NO_SIBLINGS);
+  });
+});
+
+describe("computeChildrenUniqueness with too few children", () => {
   it("returns NO_SIBLINGS when children is empty", () => {
     const parent = makeFileNode({ key: "file:p", name: "p" });
-    const result = computeLabelUniqueness(parent, []);
+    const result = computeChildrenUniqueness(parent, []);
     expect(result.score).toBe(NO_SIBLINGS);
     expect(result.worstPair).toBeNull();
   });
@@ -174,27 +244,32 @@ describe("computeLabelUniqueness with too few children", () => {
   it("returns NO_SIBLINGS with one child", () => {
     const parent = makeFileNode({ key: "file:p", name: "p" });
     const child = makeFunctionNode({ key: "func:a", name: "a" });
-    const result = computeLabelUniqueness(parent, [child]);
+    const result = computeChildrenUniqueness(parent, [child]);
     expect(result.score).toBe(NO_SIBLINGS);
     expect(result.worstPair).toBeNull();
   });
+});
 
-  it("returns NO_SIBLINGS when children have empty identities", () => {
-    const parent = makeFileNode({ key: "file:p", name: "p" });
-    const childA = makeFunctionNode({ key: "func:a", name: "a", identity: V_EMPTY });
-    const childB = makeFunctionNode({ key: "func:b", name: "b", identity: V_EMPTY });
-    const result = computeLabelUniqueness(parent, [childA, childB]);
-    expect(result.score).toBe(NO_SIBLINGS);
+describe("computeUniqueness well-spread children", () => {
+  it("returns scores in (0, 2) for spread children", () => {
+    const parent = makeFileNode({ key: "file:p", name: "p", identity: [E0, E0, E0] });
+    const childA = makeFunctionNode({ key: "func:a", name: "a", identity: V_UNIT_X });
+    const childB = makeFunctionNode({ key: "func:b", name: "b", identity: V_UNIT_Y });
+    const childC = makeFunctionNode({ key: "func:c", name: "c", identity: V_UNIT_Z });
+    const result = computeUniqueness(parent, [childA, childB, childC]);
+    expect(result.get("func:a")).toBeGreaterThan(NONE);
+    expect(result.get("func:b")).toBeGreaterThan(NONE);
+    expect(result.get("func:c")).toBeGreaterThan(NONE);
   });
 });
 
-describe("computeLabelUniqueness well-spread children", () => {
+describe("computeChildrenUniqueness well-spread children", () => {
   it("returns a score in (0, 1] for spread children", () => {
     const parent = makeFileNode({ key: "file:p", name: "p", identity: [E0, E0, E0] });
     const childA = makeFunctionNode({ key: "func:a", name: "a", identity: V_UNIT_X });
     const childB = makeFunctionNode({ key: "func:b", name: "b", identity: V_UNIT_Y });
     const childC = makeFunctionNode({ key: "func:c", name: "c", identity: V_UNIT_Z });
-    const result = computeLabelUniqueness(parent, [childA, childB, childC]);
+    const result = computeChildrenUniqueness(parent, [childA, childB, childC]);
     expect(result.score).toBeGreaterThan(NONE);
     expect(result.score).toBeLessThanOrEqual(NEXT);
   });
@@ -203,35 +278,35 @@ describe("computeLabelUniqueness well-spread children", () => {
     const parent = makeFileNode({ key: "file:p", name: "p", identity: [E0, E0, E0] });
     const childA = makeFunctionNode({ key: "func:a", name: "a", identity: V_UNIT_X });
     const childB = makeFunctionNode({ key: "func:b", name: "b", identity: V_UNIT_Y });
-    const result = computeLabelUniqueness(parent, [childA, childB]);
+    const result = computeChildrenUniqueness(parent, [childA, childB]);
     expect(result.score).toBeCloseTo(NEXT, TOLERANCE);
   });
 });
 
-describe("computeLabelUniqueness identical children", () => {
+describe("computeChildrenUniqueness identical children", () => {
   it("returns 0 when all children have identical identity vectors", () => {
     const parent = makeFileNode({ key: "file:p", name: "p", identity: [E0, E0, E0] });
     const childA = makeFunctionNode({ key: "func:a", name: "a", identity: V_UNIT_X });
     const childB = makeFunctionNode({ key: "func:b", name: "b", identity: V_UNIT_X });
-    const result = computeLabelUniqueness(parent, [childA, childB]);
+    const result = computeChildrenUniqueness(parent, [childA, childB]);
     expect(result.score).toBe(NONE);
   });
 });
 
-describe("computeLabelUniqueness worstPair tracking", () => {
+describe("computeChildrenUniqueness worstPair tracking", () => {
   it("tracks the least-unique pair names", () => {
     const parent = makeFileNode({ key: "file:p", name: "p", identity: [E0, E0, E0] });
     const childA = makeFunctionNode({ key: "func:a", name: "alpha", identity: V_UNIT_X });
     const childB = makeFunctionNode({ key: "func:b", name: "beta", identity: V_SIMILAR_X });
     const childC = makeFunctionNode({ key: "func:c", name: "gamma", identity: V_UNIT_Y });
-    const result = computeLabelUniqueness(parent, [childA, childB, childC]);
+    const result = computeChildrenUniqueness(parent, [childA, childB, childC]);
     expect(result.worstPair).not.toBeNull();
     expect(result.worstPair).toContain("alpha");
     expect(result.worstPair).toContain("beta");
   });
 });
 
-describe("computeLabelUniqueness pattern deduplication", () => {
+describe("computeChildrenUniqueness pattern deduplication", () => {
   it("deduplicates children by pattern group", () => {
     const parent = makeFileNode({ key: "file:p", name: "p", identity: [E0, E0, E0] });
     const childA = makeFunctionNode({
@@ -247,12 +322,12 @@ describe("computeLabelUniqueness pattern deduplication", () => {
       patterns: "group-1",
     });
     const childC = makeFunctionNode({ key: "func:c", name: "c", identity: V_UNIT_Y });
-    const result = computeLabelUniqueness(parent, [childA, childB, childC]);
+    const result = computeChildrenUniqueness(parent, [childA, childB, childC]);
     expect(result.score).toBeGreaterThan(NONE);
   });
 });
 
-describe("computeLabelUniqueness companion deduplication", () => {
+describe("computeChildrenUniqueness companion deduplication", () => {
   it("deduplicates children by companion group", () => {
     const parent = makeFileNode({ key: "file:p", name: "p", identity: [E0, E0, E0] });
     const childA = makeFunctionNode({
@@ -268,7 +343,7 @@ describe("computeLabelUniqueness companion deduplication", () => {
       companion: "comp-1",
     });
     const childC = makeFunctionNode({ key: "func:c", name: "c", identity: V_UNIT_Y });
-    const result = computeLabelUniqueness(parent, [childA, childB, childC]);
+    const result = computeChildrenUniqueness(parent, [childA, childB, childC]);
     expect(result.score).toBeGreaterThan(NONE);
   });
 });

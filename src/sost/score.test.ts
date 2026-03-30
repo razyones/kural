@@ -125,7 +125,7 @@ describe("score single file", () => {
 });
 
 describe("score null overallScore", () => {
-  it("overallScore is null when labelFit is null", () => {
+  it("overallScore is null when fit is null", () => {
     const cards = score(utilFileResult());
     const utilCard = cards.find((c) => c.name === "util.ts");
     if (utilCard !== undefined) {
@@ -136,7 +136,7 @@ describe("score null overallScore", () => {
   it("overallScore is null when uniqueness is NO_SIBLINGS", () => {
     const cards = score(singleFileResult());
     const fileCard = cards.find((c) => c.kind === "file");
-    if (fileCard !== undefined && fileCard.labelUniqueness === NO_SIBLINGS) {
+    if (fileCard !== undefined && fileCard.uniqueness === NO_SIBLINGS) {
       expect(fileCard.overallScore).toBeNull();
     }
   });
@@ -232,11 +232,22 @@ function makeKuralFile(
 }
 
 describe("score card count", () => {
-  it("produces one card per non-leaf node", () => {
+  it("produces one card per node including leaves", () => {
     const cards = score(twoFileResult());
     const FILE_COUNT = 2;
     const DIR_COUNT = 1;
-    const EXPECTED_CARDS = FILE_COUNT + DIR_COUNT;
+    const FN_COUNT = 2;
+    const EXPECTED_CARDS = FILE_COUNT + DIR_COUNT + FN_COUNT;
     expect(cards).toHaveLength(EXPECTED_CARDS);
+  });
+
+  it("leaf cards have null subtree fields", () => {
+    const cards = score(twoFileResult());
+    const leafCards = cards.filter((c) => c.kind === "function");
+    expect(leafCards.length).toBeGreaterThan(NONE);
+    for (const card of leafCards) {
+      expect(card.subtreeFit).toBeNull();
+      expect(card.subtreeUniqueness).toBeNull();
+    }
   });
 });

@@ -124,8 +124,8 @@ describe("collectSubtree leaf and unknown", () => {
     const fitMap = new Map<string, number | null>();
     const uniqMap = new Map<string, number>();
     const result = collectSubtree("func:a", nodes, fitMap, uniqMap);
-    expect(result.fitValues).toEqual([]);
-    expect(result.uniqValues).toEqual([]);
+    expect(result.childrenFitValues).toEqual([]);
+    expect(result.childrenUniqValues).toEqual([]);
   });
 
   it("returns empty result for unknown keys", () => {
@@ -133,8 +133,8 @@ describe("collectSubtree leaf and unknown", () => {
     const fitMap = new Map<string, number | null>();
     const uniqMap = new Map<string, number>();
     const result = collectSubtree("missing", nodes, fitMap, uniqMap);
-    expect(result.fitValues).toEqual([]);
-    expect(result.uniqValues).toEqual([]);
+    expect(result.childrenFitValues).toEqual([]);
+    expect(result.childrenUniqValues).toEqual([]);
   });
 });
 
@@ -147,8 +147,8 @@ describe("collectSubtree local values", () => {
     const fitMap = new Map<string, number | null>([["file:a", FIT_A]]);
     const uniqMap = new Map<string, number>([["file:a", UNIQ_A]]);
     const result = collectSubtree("file:a", nodes, fitMap, uniqMap);
-    expect(result.fitValues).toEqual([FIT_A]);
-    expect(result.uniqValues).toEqual([UNIQ_A]);
+    expect(result.childrenFitValues).toEqual([FIT_A]);
+    expect(result.childrenUniqValues).toEqual([UNIQ_A]);
   });
 
   it("skips util children", () => {
@@ -170,9 +170,9 @@ describe("collectSubtree local values", () => {
       ["file:util", UNIQ_C],
     ]);
     const result = collectSubtree("dir:root", nodes, fitMap, uniqMap);
-    expect(result.fitValues).toContain(FIT_A);
-    expect(result.fitValues).toContain(FIT_B);
-    expect(result.fitValues).not.toContain(FIT_C);
+    expect(result.childrenFitValues).toContain(FIT_A);
+    expect(result.childrenFitValues).toContain(FIT_B);
+    expect(result.childrenFitValues).not.toContain(FIT_C);
   });
 });
 
@@ -198,21 +198,19 @@ describe("collectSubtree multi-level", () => {
     const result = collectSubtree("dir:root", nodes, fitMap, uniqMap);
     const EXPECTED_FIT_COUNT = 3;
     const EXPECTED_UNIQ_COUNT = 3;
-    expect(result.fitValues).toHaveLength(EXPECTED_FIT_COUNT);
-    expect(result.uniqValues).toHaveLength(EXPECTED_UNIQ_COUNT);
-    expect(result.fitValues).toContain(FIT_A);
-    expect(result.fitValues).toContain(FIT_B);
-    expect(result.fitValues).toContain(FIT_C);
+    expect(result.childrenFitValues).toHaveLength(EXPECTED_FIT_COUNT);
+    expect(result.childrenUniqValues).toHaveLength(EXPECTED_UNIQ_COUNT);
+    expect(result.childrenFitValues).toContain(FIT_A);
+    expect(result.childrenFitValues).toContain(FIT_B);
+    expect(result.childrenFitValues).toContain(FIT_C);
   });
 });
 
 describe("descendantScores self exclusion", () => {
   it("excludes self from subtree values", () => {
     const sub = {
-      minFit: FIT_B,
-      minUniq: UNIQ_B,
-      fitValues: [FIT_A, FIT_B, FIT_C],
-      uniqValues: [UNIQ_A, UNIQ_B, UNIQ_C],
+      childrenFitValues: [FIT_A, FIT_B, FIT_C],
+      childrenUniqValues: [UNIQ_A, UNIQ_B, UNIQ_C],
     };
     const result = descendantScores(sub, FIT_A, UNIQ_A);
     const expectedFit = (FIT_B + FIT_C) / TWO;
@@ -223,10 +221,8 @@ describe("descendantScores self exclusion", () => {
 
   it("falls back to localFit when no descendants", () => {
     const sub = {
-      minFit: FIT_A,
-      minUniq: UNIQ_A,
-      fitValues: [FIT_A],
-      uniqValues: [UNIQ_A],
+      childrenFitValues: [FIT_A],
+      childrenUniqValues: [UNIQ_A],
     };
     const result = descendantScores(sub, FIT_A, UNIQ_A);
     expect(result.subtreeFit).toBe(FIT_A);
@@ -234,26 +230,22 @@ describe("descendantScores self exclusion", () => {
 });
 
 describe("descendantScores no-siblings", () => {
-  it("returns NO_SIBLINGS when no uniqueness data", () => {
+  it("returns null when no uniqueness data", () => {
     const sub = {
-      minFit: FIT_A,
-      minUniq: Infinity,
-      fitValues: [FIT_A],
-      uniqValues: [],
+      childrenFitValues: [FIT_A],
+      childrenUniqValues: [],
     };
     const result = descendantScores(sub, FIT_A, NO_SIBLINGS);
-    expect(result.subtreeUniqueness).toBe(NO_SIBLINGS);
+    expect(result.subtreeUniqueness).toBeNull();
   });
 
-  it("falls back to zero when localFit is null", () => {
+  it("falls back to null when localFit is null and no data", () => {
     const sub = {
-      minFit: Infinity,
-      minUniq: Infinity,
-      fitValues: [],
-      uniqValues: [],
+      childrenFitValues: [],
+      childrenUniqValues: [],
     };
     const result = descendantScores(sub, null, NO_SIBLINGS);
-    expect(result.subtreeFit).toBe(NONE);
-    expect(result.subtreeUniqueness).toBe(NO_SIBLINGS);
+    expect(result.subtreeFit).toBeNull();
+    expect(result.subtreeUniqueness).toBeNull();
   });
 });

@@ -1,11 +1,18 @@
 /**
  * The judge. Orchestrates the complete scoring pipeline to produce a
- * ScoreCard for every non-leaf node. It is the only entry point for
- * structural health evaluation — no other module triggers scoring.
+ * ScoreCard for every node in the tree — capturing three perspectives:
+ * as a child, as a parent, and as a subtree root.
  */
 
 import type { CodeNode, NodeMap } from "./tree.ts";
-import { NO_SIBLINGS, computeLabelFit, computeLabelUniqueness, findBestUncle } from "./metrics.ts";
+import {
+  NO_SIBLINGS,
+  computeChildrenFit,
+  computeChildrenUniqueness,
+  computeFit,
+  computeUniqueness,
+  findBestUncle,
+} from "./metrics.ts";
 import { buildTree, getEligibleChildren, isLeaf } from "./tree.ts";
 import { collectSubtree, descendantScores } from "./subtree.ts";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
@@ -14,125 +21,220 @@ import { harmonicMean } from "../utils/vectors.ts";
 
 const NONE = 0;
 
-/** Structural health metrics for a single non-leaf node. */
+/** Structural health metrics for a single node. */
 type ScoreCard = {
   key: string;
   kind: CodeNode["kind"];
   name: string;
-  labelFit: number | null;
-  labelUniqueness: number;
-  subtreeFit: number;
-  subtreeUniqueness: number;
-  subtreeMinFit: number;
-  subtreeMinUniqueness: number;
+  fit: number | null;
+  uniqueness: number;
+  score: number | null;
+  childrenFit: number | null;
+  childrenUniqueness: number | null;
+  childrenScore: number | null;
+  subtreeFit: number | null;
+  subtreeUniqueness: number | null;
+  subtreeScore: number | null;
   overallScore: number | null;
   worstPair: [string, string] | null;
   bestUncle: { name: string; score: number } | null;
 };
 
-/** Pre-computed per-node metrics needed before card building. */
+/** Pre-computed per-node metrics. */
 type NodeMetrics = {
   fitMap: Map<string, number | null>;
   uniqMap: Map<string, number>;
+  childrenFitMap: Map<string, number | null>;
+  childrenUniqMap: Map<string, number>;
   worstPairs: Map<string, [string, string] | null>;
 };
 
 /**
- * Computes label-fit, label-uniqueness, and worst-pair for all
- * eligible non-leaf nodes.
+ * Computes all per-node metrics in a single pass.
  */
 function computeMetrics(nodes: NodeMap): NodeMetrics {
   const fitMap = new Map<string, number | null>();
   const uniqMap = new Map<string, number>();
+  const childrenFitMap = new Map<string, number | null>();
+  const childrenUniqMap = new Map<string, number>();
   const worstPairs = new Map<string, [string, string] | null>();
 
   for (const [key, node] of nodes) {
-    if (isLeaf(node)) {
-      continue;
-    }
-    const children = getEligibleChildren(node, nodes);
-    if (children.length === NONE) {
-      continue;
-    }
+    fitMap.set(key, computeFit(node, nodes));
+    childrenFitMap.set(key, computeChildrenFit(node));
 
-    fitMap.set(key, computeLabelFit(node));
+    if (!isLeaf(node)) {
+      const children = getEligibleChildren(node, nodes);
+      if (children.length > NONE) {
+        const perChild = computeUniqueness(node, children);
+        for (const [childKey, val] of perChild) {
+          uniqMap.set(childKey, val);
+        }
 
-    const { score: uniq, worstPair } = computeLabelUniqueness(node, children);
-    uniqMap.set(key, uniq);
-    worstPairs.set(key, worstPair);
+        const cvResult = computeChildrenUniqueness(node, children);
+        childrenUniqMap.set(key, cvResult.score);
+        worstPairs.set(key, cvResult.worstPair);
+      }
+    }
   }
 
-  return { fitMap, uniqMap, worstPairs };
+  return { fitMap, uniqMap, childrenFitMap, childrenUniqMap, worstPairs };
 }
 
 /**
- * Builds ScoreCards for all non-leaf nodes using pre-computed metrics.
+ * Computes the self-placement score.
  */
-function buildCards(nodes: NodeMap, metrics: NodeMetrics): ScoreCard[] {
-  const { fitMap, uniqMap, worstPairs } = metrics;
+function computeScore(fit: number | null, uniqueness: number): number | null {
+  if (fit === null || uniqueness === NO_SIBLINGS) {
+    return null;
+  }
+  return harmonicMean(fit, uniqueness);
+}
+
+/**
+ * Computes the children score.
+ */
+function computeChildrenScore(
+  childrenFit: number | null,
+  childrenUniqueness: number | null,
+): number | null {
+  if (childrenFit === null || childrenUniqueness === null) {
+    return null;
+  }
+  if (childrenUniqueness === NO_SIBLINGS) {
+    return null;
+  }
+  return harmonicMean(childrenFit, childrenUniqueness);
+}
+
+/**
+ * Builds a ScoreCard for a leaf node.
+ */
+function buildLeafCard(node: CodeNode, metrics: NodeMetrics, nodes: NodeMap): ScoreCard {
+  const fit = metrics.fitMap.get(node.key) ?? null;
+  const uniqueness = metrics.uniqMap.get(node.key) ?? NO_SIBLINGS;
+  const selfScore = computeScore(fit, uniqueness);
+
+  return {
+    key: node.key,
+    kind: node.kind,
+    name: node.name,
+    fit,
+    uniqueness,
+    score: selfScore,
+    childrenFit: null,
+    childrenUniqueness: null,
+    childrenScore: null,
+    subtreeFit: null,
+    subtreeUniqueness: null,
+    subtreeScore: null,
+    overallScore: selfScore,
+    worstPair: null,
+    bestUncle: findBestUncle(node, nodes),
+  };
+}
+
+/**
+ * Computes subtree-level scores for a container.
+ */
+function computeSubtreeScores(
+  key: string,
+  metrics: NodeMetrics,
+  nodes: NodeMap,
+  subtreeCache: Map<string, SubtreeResult>,
+): { subtreeFit: number | null; subtreeUniqueness: number | null; subtreeScore: number | null } {
+  const cFit = metrics.childrenFitMap.get(key) ?? null;
+  const cUniq = metrics.childrenUniqMap.get(key) ?? NO_SIBLINGS;
+
+  const sub = memoizedCollectSubtree(
+    key,
+    nodes,
+    metrics.childrenFitMap,
+    metrics.childrenUniqMap,
+    subtreeCache,
+  );
+  const { subtreeFit, subtreeUniqueness } = descendantScores(sub, cFit, cUniq);
+
+  const subtreeScore =
+    subtreeFit === null || subtreeUniqueness === null
+      ? null
+      : harmonicMean(subtreeFit, subtreeUniqueness);
+
+  return { subtreeFit, subtreeUniqueness, subtreeScore };
+}
+
+/**
+ * Builds a ScoreCard for a container node.
+ */
+function buildContainerCard(
+  key: string,
+  node: CodeNode,
+  metrics: NodeMetrics,
+  nodes: NodeMap,
+  subtreeCache: Map<string, SubtreeResult>,
+): ScoreCard {
+  const fit = metrics.fitMap.get(key) ?? null;
+  const uniqueness = metrics.uniqMap.get(key) ?? NO_SIBLINGS;
+  const selfScore = computeScore(fit, uniqueness);
+
+  const cFit = metrics.childrenFitMap.get(key) ?? null;
+  const cUniq = metrics.childrenUniqMap.get(key) ?? NO_SIBLINGS;
+  const cUniqOrNull = cUniq === NO_SIBLINGS ? null : cUniq;
+  const cScore = computeChildrenScore(cFit, cUniqOrNull);
+
+  const { subtreeFit, subtreeUniqueness, subtreeScore } = computeSubtreeScores(
+    key,
+    metrics,
+    nodes,
+    subtreeCache,
+  );
+
+  const overallScore =
+    selfScore === null || subtreeScore === null
+      ? (selfScore ?? subtreeScore ?? null)
+      : harmonicMean(selfScore, subtreeScore);
+
+  return {
+    key,
+    kind: node.kind,
+    name: node.name,
+    fit,
+    uniqueness,
+    score: selfScore,
+    childrenFit: cFit,
+    childrenUniqueness: cUniqOrNull,
+    childrenScore: cScore,
+    subtreeFit,
+    subtreeUniqueness,
+    subtreeScore,
+    overallScore,
+    worstPair: metrics.worstPairs.get(key) ?? null,
+    bestUncle: findBestUncle(node, nodes),
+  };
+}
+
+/**
+ * Produces a ScoreCard for every node in the codebase tree.
+ */
+function score(result: ParseResult): ScoreCard[] {
+  const nodes = buildTree(result);
+  const metrics = computeMetrics(nodes);
   const subtreeCache = new Map<string, SubtreeResult>();
   const cards: ScoreCard[] = [];
 
   for (const [key, node] of nodes) {
     if (isLeaf(node)) {
-      continue;
+      cards.push(buildLeafCard(node, metrics, nodes));
+    } else {
+      cards.push(buildContainerCard(key, node, metrics, nodes, subtreeCache));
     }
-
-    const localFit = fitMap.get(key) ?? null;
-    const localUniq = uniqMap.get(key) ?? NO_SIBLINGS;
-
-    const sub = memoizedCollectSubtree(key, nodes, fitMap, uniqMap, subtreeCache);
-    const { subtreeFit, subtreeUniqueness, subtreeMinFit, subtreeMinUniqueness } = descendantScores(
-      sub,
-      localFit,
-      localUniq,
-    );
-
-    const overallScore =
-      localFit === null || subtreeUniqueness === NO_SIBLINGS
-        ? null
-        : harmonicMean(subtreeFit, subtreeUniqueness);
-
-    cards.push({
-      key,
-      kind: node.kind,
-      name: node.name,
-      labelFit: localFit,
-      labelUniqueness: localUniq,
-      subtreeFit,
-      subtreeUniqueness,
-      subtreeMinFit,
-      subtreeMinUniqueness,
-      overallScore,
-      worstPair: worstPairs.get(key) ?? null,
-      bestUncle: findBestUncle(node, nodes),
-    });
   }
 
   return cards;
 }
 
 /**
- * Produces a ScoreCard for every non-leaf node in the codebase tree.
- *
- * Pipeline:
- * 1. Build tree from ParseResult
- * 2. Compute label-fit for all non-leaf nodes
- * 3. Compute label-uniqueness (V2 CV-based) for all non-leaf nodes
- * 4. Collect subtree aggregations (memoized, single traversal)
- * 5. Compute overall harmonic mean
- *
- * @param result - Parsed codebase with embedded units
- * @returns Array of score cards, one per non-leaf node
- */
-function score(result: ParseResult): ScoreCard[] {
-  const nodes = buildTree(result);
-  const metrics = computeMetrics(nodes);
-  return buildCards(nodes, metrics);
-}
-
-/**
- * Memoized wrapper around collectSubtree to avoid redundant traversals.
+ * Memoized wrapper around collectSubtree.
  */
 function memoizedCollectSubtree(
   key: string,

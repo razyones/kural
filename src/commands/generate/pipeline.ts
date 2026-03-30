@@ -6,7 +6,7 @@
  */
 
 import type { EmbedOptions, Embedder } from "../../ingestion/embed/pipeline.ts";
-import { closeSnapshot, createActive, rotateActive } from "../../db/snapshot.ts";
+import { closeSnapshot, createActive, currentBranch, rotateActive } from "../../db/snapshot.ts";
 import type { EmbeddingCache } from "../../ingestion/embed/types.ts";
 import type { ScoreCard } from "../../sost/score.ts";
 import type { SnapshotCollections } from "../../db/collections.ts";
@@ -172,12 +172,15 @@ async function writeScoreCards(
     key: c.key,
     kind: c.kind,
     name: c.name,
-    labelFit: c.labelFit ?? undefined,
-    labelUniqueness: c.labelUniqueness,
-    subtreeFit: c.subtreeFit,
-    subtreeUniqueness: c.subtreeUniqueness,
-    subtreeMinFit: c.subtreeMinFit,
-    subtreeMinUniqueness: c.subtreeMinUniqueness,
+    fit: c.fit ?? undefined,
+    uniqueness: c.uniqueness,
+    score: c.score ?? undefined,
+    childrenFit: c.childrenFit ?? undefined,
+    childrenUniqueness: c.childrenUniqueness ?? undefined,
+    childrenScore: c.childrenScore ?? undefined,
+    subtreeFit: c.subtreeFit ?? undefined,
+    subtreeUniqueness: c.subtreeUniqueness ?? undefined,
+    subtreeScore: c.subtreeScore ?? undefined,
     overallScore: c.overallScore ?? undefined,
     worstPair: c.worstPair ? JSON.stringify(c.worstPair) : undefined,
     bestUncleName: c.bestUncle?.name,
@@ -220,9 +223,10 @@ async function generate(
   const cards = score(result);
   callbacks?.onScored?.(cards.length);
 
-  await rotateActive(root);
-  const snapshot = await createActive(root);
-  const dbPath = `${root}/.kural-db/kural-active.db`;
+  const branch = currentBranch();
+  await rotateActive(root, branch);
+  const snapshot = await createActive(root, branch);
+  const dbPath = `${root}/.kural-db/${branch}/active.db`;
 
   await writeMetadata(snapshot.collections, modelId);
   await writeUnits(snapshot.collections, result);

@@ -9,21 +9,23 @@ import { cleanupAll, createSnapshotCollections, preloadAll } from "./collections
 import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "node:fs";
 import BetterSqlite3 from "better-sqlite3";
 import type { SnapshotCollections } from "./collections.ts";
+import { execSync } from "node:child_process";
 import { join } from "node:path";
 
 const DB_DIR = ".kural-db";
 const HISTORY_DIR = "history";
-const ACTIVE_NAME = "kural-active.db";
-const ADVISE_NAME = "kural-active-advise.db";
-const HISTORY_PREFIX = "kural-history-";
+const ACTIVE_NAME = "active.db";
+const ADVISE_NAME = "advise.db";
 const HISTORY_SUFFIX = ".db";
 const MAX_HISTORY = 10;
-const TIMESTAMP_PATTERN = /^kural-history-(\d+)\.db$/;
-const MATCH_GROUP = 1;
+const SNAPSHOT_ID_PATTERN = /^(\d+)-([a-f0-9]+)\.db$/;
+const MATCH_TIMESTAMP = 1;
+const HASH_LENGTH = 7;
 
 /** Metadata for a single snapshot database file. */
 type SnapshotInfo = {
   path: string;
+  snapshotId: string;
   timestamp: number;
 };
 
@@ -34,36 +36,68 @@ type OpenSnapshot = {
 };
 
 /**
- * Resolves the history subdirectory path for a project root.
- * @param root - Absolute path to the project root
- * @returns Absolute path to the .kural-db/history directory
+ * Detects the current git branch name.
+ * Falls back to "main" if not in a git repo.
  */
-function historyDir(root: string): string {
-  return join(root, DB_DIR, HISTORY_DIR);
+function currentBranch(): string {
+  try {
+    return execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf-8" }).trim();
+  } catch {
+    return "main";
+  }
 }
 
 /**
- * Resolves the active database file path for a project root.
- * @param root - Absolute path to the project root
- * @returns Absolute path to kural-active.db
+ * Gets the short commit hash of HEAD.
+ * Falls back to "0000000" if not in a git repo.
  */
-function activePath(root: string): string {
-  return join(root, DB_DIR, ACTIVE_NAME);
+function currentCommitHash(): string {
+  try {
+    return execSync(`git rev-parse --short=${String(HASH_LENGTH)} HEAD`, {
+      encoding: "utf-8",
+    }).trim();
+  } catch {
+    return "0000000";
+  }
 }
 
 /**
- * Resolves the advise database file path for a project root.
- * @param root - Absolute path to the project root
- * @returns Absolute path to kural-active-advise.db
+ * Builds a snapshot ID from timestamp and commit hash.
  */
-function advisePath(root: string): string {
-  return join(root, DB_DIR, ADVISE_NAME);
+function buildSnapshotId(timestamp: number, commitHash: string): string {
+  return `${String(timestamp)}-${commitHash}`;
+}
+
+/**
+ * Resolves the branch directory path.
+ */
+function branchDir(root: string, branch: string): string {
+  return join(root, DB_DIR, branch);
+}
+
+/**
+ * Resolves the history subdirectory path.
+ */
+function historyDir(root: string, branch: string): string {
+  return join(branchDir(root, branch), HISTORY_DIR);
+}
+
+/**
+ * Resolves the active database file path.
+ */
+function activePath(root: string, branch: string): string {
+  return join(branchDir(root, branch), ACTIVE_NAME);
+}
+
+/**
+ * Resolves the advise database file path.
+ */
+function advisePath(root: string, branch: string): string {
+  return join(branchDir(root, branch), ADVISE_NAME);
 }
 
 /**
  * Opens an existing snapshot database and preloads all collections.
- * @param dbPath - Absolute path to the database file
- * @returns An open snapshot with database handle and collections
  */
 async function openSnapshot(dbPath: string): Promise<OpenSnapshot> {
   const database = new BetterSqlite3(dbPath);
@@ -74,19 +108,16 @@ async function openSnapshot(dbPath: string): Promise<OpenSnapshot> {
 
 /**
  * Creates a fresh active database with initialized collections.
- * @param root - Absolute path to the project root
- * @returns An open snapshot for writing
  */
-async function createActive(root: string): Promise<OpenSnapshot> {
-  mkdirSync(historyDir(root), { recursive: true });
-  const path = activePath(root);
+async function createActive(root: string, branch: string): Promise<OpenSnapshot> {
+  mkdirSync(historyDir(root, branch), { recursive: true });
+  const path = activePath(root, branch);
   const snapshot = await openSnapshot(path);
   return snapshot;
 }
 
 /**
  * Closes a snapshot, cleaning up collections and the database handle.
- * @param snapshot - The open snapshot to close
  */
 async function closeSnapshot(snapshot: OpenSnapshot): Promise<void> {
   await cleanupAll(snapshot.collections);
@@ -96,11 +127,9 @@ async function closeSnapshot(snapshot: OpenSnapshot): Promise<void> {
 /**
  * Reads the creation timestamp from an active database's metadata.
  * Falls back to the current time if unavailable.
- * @param root - Absolute path to the project root
- * @returns The creation timestamp in milliseconds
  */
-async function readCreatedAt(root: string): Promise<number> {
-  const path = activePath(root);
+async function readCreatedAt(root: string, branch: string): Promise<number> {
+  const path = activePath(root, branch);
   if (!existsSync(path)) {
     return Date.now();
   }
@@ -118,24 +147,25 @@ async function readCreatedAt(root: string): Promise<number> {
 }
 
 /**
- * Rotates the active database into the history directory.
+ * Rotates the active database into the history directory with a
+ * snapshot ID of `<timestamp>-<commit-hash>`.
  * Evicts the oldest history file if the count exceeds the maximum.
- * @param root - Absolute path to the project root
  */
-async function rotateActive(root: string): Promise<void> {
-  const active = activePath(root);
+async function rotateActive(root: string, branch: string): Promise<void> {
+  const active = activePath(root, branch);
   if (!existsSync(active)) {
     return;
   }
 
-  const timestamp = await readCreatedAt(root);
-  const historyName = `${HISTORY_PREFIX}${String(timestamp)}${HISTORY_SUFFIX}`;
-  const historyPath = join(historyDir(root), historyName);
+  const timestamp = await readCreatedAt(root, branch);
+  const commitHash = currentCommitHash();
+  const snapshotId = buildSnapshotId(timestamp, commitHash);
+  const historyPath = join(historyDir(root, branch), `${snapshotId}${HISTORY_SUFFIX}`);
 
-  mkdirSync(historyDir(root), { recursive: true });
+  mkdirSync(historyDir(root, branch), { recursive: true });
   renameSync(active, historyPath);
 
-  const snapshots = getHistorySnapshots(root);
+  const snapshots = getHistorySnapshots(root, branch);
   while (snapshots.length > MAX_HISTORY) {
     const oldest = snapshots.shift();
     if (oldest) {
@@ -146,11 +176,9 @@ async function rotateActive(root: string): Promise<void> {
 
 /**
  * Lists all history snapshots sorted by timestamp ascending.
- * @param root - Absolute path to the project root
- * @returns Array of snapshot metadata ordered by creation time
  */
-function getHistorySnapshots(root: string): SnapshotInfo[] {
-  const dir = historyDir(root);
+function getHistorySnapshots(root: string, branch: string): SnapshotInfo[] {
+  const dir = historyDir(root, branch);
   if (!existsSync(dir)) {
     return [];
   }
@@ -159,11 +187,13 @@ function getHistorySnapshots(root: string): SnapshotInfo[] {
   const snapshots: SnapshotInfo[] = [];
 
   for (const entry of entries) {
-    const match = TIMESTAMP_PATTERN.exec(entry);
+    const match = SNAPSHOT_ID_PATTERN.exec(entry);
     if (match) {
+      const snapshotId = entry.replace(HISTORY_SUFFIX, "");
       snapshots.push({
         path: join(dir, entry),
-        timestamp: Number(match[MATCH_GROUP]),
+        snapshotId,
+        timestamp: Number(match[MATCH_TIMESTAMP]),
       });
     }
   }
@@ -174,26 +204,23 @@ function getHistorySnapshots(root: string): SnapshotInfo[] {
 
 /**
  * Copies the active database to the advise file for simulation.
- * @param root - Absolute path to the project root
- * @returns Absolute path to the created advise database file
  */
-function cloneActiveToAdvise(root: string): string {
-  const active = activePath(root);
+function cloneActiveToAdvise(root: string, branch: string): string {
+  const active = activePath(root, branch);
   if (!existsSync(active)) {
     throw new Error("No active database to clone — run generate first");
   }
 
-  const advise = advisePath(root);
+  const advise = advisePath(root, branch);
   copyFileSync(active, advise);
   return advise;
 }
 
 /**
  * Deletes the advise database file if it exists.
- * @param root - Absolute path to the project root
  */
-function deleteAdvise(root: string): void {
-  const advise = advisePath(root);
+function deleteAdvise(root: string, branch: string): void {
+  const advise = advisePath(root, branch);
   if (existsSync(advise)) {
     rmSync(advise);
   }
@@ -204,6 +231,7 @@ export {
   cloneActiveToAdvise,
   closeSnapshot,
   createActive,
+  currentBranch,
   deleteAdvise,
   getHistorySnapshots,
   openSnapshot,
