@@ -13,6 +13,7 @@ import { relative, resolve } from "node:path";
 import { createStepTracker } from "../../ui/step-tracker.ts";
 import { define } from "gunshi";
 import { generate } from "./pipeline.ts";
+import { renderFooter } from "../../ui/footer.ts";
 
 const NONE = 0;
 const JSON_INDENT = 2;
@@ -90,6 +91,28 @@ function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]
 }
 
 /**
+ * Prints the generate command footer with glossary and next steps.
+ */
+function printGenerateFooter(): void {
+  renderFooter(
+    [
+      { term: "fileCount", definition: "number of source files parsed" },
+      { term: "dirCount", definition: "number of directories discovered" },
+      {
+        term: "unitCount",
+        definition: "total units embedded (files + types + functions + dirs)",
+      },
+    ],
+    [
+      { command: "kural score", description: "view the overall structural score" },
+      { command: "kural score -p <path>", description: "score a specific node" },
+      { command: "kural score -e", description: "detailed score breakdown table" },
+      { command: "kural generate --json", description: "output result as JSON" },
+    ],
+  );
+}
+
+/**
  * Runs the generate command with the given CLI arguments.
  */
 async function handleGenerate(values: {
@@ -137,7 +160,10 @@ async function handleGenerate(values: {
 
   if (jsonMode) {
     printJson(targetPath, provider, modelId, result);
+    return;
   }
+
+  printGenerateFooter();
 }
 
 export default define({
