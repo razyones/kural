@@ -6,15 +6,16 @@
  */
 
 import type { EmbedOptions, Embedder } from "../../ingestion/embed/pipeline.ts";
+import type { GenerateCallbacks, GenerateResult } from "./pipeline.ts";
 import { createEmbeddingModel, embedSignatures } from "../../ingestion/embed/model.ts";
 import { logBanner, logger } from "../../ui/log.ts";
 import { relative, resolve } from "node:path";
-import type { GenerateCallbacks } from "./pipeline.ts";
 import { createStepTracker } from "../../ui/step-tracker.ts";
 import { define } from "gunshi";
 import { generate } from "./pipeline.ts";
 
 const NONE = 0;
+const JSON_INDENT = 2;
 const FACET_NAMES = [
   "names",
   "descriptions",
@@ -52,6 +53,93 @@ function buildCallbacks(): GenerateCallbacks {
   };
 }
 
+/**
+ * Prints the generation result as JSON to stdout.
+ */
+function printJson(
+  targetPath: string,
+  provider: string,
+  modelId: string,
+  result: GenerateResult,
+): void {
+  const output = {
+    path: relative(process.cwd(), targetPath) || ".",
+    provider,
+    model: modelId,
+    branch: result.branch,
+    fileCount: result.fileCount,
+    dirCount: result.dirCount,
+    unitCount: result.unitCount,
+    dbPath: relative(process.cwd(), result.dbPath),
+  };
+  console.log(JSON.stringify(output, null, JSON_INDENT));
+}
+
+/**
+ * Creates an embedder that tracks progress through named facet steps.
+ */
+function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]>): Embedder {
+  const tracker = createStepTracker("Embedding", FACET_NAMES);
+  return async (sigs) => {
+    const vectors = await tracker(async (onProgress) => {
+      const result = await embedSignatures(sigs, embedFn, { onProgress });
+      return result;
+    });
+    return vectors;
+  };
+}
+
+/**
+ * Runs the generate command with the given CLI arguments.
+ */
+async function handleGenerate(values: {
+  path: string;
+  provider?: string;
+  model?: string;
+  apiKey?: string;
+  json?: boolean;
+}): Promise<void> {
+  const targetPath = resolve(values.path);
+  const provider = values.provider ?? "vercel";
+  const jsonMode = values.json === true;
+
+  const { embed: embedFn, modelId } = createEmbeddingModel({
+    provider,
+    model: values.model,
+    apiKey: values.apiKey,
+  });
+
+  if (!jsonMode) {
+    logBanner("generate", {
+      path: relative(process.cwd(), targetPath) || ".",
+      provider,
+      model: modelId,
+    });
+  }
+
+  const embedOptions: EmbedOptions = {
+    rootPath: targetPath,
+    domainKeywords: [],
+    dictionary: {},
+  };
+
+  const root = process.cwd();
+  const callbacks = jsonMode ? {} : buildCallbacks();
+  const result = await generate(
+    root,
+    targetPath,
+    createTrackedEmbedder(embedFn),
+    embedOptions,
+    modelId,
+    undefined,
+    callbacks,
+  );
+
+  if (jsonMode) {
+    printJson(targetPath, provider, modelId, result);
+  }
+}
+
 export default define({
   name: "generate",
   description: "Parse, embed, and score a codebase snapshot",
@@ -76,39 +164,12 @@ export default define({
       short: "k",
       description: "API key (defaults to AI_GATEWAY_API_KEY env var)",
     },
+    json: {
+      type: "boolean" as const,
+      description: "Output result as JSON",
+    },
   },
   run: async (ctx) => {
-    const targetPath = resolve(ctx.values.path);
-    const provider = ctx.values.provider ?? "vercel";
-
-    const { embed: embedFn, modelId } = createEmbeddingModel({
-      provider,
-      model: ctx.values.model,
-      apiKey: ctx.values.apiKey,
-    });
-
-    logBanner("generate", {
-      path: relative(process.cwd(), targetPath) || ".",
-      provider,
-      model: modelId,
-    });
-
-    const tracker = createStepTracker("Embedding", FACET_NAMES);
-    const embedder: Embedder = async (sigs) => {
-      const vectors = await tracker(async (onProgress) => {
-        const result = await embedSignatures(sigs, embedFn, { onProgress });
-        return result;
-      });
-      return vectors;
-    };
-
-    const embedOptions: EmbedOptions = {
-      rootPath: targetPath,
-      domainKeywords: [],
-      dictionary: {},
-    };
-
-    const root = process.cwd();
-    await generate(root, targetPath, embedder, embedOptions, modelId, undefined, buildCallbacks());
+    await handleGenerate(ctx.values);
   },
 });

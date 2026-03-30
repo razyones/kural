@@ -29,7 +29,7 @@ type GenerateResult = {
   fileCount: number;
   dirCount: number;
   unitCount: number;
-  cardCount: number;
+  branch: string;
   dbPath: string;
 };
 
@@ -238,7 +238,7 @@ async function generate(
     fileCount,
     dirCount,
     unitCount,
-    cardCount: cards.length,
+    branch,
     dbPath,
   };
 }
