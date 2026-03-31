@@ -5,7 +5,7 @@
  * defines how the system connects to a generative language model.
  */
 
-/** LLM provider and model configuration. */
+/** LLM provider and model configuration. @kuralPatterns providerConfig */
 type LLMConfig = {
   /** Provider name (e.g. "google", "openrouter", "openai", "ollama") */
   provider: string;

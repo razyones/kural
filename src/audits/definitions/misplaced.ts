@@ -20,6 +20,7 @@ const MISPLACED_HALVE = 2;
  * Renders the uncle-fit comparison showing where a node would be better placed in the tree.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatMisplaced({ finding, prefix, label, labelNode }: FormatCtx): ListItem {

@@ -124,6 +124,7 @@ function computeChildrenScore(
  * @param metrics - Pre-computed per-node metrics
  * @param nodes - The flat node map for uncle lookups
  * @returns A complete ScoreCard for the leaf node
+ * @kuralPatterns cardBuilder
  * @kuralPure
  */
 function buildLeafCard(node: CodeNode, metrics: NodeMetrics, nodes: NodeMap): ScoreCard {
@@ -193,6 +194,7 @@ function computeSubtreeScores(
  * @param nodes - The flat node map for traversal and uncle lookups
  * @param subtreeCache - Memoization cache for subtree results
  * @returns A complete ScoreCard for the container node
+ * @kuralPatterns cardBuilder
  * @kuralPure
  */
 function buildContainerCard(

@@ -39,6 +39,7 @@ type OpenSnapshot = {
  * Detects the current git branch name.
  * Falls back to "main" if not in a git repo.
  * @returns The current git branch name, or "main" as fallback
+ * @kuralPatterns gitInfo
  * @kuralCauses runs git rev-parse via execSync
  */
 function currentBranch(): string {
@@ -53,6 +54,7 @@ function currentBranch(): string {
  * Gets the short commit hash of HEAD.
  * Falls back to "0000000" if not in a git repo.
  * @returns The short commit hash of HEAD, or "0000000" as fallback
+ * @kuralPatterns gitInfo
  * @kuralCauses runs git rev-parse via execSync
  */
 function currentCommitHash(): string {

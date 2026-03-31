@@ -15,6 +15,7 @@ const NONE = 0;
  * Renders the similarity measurement between two siblings that are too close to justify separate existence.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatMerge({ finding, label, location, labelNode }: FormatCtx): ListItem {

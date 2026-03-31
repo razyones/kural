@@ -24,6 +24,7 @@ const HALF = 2;
  * Renders the dominance gap showing which child overwhelms its parent's identity.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatContainment({ finding, prefix, label }: FormatCtx): ListItem {

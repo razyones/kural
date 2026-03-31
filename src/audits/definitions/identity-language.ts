@@ -17,6 +17,7 @@ const HALF = 2;
  * Renders the is-does axis score showing linguistic misalignment in a directory's description.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatIdentityLanguage({ finding, prefix, label }: FormatCtx): ListItem {

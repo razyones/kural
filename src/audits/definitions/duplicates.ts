@@ -19,6 +19,7 @@ const NEXT = 1;
  * Shared formatter for both duplicates and duplicate-utils audits.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatDuplicate({ finding, label, labelNode }: FormatCtx): ListItem {
@@ -36,6 +37,7 @@ function formatDuplicate({ finding, label, labelNode }: FormatCtx): ListItem {
  * @param nodes - The code tree node map
  * @param fence - The similarity threshold above which a pair is flagged
  * @returns Findings for cross-file leaf duplicates
+ * @kuralPatterns crossScan
  * @kuralPure
  */
 function scanLeafCrossFile(
@@ -128,6 +130,7 @@ function scanCrossPopDuplicates(
  * @param entries - File node entries to compare pairwise
  * @param fence - The similarity threshold above which a pair is flagged
  * @returns Findings for cross-directory file duplicates
+ * @kuralPatterns crossScan
  * @kuralPure
  */
 function scanFileCrossDir(entries: [string, CodeNode][], fence: number): Finding[] {

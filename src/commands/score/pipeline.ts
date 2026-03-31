@@ -57,6 +57,7 @@ type ScoreDelta = {
  * Keys are formatted as `kind:path` or `kind:path:name`.
  * @param key - the score key to extract the path from
  * @returns the path segment of the key
+ * @kuralPatterns pathExtractor
  * @kuralPure
  */
 function extractPath(key: string): string {

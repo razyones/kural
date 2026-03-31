@@ -52,6 +52,7 @@ function crossPulls(details: Record<string, unknown> | undefined): { path: strin
  * Renders the cross-module pull showing which non-sibling a directory's vocabulary drifts toward.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatVocabBleed({ finding, prefix, label, rootPath }: FormatCtx): ListItem {

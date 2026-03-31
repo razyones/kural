@@ -13,6 +13,7 @@ const NONE = 0;
  * Renders the checklist of missing documentation items — description, params, returns, or purity annotation — for a code unit.
  * @param ctx - The formatting context with finding and display data
  * @returns A list item with heading and missing-doc details
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatIncompleteDocs({ finding, prefix, label, location }: FormatCtx): ListItem {

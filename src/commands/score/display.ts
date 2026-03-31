@@ -58,6 +58,7 @@ function buildTableRows(
 
 /**
  * Prints the score command footer with glossary and next steps.
+ * @kuralPatterns commandFooter
  * @kuralCauses writes footer glossary and next-step hints to stdout
  */
 function printScoreFooter(): void {

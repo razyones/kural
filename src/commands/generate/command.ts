@@ -104,6 +104,7 @@ function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]
 
 /**
  * Closes the generate output with term definitions and suggested follow-up commands.
+ * @kuralPatterns commandFooter
  * @kuralCauses writes footer sections to stdout
  */
 function printGenerateFooter(): void {

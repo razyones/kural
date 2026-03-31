@@ -20,6 +20,7 @@ const NEXT = 1;
  * Renders cluster composition details showing which children should split into separate containers.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatBloated({ finding, prefix, label }: FormatCtx): ListItem {

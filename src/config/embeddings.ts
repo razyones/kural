@@ -5,7 +5,7 @@
  * module defines how the system connects to an embedding API.
  */
 
-/** Embedding provider and model configuration. */
+/** Embedding provider and model configuration. @kuralPatterns providerConfig */
 type EmbeddingsConfig = {
   /** Provider name (e.g. "openrouter", "openai", "vercel", "ollama") */
   provider: string;

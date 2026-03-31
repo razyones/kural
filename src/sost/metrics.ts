@@ -20,6 +20,7 @@ const MIN_PAIR_COUNT = 2;
  * @param node - The node to compute fit for
  * @param nodes - The flat node map for parent lookup
  * @returns cosineSimilarity(parent.identity, N.leaf), or null if no parent or util container
+ * @kuralPatterns fitMetric
  * @kuralPure
  */
 function computeFit(node: CodeNode, nodes: NodeMap): number | null {
@@ -44,6 +45,7 @@ function computeFit(node: CodeNode, nodes: NodeMap): number | null {
  * matches its own declared identity.
  * @param node - The node to compute children fit for
  * @returns cosineSimilarity(N.identity, N.leaf), or null for leaves/util containers
+ * @kuralPatterns fitMetric
  * @kuralPure
  */
 function computeChildrenFit(node: CodeNode): number | null {

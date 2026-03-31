@@ -19,6 +19,7 @@ const INCOHERENT_CAP = 0.9;
  * Renders the label-fit deficit showing how far a container's declared identity strays from its actual content.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
+ * @kuralPatterns formatAudit
  * @kuralPure
  */
 function formatIncoherent({ finding, prefix, label }: FormatCtx): ListItem {

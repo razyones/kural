@@ -1,1 +1,1 @@
-The inspector's office. Wires the audit CLI arguments to the detection pipeline and formats results for the terminal. It is the only command that runs structural audits — no other command reads stored data to produce diagnostic findings.
+The inspector's office. Wires CLI arguments to the health-check engine and renders its output for the terminal. It is the only command that presents anomaly reports — no other command reads snapshot data to surface deviations.
