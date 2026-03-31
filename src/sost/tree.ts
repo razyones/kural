@@ -70,6 +70,8 @@ type NodeMap = Map<string, CodeNode>;
 
 /**
  * Detects helper functions: unexported functions called by 2+ siblings.
+ * @param nodes - The flat node map to scan for helpers
+ * @kuralCauses mutates helper flags on function nodes in place
  */
 function detectHelpers(nodes: NodeMap): void {
   for (const node of nodes.values()) {
@@ -100,6 +102,8 @@ function detectHelpers(nodes: NodeMap): void {
 
 /**
  * Propagates util flag upward: if all children are util, parent becomes util.
+ * @param nodes - The flat node map to propagate util flags on
+ * @kuralCauses mutates util flags on container nodes in place
  */
 function propagateUtil(nodes: NodeMap): void {
   for (const node of nodes.values()) {
@@ -118,6 +122,9 @@ function propagateUtil(nodes: NodeMap): void {
 
 /**
  * Wires parent pointers from directory children references.
+ * @param nodes - The flat node map to wire parent pointers on
+ * @param result - The parse result containing directory-child relationships
+ * @kuralCauses mutates parent pointers on child nodes in place
  */
 function wireParents(nodes: NodeMap, result: ParseResult): void {
   for (const [dirPath, dir] of Object.entries(result.directories)) {
@@ -136,6 +143,7 @@ function wireParents(nodes: NodeMap, result: ParseResult): void {
  * Builds the complete scoring tree from a parse result.
  * @param result - Parsed codebase with files and directories
  * @returns Flat node map with parent-child pointers
+ * @kuralPure
  */
 function buildTree(result: ParseResult): NodeMap {
   const nodes: NodeMap = new Map();
@@ -176,6 +184,10 @@ function buildTree(result: ParseResult): NodeMap {
 
 /**
  * Resolves child keys to CodeNode instances.
+ * @param node - The parent node whose children to resolve
+ * @param nodes - The flat node map to look up children in
+ * @returns Array of resolved child CodeNode instances
+ * @kuralPure
  */
 function getChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
   return node.childKeys.map((k) => nodes.get(k)).filter((n): n is CodeNode => n !== undefined);
@@ -183,6 +195,10 @@ function getChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
 
 /**
  * Returns eligible children for domain scoring: excludes util nodes.
+ * @param node - The parent node whose eligible children to resolve
+ * @param nodes - The flat node map to look up children in
+ * @returns Array of non-util child CodeNode instances
+ * @kuralPure
  */
 function getEligibleChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
   return getChildren(node, nodes).filter((c) => !c.util);
@@ -190,6 +206,9 @@ function getEligibleChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
 
 /**
  * Returns true if the node is a leaf (type or function).
+ * @param node - The node to check
+ * @returns True if the node is a type or function node
+ * @kuralPure
  */
 function isLeaf(node: CodeNode): boolean {
   return node.kind === "type" || node.kind === "function";

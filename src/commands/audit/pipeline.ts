@@ -28,6 +28,12 @@ type AuditPipelineResult = {
   createdAt: number | null;
 };
 
+/**
+ * Deserializes stored axis scores from their JSON metadata representation back into a typed numeric map.
+ * @param text - JSON string to parse
+ * @returns A record of string keys to number values, or null if input is not a valid object
+ * @kuralPure
+ */
 function parseNumberRecord(text: string): Record<string, number> | null {
   const parsed: unknown = JSON.parse(text);
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
@@ -48,6 +54,7 @@ function parseNumberRecord(text: string): Record<string, number> | null {
  * @param config - Audit sensitivity and tuning parameters
  * @param disabledAudits - Set of audit names to skip
  * @returns The audit report and the node map used for formatting
+ * @kuralCauses reads snapshot database and runs detection
  */
 async function runAudits(
   root: string,
@@ -84,7 +91,12 @@ async function runAudits(
   }
 }
 
-/** Indexes snapshot functions by path into a lookup map. */
+/**
+ * Indexes snapshot functions by path into a lookup map.
+ * @param fns - Snapshot function collection to index
+ * @returns Map from file path to a record of function name to KuralFunction
+ * @kuralPure
+ */
 function indexFunctionsByPath(
   fns: SnapshotCollections["functions"],
 ): Map<string, Record<string, KuralFunction>> {
@@ -120,7 +132,12 @@ function indexFunctionsByPath(
   return fnsByPath;
 }
 
-/** Indexes snapshot types by path into a lookup map. */
+/**
+ * Indexes snapshot types by path into a lookup map.
+ * @param types - Snapshot type collection to index
+ * @returns Map from file path to a record of type name to KuralType
+ * @kuralPure
+ */
 function indexTypesByPath(
   types: SnapshotCollections["types"],
 ): Map<string, Record<string, KuralType>> {
@@ -153,6 +170,9 @@ function indexTypesByPath(
 /**
  * Rebuilds a ParseResult from snapshot collections for tree building.
  * Pre-indexes functions and types by path for O(F + Fn + T) instead of O(F * (Fn + T)).
+ * @param collections - Snapshot collections containing files, functions, types, and directories
+ * @returns A ParseResult with files and directories reconstructed from the snapshot
+ * @kuralPure
  */
 function rebuildParseResult(collections: SnapshotCollections): ParseResult {
   const fnsByPath = indexFunctionsByPath(collections.functions);

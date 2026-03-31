@@ -18,6 +18,7 @@ const MAD_SCALE = 1.4826;
  * Sorts the distribution and picks the middle element as the central tendency.
  * @param distribution - Sample of numbers to find the midpoint of
  * @returns The middle value (or average of two middle values for even length)
+ * @kuralPure
  */
 function median(distribution: number[]): number {
   const sorted = [...distribution].toSorted((a, b) => a - b);
@@ -32,6 +33,7 @@ function median(distribution: number[]): number {
  * @param values - Array of numbers
  * @param mu - The mean of the values
  * @returns Standard deviation, or 0 for fewer than 2 values
+ * @kuralPure
  */
 function stddev(values: number[], mu: number): number {
   if (values.length < MIN_SAMPLE) {
@@ -49,6 +51,7 @@ function stddev(values: number[], mu: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of standard deviations from the mean
  * @returns Upper fence threshold, or Infinity for fewer than 2 values
+ * @kuralPure
  */
 function upperFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {
@@ -63,6 +66,7 @@ function upperFence(values: number[], sensitivity: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of standard deviations from the mean
  * @returns Lower fence threshold, or -Infinity for fewer than 2 values
+ * @kuralPure
  */
 function lowerFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {
@@ -77,6 +81,7 @@ function lowerFence(values: number[], sensitivity: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of scaled MAD units from the median
  * @returns Robust lower fence, or -Infinity for fewer than 2 values
+ * @kuralPure
  */
 function robustLowerFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {
@@ -93,6 +98,7 @@ function robustLowerFence(values: number[], sensitivity: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of scaled MAD units from the median
  * @returns Robust upper fence, or Infinity for fewer than 2 values
+ * @kuralPure
  */
 function robustUpperFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {

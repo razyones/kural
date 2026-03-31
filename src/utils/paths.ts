@@ -14,6 +14,7 @@ const AFTER_COLON = 1;
  * Strips the kind prefix (dir:, file:, func:, type:) from a node key.
  * @param key - Node key like "file:/abs/path" or "dir:/abs/path"
  * @returns The path portion after the first colon
+ * @kuralPure
  */
 function stripKeyPrefix(key: string): string {
   const idx = key.indexOf(":");

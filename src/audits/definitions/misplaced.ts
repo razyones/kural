@@ -16,6 +16,12 @@ import { upperFence } from "../fence.ts";
 const NONE = 0;
 const MISPLACED_HALVE = 2;
 
+/**
+ * Renders the uncle-fit comparison showing where a node would be better placed in the tree.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatMisplaced({ finding, prefix, label, labelNode }: FormatCtx): ListItem {
   const uncleFit = num(finding.details, "uncleFit");
   const uncle = finding.pairKey === undefined ? "unknown" : labelNode(finding.pairKey);
@@ -27,6 +33,7 @@ function formatMisplaced({ finding, prefix, label, labelNode }: FormatCtx): List
   };
 }
 
+/** Raw misplacement measurement before fence filtering. */
 type MisplacedRaw = {
   nodeKey: string;
   parentKey: string;
@@ -36,6 +43,12 @@ type MisplacedRaw = {
   delta: number;
 };
 
+/**
+ * Walks the ancestor chain testing uncle directories and measures how much better each node would fit elsewhere.
+ * @param nodes - The code tree node map
+ * @returns Raw misplacement measurements for nodes with higher uncle-fit than parent-fit
+ * @kuralPure
+ */
 function collectMisplacedCandidates(nodes: Map<string, CodeNode>): MisplacedRaw[] {
   const raw: MisplacedRaw[] = [];
   for (const [key, node] of nodes) {

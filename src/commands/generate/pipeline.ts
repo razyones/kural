@@ -34,7 +34,10 @@ type GenerateResult = {
 };
 
 /**
- * Writes metadata entries to the snapshot.
+ * Records the model identity and creation timestamp so downstream commands can validate cache coherence and display snapshot provenance.
+ * @param collections - Snapshot collections to write into
+ * @param modelId - Embedding model ID to record
+ * @kuralCauses persists metadata rows to the snapshot database
  */
 async function writeMetadata(collections: SnapshotCollections, modelId: string): Promise<void> {
   const tx = collections.metadata.insert([
@@ -46,7 +49,10 @@ async function writeMetadata(collections: SnapshotCollections, modelId: string):
 }
 
 /**
- * Writes parsed files, types, functions, and directories.
+ * Persists every parsed code unit so the snapshot captures the full structural graph of the codebase.
+ * @param collections - Snapshot collections to write into
+ * @param result - Parsed codebase with files and directories
+ * @kuralCauses persists all unit rows to the snapshot database
  */
 async function writeUnits(
   collections: SnapshotCollections,
@@ -59,6 +65,12 @@ async function writeUnits(
   await writeDirectories(collections, result);
 }
 
+/**
+ * Persists file-level units with their embeddings and import edges so the snapshot captures the mid-level organizational structure.
+ * @param collections - Snapshot collections to write into
+ * @param files - Parsed file objects to persist
+ * @kuralCauses persists file rows to the snapshot database
+ */
 async function writeFiles(
   collections: SnapshotCollections,
   files: Awaited<ReturnType<typeof parse>>["files"][string][],
@@ -81,6 +93,12 @@ async function writeFiles(
   }
 }
 
+/**
+ * Persists type units with their field shapes and embeddings so the snapshot captures the declarative schema layer.
+ * @param collections - Snapshot collections to write into
+ * @param files - Parsed file objects containing types to persist
+ * @kuralCauses persists type rows to the snapshot database
+ */
 async function writeTypes(
   collections: SnapshotCollections,
   files: Awaited<ReturnType<typeof parse>>["files"][string][],
@@ -108,6 +126,12 @@ async function writeTypes(
   }
 }
 
+/**
+ * Persists function units with their signatures, purity annotations, and embeddings so the snapshot captures the behavioral layer.
+ * @param collections - Snapshot collections to write into
+ * @param files - Parsed file objects containing functions to persist
+ * @kuralCauses persists function rows to the snapshot database
+ */
 async function writeFunctions(
   collections: SnapshotCollections,
   files: Awaited<ReturnType<typeof parse>>["files"][string][],
@@ -141,6 +165,12 @@ async function writeFunctions(
   }
 }
 
+/**
+ * Persists directory units with their child lists and embeddings so the snapshot captures the hierarchical container structure.
+ * @param collections - Snapshot collections to write into
+ * @param result - Parsed codebase with directory objects to persist
+ * @kuralCauses persists directory rows to the snapshot database
+ */
 async function writeDirectories(
   collections: SnapshotCollections,
   result: Awaited<ReturnType<typeof parse>>,
@@ -162,7 +192,10 @@ async function writeDirectories(
 }
 
 /**
- * Writes score cards to the snapshot.
+ * Persists computed health metrics so downstream commands can query scores without re-running the pipeline.
+ * @param collections - Snapshot collections to write into
+ * @param cards - Computed score cards to persist
+ * @kuralCauses persists score card rows to the snapshot database
  */
 async function writeScoreCards(
   collections: SnapshotCollections,

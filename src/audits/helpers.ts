@@ -12,6 +12,7 @@ const EMPTY: string[] = [];
  * Only FunctionNodes have calls — returns empty array for other kinds.
  * @param node - The code node
  * @returns Array of function names called by this node
+ * @kuralPure
  */
 function getCalls(node: CodeNode): string[] {
   return node.kind === "function" ? node.calls : EMPTY;
@@ -22,6 +23,7 @@ function getCalls(node: CodeNode): string[] {
  * @param a - First node
  * @param b - Second node
  * @returns True if either node calls the other by name
+ * @kuralPure
  */
 function isCallerCallee(a: CodeNode, b: CodeNode): boolean {
   return getCalls(a).includes(b.name) || getCalls(b).includes(a.name);

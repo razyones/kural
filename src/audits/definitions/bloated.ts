@@ -16,6 +16,12 @@ import { num } from "../../utils/record.ts";
 const NONE = 0;
 const NEXT = 1;
 
+/**
+ * Renders cluster composition details showing which children should split into separate containers.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatBloated({ finding, prefix, label }: FormatCtx): ListItem {
   const clusterCount = num(finding.details, "clusterCount");
   const details: string[] = [];
@@ -27,6 +33,13 @@ function formatBloated({ finding, prefix, label }: FormatCtx): ListItem {
   return { heading: `${prefix} ${label} has split identity (${clusterCount} clusters)`, details };
 }
 
+/**
+ * Distinguishes trivial type-vs-function splits from meaningful semantic clusters worth reporting.
+ * @param clusters - The cluster index groups from dendrogram analysis
+ * @param valid - The valid child nodes with their code nodes
+ * @returns True if only one cluster contains non-type nodes
+ * @kuralPure
+ */
 function isTypeOnlySplit(clusters: number[][], valid: { node: CodeNode }[]): boolean {
   const nonTypeClusters = clusters.filter(
     (cluster) => !cluster.every((idx) => valid[idx].node.kind === "type"),
@@ -34,6 +47,14 @@ function isTypeOnlySplit(clusters: number[][], valid: { node: CodeNode }[]): boo
   return nonTypeClusters.length <= NEXT;
 }
 
+/**
+ * Discovers containers whose children form distinct semantic clusters that would be better split into separate siblings.
+ * @param ctx - The shared audit context with node map and configuration
+ * @param kind - Whether to scan directories or files
+ * @param auditName - The audit name used for suppression checks
+ * @returns Findings for containers whose children cluster into distinct groups
+ * @kuralPure
+ */
 function detectBloated(
   ctx: AuditContext,
   kind: "directory" | "file",

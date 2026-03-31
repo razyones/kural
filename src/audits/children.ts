@@ -15,6 +15,7 @@ type ChildWithKey = { key: string; node: CodeNode };
  * @param node - The parent node
  * @param nodes - Full code node map
  * @returns Array of key-node pairs
+ * @kuralPure
  */
 function getChildrenWithKeys(node: CodeNode, nodes: Map<string, CodeNode>): ChildWithKey[] {
   return node.childKeys

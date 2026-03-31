@@ -28,7 +28,9 @@ const FACET_NAMES = [
 ];
 
 /**
- * Builds progress callbacks that log each stage to stdout.
+ * Constructs the observer that reports pipeline milestones — parse counts, embed totals, score counts, and storage paths — to the terminal as each stage completes.
+ * @returns Callback object with onParsed, onEmbedded, onScored, and onStored hooks
+ * @kuralCauses logs progress to stdout via logger
  */
 function buildCallbacks(): GenerateCallbacks {
   return {
@@ -55,7 +57,12 @@ function buildCallbacks(): GenerateCallbacks {
 }
 
 /**
- * Prints the generation result as JSON to stdout.
+ * Serializes the generation outcome into a machine-readable JSON report for programmatic consumers.
+ * @param targetPath - Absolute path to the scanned directory
+ * @param provider - Embedding provider name
+ * @param modelId - Resolved embedding model ID
+ * @param result - Completed generation result with counts and paths
+ * @kuralCauses writes JSON to stdout
  */
 function printJson(
   targetPath: string,
@@ -77,7 +84,10 @@ function printJson(
 }
 
 /**
- * Creates an embedder that tracks progress through named facet steps.
+ * Wraps the raw embedding function with a multi-step spinner that visualizes progress through each facet pass.
+ * @param embedFn - Raw embedding function to wrap with progress tracking
+ * @returns An embedder that displays step-by-step spinner progress
+ * @kuralCauses wraps embedFn with animated progress spinners
  */
 function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]>): Embedder {
   const tracker = createStepTracker("Embedding", FACET_NAMES);
@@ -91,7 +101,8 @@ function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]
 }
 
 /**
- * Prints the generate command footer with glossary and next steps.
+ * Closes the generate output with term definitions and suggested follow-up commands.
+ * @kuralCauses writes footer sections to stdout
  */
 function printGenerateFooter(): void {
   renderFooter(
@@ -113,7 +124,9 @@ function printGenerateFooter(): void {
 }
 
 /**
- * Runs the generate command with the given CLI arguments.
+ * Orchestrates the full generate flow — resolves the embedding provider, runs the pipeline, and renders either human or JSON output.
+ * @param values - Parsed CLI arguments for the generate command
+ * @kuralCauses orchestrates the full parse-embed-score-store pipeline with I/O
  */
 async function handleGenerate(values: {
   path: string;

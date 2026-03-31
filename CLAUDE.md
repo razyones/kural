@@ -95,6 +95,29 @@ src/
     main.ts           # Root command definition
 ```
 
+## Description Principles
+
+Every unit's description — directory KURAL.md, file-level JSDoc, function JSDoc, and type JSDoc — is embedded and carries **50% weight** in the identity vector. Description quality directly affects scoring accuracy. The same principles apply at every level.
+
+### Principles for writing descriptions
+
+1. **Describe what only THIS unit does, in its own vocabulary.** Use exclusivity language: "It is the only module that...", "Nothing else in the system...". This creates semantic separation between siblings.
+2. **Never borrow sibling or cousin module vocabulary.** Naming other modules' concepts (e.g., "embedding providers" in config, "parse-embed-store pipeline" in a command) pulls the description toward those modules in embedding space. Use abstract terms instead: "provider selection", "the engine". The vocabulary bleed audit catches this automatically.
+3. **Anchor identity with a metaphor.** Lead with a one-word role ("The brain", "The memory", "The toolbox") that captures the unit's irreplaceable character in the system. Most impactful for directories and files; optional for individual functions and types.
+4. **Describe the role in the system, not a generic job.** "Persists and retrieves all application state in a local database" is better than "SQLite database schema and operations" — the former says what makes it unique here, the latter describes any database module anywhere. For functions: "Persists computed health metrics so downstream commands can query scores without re-running the pipeline" is better than "Writes score cards to the snapshot."
+5. **For folder-level descriptions, combine children's identities.** A parent folder's KURAL.md should describe the shared boundary its children own, not repeat their individual descriptions. Example: "The reader and translator — turns source files into numerical vectors" combines parse and embed's roles.
+
+## Kural Params
+
+| Param                         | Role in scoring                                       |
+| :---------------------------- | :---------------------------------------------------- |
+| `@kuralHelper`                | Participates in scoring, excluded from audits         |
+| `@kuralUtil`                  | Excluded from domain scoring, scored in own sandbox   |
+| `@kuralPatterns`              | Deduplicated to centroid representative               |
+| `@kuralCompanion`             | Deduplicated to centroid representative               |
+| `@kuralResidual`              | No role in scoring, audit suppression only            |
+| `@kuralPure` / `@kuralCauses` | Influences what gets embedded, not how scores compute |
+
 ## Build & Run
 
 - `vp pack` — builds CLI to `dist/cli.mjs` (tsdown, ESM, Node platform)

@@ -20,6 +20,7 @@ const NONE = 0;
  * Computes a short SHA-256 hash for change detection.
  * @param parts - Strings to hash together
  * @returns 8-character hex digest
+ * @kuralPure
  */
 function computeHash(...parts: string[]): string {
   return sha256(parts.join("\0")).slice(NONE, HASH_LENGTH);
@@ -27,6 +28,10 @@ function computeHash(...parts: string[]): string {
 
 /**
  * Builds a FunctionNode from a KuralFunction.
+ * @param fn - The parsed function data
+ * @param filePath - The source file path containing the function
+ * @returns A fully constructed FunctionNode
+ * @kuralPure
  */
 function functionNode(fn: KuralFunction, filePath: string): FunctionNode {
   return {
@@ -58,6 +63,10 @@ function functionNode(fn: KuralFunction, filePath: string): FunctionNode {
 
 /**
  * Builds a TypeNode from a KuralType.
+ * @param type - The parsed type data
+ * @param filePath - The source file path containing the type
+ * @returns A fully constructed TypeNode
+ * @kuralPure
  */
 function typeNode(type: KuralType, filePath: string): TypeNode {
   return {
@@ -81,6 +90,11 @@ function typeNode(type: KuralType, filePath: string): TypeNode {
 
 /**
  * Builds a FileNode from a KuralFile.
+ * @param file - The parsed file data
+ * @param filePath - The source file path
+ * @param childKeys - Keys of child nodes (functions and types) in this file
+ * @returns A fully constructed FileNode
+ * @kuralPure
  */
 function fileNode(file: KuralFile, filePath: string, childKeys: string[]): FileNode {
   return {
@@ -104,6 +118,11 @@ function fileNode(file: KuralFile, filePath: string, childKeys: string[]): FileN
 
 /**
  * Builds a DirectoryNode from a KuralDirectory.
+ * @param dir - The parsed directory data
+ * @param dirPath - The directory path
+ * @param childKeys - Keys of child nodes (files and subdirectories)
+ * @returns A fully constructed DirectoryNode
+ * @kuralPure
  */
 function directoryNode(dir: KuralDirectory, dirPath: string, childKeys: string[]): DirectoryNode {
   return {

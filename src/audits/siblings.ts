@@ -21,6 +21,7 @@ const HALF = 2;
  * @param first - First sibling node
  * @param second - Second sibling node
  * @returns True if the pair has a parameter or return type relationship
+ * @kuralPure
  */
 function isTypeProducerPair(first: CodeNode, second: CodeNode): boolean {
   const [ty, fn] =
@@ -39,6 +40,7 @@ function isTypeProducerPair(first: CodeNode, second: CodeNode): boolean {
  * Collects all non-excluded sibling pair similarities across the tree.
  * @param nodes - Full code node map
  * @returns Array of sibling pairs with their cosine similarities
+ * @kuralPure
  */
 function collectSiblingPairs(nodes: Map<string, CodeNode>): SiblingPair[] {
   const pairs: SiblingPair[] = [];

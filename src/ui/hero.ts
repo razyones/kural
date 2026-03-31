@@ -16,6 +16,7 @@ const ARROW_UP = "\u25B4";
 const ARROW_DOWN = "\u25BE";
 const ARROW_FLAT = "\u25B8";
 
+/** Options for rendering the hero score display. */
 type HeroOptions = {
   score: number;
   kind: string;
@@ -25,6 +26,10 @@ type HeroOptions = {
 
 /**
  * Returns a health-colored string for a score value.
+ * @param value - Score value used to determine color threshold
+ * @param text - Text to colorize
+ * @returns The text wrapped in a health-based color
+ * @kuralPure
  */
 function colorByHealth(value: number, text: string): string {
   if (value >= GOOD_THRESHOLD) {
@@ -38,6 +43,9 @@ function colorByHealth(value: number, text: string): string {
 
 /**
  * Returns a human-readable verdict for a score value.
+ * @param value - Score value to evaluate
+ * @returns A short verdict string describing structural fit
+ * @kuralPure
  */
 function verdict(value: number): string {
   if (value >= GOOD_THRESHOLD) {
@@ -51,6 +59,9 @@ function verdict(value: number): string {
 
 /**
  * Formats the delta indicator with directional arrow and color.
+ * @param delta - Score change value (positive, negative, or zero)
+ * @returns Formatted string with directional arrow and color
+ * @kuralPure
  */
 function formatDelta(delta: number): string {
   const sign = delta > UNCHANGED ? "+" : "";
@@ -66,6 +77,8 @@ function formatDelta(delta: number): string {
 
 /**
  * Renders a hero score display with verdict and metadata.
+ * @param options - Hero display configuration including score, kind, and optional delta
+ * @kuralCauses writes hero display to stdout
  */
 function renderHero(options: HeroOptions): void {
   const scoreText = colors.bold(

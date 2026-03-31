@@ -1,0 +1,1 @@
+The face. Renders all terminal output — banners, spinners, tables, heroes, footers, and bullet lists. It is the only part of the system that owns display formatting — no other module prints styled text to the terminal.

@@ -77,6 +77,7 @@ type AuditDefinition = {
  * Identity function that defines an audit with type checking.
  * @param def - The audit definition
  * @returns The same definition, typed
+ * @kuralPure
  */
 function defineAudit(def: AuditDefinition): AuditDefinition {
   return def;
@@ -86,6 +87,7 @@ function defineAudit(def: AuditDefinition): AuditDefinition {
  * Finds the root directory node in a node map.
  * @param nodes - The code tree
  * @returns The root directory node, or null
+ * @kuralPure
  */
 function findRootNode(nodes: NodeMap): CodeNode | null {
   for (const [, node] of nodes) {

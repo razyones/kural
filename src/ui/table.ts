@@ -10,6 +10,7 @@ import { colors, ui } from "./log.ts";
 const NONE = 0;
 const NO_VALUE = "\u2014";
 
+/** A single row in the score breakdown table. */
 type ScoreTableRow = {
   path: string;
   kind: string;
@@ -25,6 +26,10 @@ type ScoreTableRow = {
 
 /**
  * Formats a score cell with cyan color and optional delta.
+ * @param value - Score value or null for empty cell
+ * @param delta - Optional score change to display alongside the value
+ * @returns Formatted cell string with color and optional delta
+ * @kuralPure
  */
 function formatCell(value: number | null, delta?: number): string {
   if (value === null) {
@@ -45,6 +50,9 @@ type TablePagination = {
 
 /**
  * Renders a score breakdown table with optional delta columns.
+ * @param rows - Array of score rows to display
+ * @param pagination - Optional pagination info for the table header
+ * @kuralCauses writes table to stdout
  */
 function renderScoreTable(rows: ScoreTableRow[], pagination?: TablePagination): void {
   const pathHeader =

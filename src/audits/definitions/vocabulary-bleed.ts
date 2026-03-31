@@ -18,6 +18,12 @@ const NONE = 0;
 const HALF = 2;
 const MAX_CROSS_PULLS = 3;
 
+/**
+ * Tests whether a directory's identity embedding drifts closer to a non-sibling module than to its nearest sibling.
+ * @param item - The value to check
+ * @returns True if the item is a valid cross-pull measurement
+ * @kuralPure
+ */
 function isCrossPull(item: unknown): item is { path: string; sim: number } {
   if (typeof item !== "object" || item === null) {
     return false;
@@ -28,6 +34,12 @@ function isCrossPull(item: unknown): item is { path: string; sim: number } {
   return typeof item.path === "string" && typeof item.sim === "number";
 }
 
+/**
+ * Gathers all non-sibling modules whose identity is closer to the candidate than any of its actual siblings.
+ * @param details - The finding details record containing cross-pull data
+ * @returns An array of validated cross-pull measurements
+ * @kuralPure
+ */
 function crossPulls(details: Record<string, unknown> | undefined): { path: string; sim: number }[] {
   const v = details?.["crossPulls"];
   if (!Array.isArray(v)) {
@@ -36,6 +48,12 @@ function crossPulls(details: Record<string, unknown> | undefined): { path: strin
   return v.filter((item) => isCrossPull(item));
 }
 
+/**
+ * Renders the cross-module pull showing which non-sibling a directory's vocabulary drifts toward.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatVocabBleed({ finding, prefix, label, rootPath }: FormatCtx): ListItem {
   const minSiblingSim = num(finding.details, "minSiblingSim");
   const pulls = crossPulls(finding.details);
@@ -50,6 +68,7 @@ function formatVocabBleed({ finding, prefix, label, rootPath }: FormatCtx): List
   };
 }
 
+/** A vocabulary bleed candidate with cross-pull measurements. */
 type VocabCandidate = {
   key: string;
   node: CodeNode;
@@ -58,6 +77,13 @@ type VocabCandidate = {
   crossPulls: { path: string; sim: number }[];
 };
 
+/**
+ * Identifies directories whose KURAL.md descriptions use vocabulary that pulls them into another module's semantic space.
+ * @param nodes - The code tree node map
+ * @param allDirs - All directory entries with identity embeddings
+ * @returns Candidates with cross-pull measurements for fence filtering
+ * @kuralPure
+ */
 function collectVocabCandidates(
   nodes: Map<string, CodeNode>,
   allDirs: [string, CodeNode][],

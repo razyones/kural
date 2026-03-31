@@ -15,6 +15,12 @@ import { num } from "../../utils/record.ts";
 const NONE = 0;
 const INCOHERENT_CAP = 0.9;
 
+/**
+ * Renders the label-fit deficit showing how far a container's declared identity strays from its actual content.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatIncoherent({ finding, prefix, label }: FormatCtx): ListItem {
   const childCount = num(finding.details, "childCount");
   return {
@@ -25,6 +31,13 @@ function formatIncoherent({ finding, prefix, label }: FormatCtx): ListItem {
   };
 }
 
+/**
+ * Gathers identity-to-content similarity scores across containers so the fence can identify statistical outliers.
+ * @param nodes - The code tree node map
+ * @param utilMode - When true, only util containers are collected; otherwise non-util
+ * @returns Label-fit entries with identity-content similarity per container
+ * @kuralPure
+ */
 function collectLabelFits(
   nodes: Map<string, import("../../sost/tree.ts").CodeNode>,
   utilMode: boolean,
@@ -53,6 +66,13 @@ function collectLabelFits(
   return entries;
 }
 
+/**
+ * Flags containers whose identity-to-content similarity falls statistically below the codebase norm.
+ * @param ctx - The shared audit context with node map and configuration
+ * @param utilMode - When true, targets util containers; otherwise non-util
+ * @returns Findings for containers with weak identity-content similarity
+ * @kuralPure
+ */
 function detectIncoherent(ctx: AuditContext, utilMode: boolean): Finding[] {
   const { nodes, sensitivity } = ctx;
   const entries = collectLabelFits(nodes, utilMode);

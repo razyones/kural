@@ -27,6 +27,12 @@ type HCNode = {
   right: unknown;
 };
 
+/**
+ * Type guard for hierarchical clustering tree nodes.
+ * @param value - The value to check
+ * @returns True if the value is an HCNode
+ * @kuralPure
+ */
 function isHCNode(value: unknown): value is HCNode {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -34,6 +40,13 @@ function isHCNode(value: unknown): value is HCNode {
   return "isLeaf" in value && "dist" in value && "left" in value && "right" in value;
 }
 
+/**
+ * Collects merge distances from a hierarchical clustering tree.
+ * @param node - The current tree node
+ * @param out - Accumulator array for merge distances
+ * @returns Array of merge distances
+ * @kuralPure
+ */
 function collectMerges(node: HCNode, out: number[] = []): number[] {
   if (node.isLeaf) {
     return out;
@@ -53,6 +66,7 @@ function collectMerges(node: HCNode, out: number[] = []): number[] {
  * @param merges - Array of merge distances
  * @param sensitivity - Multiplier controlling how far the largest gap must exceed the median
  * @returns True if the largest gap is statistically significant
+ * @kuralPure
  */
 function hasSignificantGap(merges: number[], sensitivity: number): boolean {
   const sorted = [...merges].toSorted((a, b) => a - b);
@@ -74,6 +88,7 @@ function hasSignificantGap(merges: number[], sensitivity: number): boolean {
  * largest merge gap, and returns the resulting clusters.
  * @param embeddings - Array of embedding vectors (all same dimension)
  * @returns Clusters, gap size, and sorted merge distances, or null if fewer than 2 embeddings
+ * @kuralPure
  */
 function buildDendrogram(embeddings: number[][]): DendrogramResult | null {
   if (embeddings.length < MIN_EMBEDDINGS) {

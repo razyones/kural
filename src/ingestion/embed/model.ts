@@ -52,7 +52,7 @@ type EmbedBatchOptions = {
 /**
  * Creates a raw embed function and model ID from provider configuration.
  * @param config - Embeddings configuration with provider, model, and API key
- * @returns A batch embed function and the resolved model ID
+ * @returns An object with a batch embed function and the resolved model ID
  * @kuralCauses initializes a remote embedding connection from provider config
  */
 function createEmbeddingModel(config: KuralConfig["embeddings"]): {

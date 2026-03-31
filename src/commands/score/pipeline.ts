@@ -55,6 +55,9 @@ type ScoreDelta = {
 /**
  * Extracts the path segment from a score key.
  * Keys are formatted as `kind:path` or `kind:path:name`.
+ * @param key - the score key to extract the path from
+ * @returns the path segment of the key
+ * @kuralPure
  */
 function extractPath(key: string): string {
   const firstColon = key.indexOf(":");
@@ -74,6 +77,9 @@ function extractPath(key: string): string {
 
 /**
  * Parses a JSON-encoded worst pair string into a tuple.
+ * @param raw - optional JSON string representing a two-element array
+ * @returns a two-element tuple of strings, or null if input is missing or invalid
+ * @kuralPure
  */
 function parseWorstPair(raw?: string): [string, string] | null {
   if (raw === undefined || raw === "") {
@@ -92,6 +98,9 @@ function parseWorstPair(raw?: string): [string, string] | null {
 
 /**
  * Converts a ScoreRow into a LoadedScore with parsed fields.
+ * @param row - the raw score row from the snapshot database
+ * @returns a LoadedScore with parsed path, worst pair, and best uncle fields
+ * @kuralPure
  */
 function toLoadedScore(row: ScoreRow): LoadedScore {
   const path = extractPath(row.key);
@@ -121,6 +130,11 @@ function toLoadedScore(row: ScoreRow): LoadedScore {
 /**
  * Resolves a snapshot database path from an optional snapshot ID.
  * Returns the active path if no ID is given.
+ * @param root - absolute path to the project root
+ * @param branch - current git branch name
+ * @param snapshotId - optional snapshot identifier to look up
+ * @returns the resolved database file path, or null if the snapshot was not found
+ * @kuralPure
  */
 function resolveSnapshotPath(root: string, branch: string, snapshotId?: string): string | null {
   if (snapshotId === undefined) {
@@ -133,6 +147,11 @@ function resolveSnapshotPath(root: string, branch: string, snapshotId?: string):
 
 /**
  * Loads and filters scores from a snapshot database.
+ * @param root - absolute path to the project root
+ * @param pathFilter - optional absolute path prefix to filter scores by
+ * @param snapshotId - optional snapshot identifier to load instead of the active snapshot
+ * @returns a promise resolving to the filtered scores with branch and snapshot metadata
+ * @kuralCauses reads snapshot database from disk
  */
 async function loadScores(
   root: string,
@@ -164,6 +183,10 @@ async function loadScores(
 
 /**
  * Computes deltas between current and comparison scores.
+ * @param current - the current set of loaded scores
+ * @param comparison - the previous set of loaded scores to compare against
+ * @returns an array of ScoreDelta objects with numeric differences for each metric
+ * @kuralPure
  */
 function computeDeltas(current: LoadedScore[], comparison: LoadedScore[]): ScoreDelta[] {
   const compMap = new Map<string, LoadedScore>();
@@ -191,6 +214,10 @@ function computeDeltas(current: LoadedScore[], comparison: LoadedScore[]): Score
 
 /**
  * Counts direct children of a node from the full score list.
+ * @param target - the parent node to count children for
+ * @param allScores - the full list of loaded scores to search
+ * @returns the number of direct children of the target node
+ * @kuralPure
  */
 function countChildren(target: LoadedScore, allScores: LoadedScore[]): number {
   if (target.kind === "function" || target.kind === "type") {

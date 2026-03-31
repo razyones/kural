@@ -15,6 +15,7 @@ const SEPARATOR_WIDTH = 40;
  * Displays a command header with params and an underline separator.
  * @param command - The command being run
  * @param params - Key-value pairs to display
+ * @kuralCauses writes banner to stdout
  */
 function logBanner(command: string, params: Record<string, string>): void {
   logger.log(`${colors.cyan("kural")} ${colors.dim(`· ${command}`)}`);

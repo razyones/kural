@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+/**
+ * The entry point. Bootstraps the CLI router, loads environment variables,
+ * and dispatches to subcommands. It is the only module that wires the
+ * top-level command tree — no other module touches process argv.
+ */
+
 import audit from "./commands/audit/command.ts";
 import { cli } from "gunshi";
 import { existsSync } from "node:fs";

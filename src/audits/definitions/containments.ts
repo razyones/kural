@@ -20,6 +20,12 @@ const NONE = 0;
 const NEXT = 1;
 const HALF = 2;
 
+/**
+ * Renders the dominance gap showing which child overwhelms its parent's identity.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatContainment({ finding, prefix, label }: FormatCtx): ListItem {
   const dominantName = str(finding.details, "dominantName");
   const dominantSim = num(finding.details, "dominantSim");
@@ -33,6 +39,7 @@ function formatContainment({ finding, prefix, label }: FormatCtx): ListItem {
   };
 }
 
+/** A parent-child dominance measurement for containment detection. */
 type DominanceEntry = {
   parentKey: string;
   dominantName: string;
@@ -42,6 +49,12 @@ type DominanceEntry = {
   childCount: number;
 };
 
+/**
+ * Measures how much each parent's identity is dominated by a single child versus evenly distributed across all children.
+ * @param nodes - The code tree node map
+ * @returns Dominance entries for each parent with enough valid children
+ * @kuralPure
+ */
 function collectDominanceGaps(nodes: Map<string, CodeNode>): DominanceEntry[] {
   const entries: DominanceEntry[] = [];
   for (const [key, node] of nodes) {

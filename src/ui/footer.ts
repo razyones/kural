@@ -20,6 +20,9 @@ type HintEntry = {
 
 /**
  * Renders a glossary section followed by next-step hints.
+ * @param glossary - Array of glossary entries to display
+ * @param hints - Array of hint entries with suggested next commands
+ * @kuralCauses writes glossary and hints to stdout
  */
 function renderFooter(glossary: GlossaryEntry[], hints: HintEntry[]): void {
   logger.log("");

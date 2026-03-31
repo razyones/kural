@@ -28,6 +28,7 @@ type AuditReport = AuditResult[];
  * @param axisScores - Pre-computed is-does axis scores (optional)
  * @param disabledAudits - Set of audit names to skip
  * @returns Ordered list of audit results with definitions and findings
+ * @kuralPure
  */
 function detect(
   nodes: NodeMap,

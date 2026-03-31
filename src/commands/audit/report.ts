@@ -23,10 +23,24 @@ const KIND_LABELS: Record<string, string> = {
   function: "Function",
 };
 
+/**
+ * Maps a node's structural kind to its human-readable category prefix for audit output.
+ * @param node - The code node to get a kind prefix for
+ * @returns The human-readable kind label, or empty string if unknown
+ * @kuralPure
+ */
 function kindPrefix(node: CodeNode): string {
   return KIND_LABELS[node.kind] ?? "";
 }
 
+/**
+ * Resolves a node key into a root-relative path label that anchors audit findings to their source location.
+ * @param key - The unique node key to look up
+ * @param nodes - The full code node map for resolution
+ * @param rootPath - Absolute project root path for relative display, or null for absolute paths
+ * @returns A formatted label string suitable for terminal display
+ * @kuralPure
+ */
 function nodeLabel(key: string, nodes: NodeMap, rootPath: string | null): string {
   const node = nodes.get(key);
   if (!node) {
@@ -50,6 +64,7 @@ function nodeLabel(key: string, nodes: NodeMap, rootPath: string | null): string
  * @param nodes - Full code node map for label resolution
  * @param limit - Max findings per section (0 = show all)
  * @returns List sections with formatted items
+ * @kuralPure
  */
 function formatReport(
   report: AuditReport,

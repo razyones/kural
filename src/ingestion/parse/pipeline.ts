@@ -25,7 +25,7 @@ type ParseResult = {
 /**
  * Parses @kuralResidual lines from KURAL.md content.
  * @param content - The raw KURAL.md text
- * @returns Array of residual entries and the description (lines without @kuralResidual)
+ * @returns Object with description text and parsed residual entries
  * @kuralPure
  */
 function parseKuralMdResiduals(content: string): {

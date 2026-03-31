@@ -38,6 +38,11 @@ type SnapshotCollections = {
 
 /**
  * Creates a single persisted collection for the given entity type.
+ * @param database - A better-sqlite3 Database instance
+ * @param id - The collection identifier used as the persistence key
+ * @param getKey - Function that extracts the unique string key from an item
+ * @returns A persisted TanStack DB collection backed by SQLite
+ * @kuralCauses creates a persisted SQLite-backed collection
  */
 function persisted<T extends object>(
   database: Database.Database,
@@ -58,6 +63,7 @@ function persisted<T extends object>(
  * Creates all six collections for a snapshot, backed by a SQLite database.
  * @param database - A better-sqlite3 Database instance
  * @returns Typed collections for files, types, functions, directories, scores, metadata
+ * @kuralCauses creates six persisted collections backed by SQLite
  */
 function createSnapshotCollections(database: Database.Database): SnapshotCollections {
   return {
@@ -78,6 +84,8 @@ function createSnapshotCollections(database: Database.Database): SnapshotCollect
  * Preloads all collections from the database into memory.
  * Must be called before reading from any collection.
  * @param collections - The snapshot collections to preload
+ * @returns Promise that resolves when all collections are preloaded
+ * @kuralCauses reads all collection data from SQLite into memory
  */
 async function preloadAll(collections: SnapshotCollections): Promise<void> {
   await Promise.all([
@@ -93,6 +101,8 @@ async function preloadAll(collections: SnapshotCollections): Promise<void> {
 /**
  * Cleans up all collections. Call before closing the database.
  * @param collections - The snapshot collections to clean up
+ * @returns Promise that resolves when all collections are cleaned up
+ * @kuralCauses releases collection resources
  */
 async function cleanupAll(collections: SnapshotCollections): Promise<void> {
   await Promise.all([

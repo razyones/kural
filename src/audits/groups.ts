@@ -14,6 +14,7 @@ const NEXT = 1;
  * Returns the deduplication group ID for a node (pattern or companion).
  * @param node - The node to get the group ID for
  * @returns The group ID, or null if ungrouped
+ * @kuralPure
  */
 function groupId(node: CodeNode): string | null {
   return node.patterns ?? node.companion ?? null;
@@ -23,6 +24,7 @@ function groupId(node: CodeNode): string | null {
  * Deduplicates children by pattern or companion group, keeping one representative per group.
  * @param cwk - Array of child-key pairs to deduplicate
  * @returns Representatives and group counts
+ * @kuralPure
  */
 function deduplicateByGroup(cwk: ChildWithKey[]): {
   reps: ChildWithKey[];

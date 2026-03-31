@@ -13,6 +13,12 @@ import { robustLowerFence } from "../fence.ts";
 const NONE = 0;
 const HALF = 2;
 
+/**
+ * Renders the is-does axis score showing linguistic misalignment in a directory's description.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatIdentityLanguage({ finding, prefix, label }: FormatCtx): ListItem {
   return {
     heading: `${prefix} ${label} description leans toward "is" instead of "does"`,
@@ -33,6 +39,7 @@ export default defineAudit({
       ([, n]) => n.kind === "directory" && n.identity.length > NONE,
     );
 
+    /** An axis score entry for a directory node. */
     type Entry = { key: string; node: CodeNode; score: number };
     const entries: Entry[] = [];
     for (const [key, node] of allDirs) {

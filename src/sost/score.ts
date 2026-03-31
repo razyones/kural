@@ -51,6 +51,9 @@ type NodeMetrics = {
 
 /**
  * Computes all per-node metrics in a single pass.
+ * @param nodes - The flat node map to compute metrics for
+ * @returns Pre-computed per-node metrics including fit, uniqueness, and worst pairs
+ * @kuralPure
  */
 function computeMetrics(nodes: NodeMap): NodeMetrics {
   const fitMap = new Map<string, number | null>();
@@ -83,6 +86,10 @@ function computeMetrics(nodes: NodeMap): NodeMetrics {
 
 /**
  * Computes the self-placement score.
+ * @param fit - The node's fit score, or null if unavailable
+ * @param uniqueness - The node's uniqueness score
+ * @returns Harmonic mean of fit and uniqueness, or null if inputs are insufficient
+ * @kuralPure
  */
 function computeScore(fit: number | null, uniqueness: number): number | null {
   if (fit === null || uniqueness === NO_SIBLINGS) {
@@ -93,6 +100,10 @@ function computeScore(fit: number | null, uniqueness: number): number | null {
 
 /**
  * Computes the children score.
+ * @param childrenFit - The container's children fit score, or null if unavailable
+ * @param childrenUniqueness - The container's children uniqueness score, or null if unavailable
+ * @returns Harmonic mean of childrenFit and childrenUniqueness, or null if inputs are insufficient
+ * @kuralPure
  */
 function computeChildrenScore(
   childrenFit: number | null,
@@ -109,6 +120,11 @@ function computeChildrenScore(
 
 /**
  * Builds a ScoreCard for a leaf node.
+ * @param node - The leaf node to build a card for
+ * @param metrics - Pre-computed per-node metrics
+ * @param nodes - The flat node map for uncle lookups
+ * @returns A complete ScoreCard for the leaf node
+ * @kuralPure
  */
 function buildLeafCard(node: CodeNode, metrics: NodeMetrics, nodes: NodeMap): ScoreCard {
   const fit = metrics.fitMap.get(node.key) ?? null;
@@ -136,6 +152,12 @@ function buildLeafCard(node: CodeNode, metrics: NodeMetrics, nodes: NodeMap): Sc
 
 /**
  * Computes subtree-level scores for a container.
+ * @param key - The node key to compute subtree scores for
+ * @param metrics - Pre-computed per-node metrics
+ * @param nodes - The flat node map for traversal
+ * @param subtreeCache - Memoization cache for subtree results
+ * @returns Subtree fit, uniqueness, and combined score
+ * @kuralPure
  */
 function computeSubtreeScores(
   key: string,
@@ -165,6 +187,13 @@ function computeSubtreeScores(
 
 /**
  * Builds a ScoreCard for a container node.
+ * @param key - The node key
+ * @param node - The container node to build a card for
+ * @param metrics - Pre-computed per-node metrics
+ * @param nodes - The flat node map for traversal and uncle lookups
+ * @param subtreeCache - Memoization cache for subtree results
+ * @returns A complete ScoreCard for the container node
+ * @kuralPure
  */
 function buildContainerCard(
   key: string,
@@ -215,6 +244,9 @@ function buildContainerCard(
 
 /**
  * Produces a ScoreCard for every node in the codebase tree.
+ * @param result - Parsed codebase with files and directories
+ * @returns Array of ScoreCards, one per node
+ * @kuralPure
  */
 function score(result: ParseResult): ScoreCard[] {
   const nodes = buildTree(result);
@@ -235,6 +267,13 @@ function score(result: ParseResult): ScoreCard[] {
 
 /**
  * Memoized wrapper around collectSubtree.
+ * @param key - The node key to collect subtree for
+ * @param nodes - The flat node map for traversal
+ * @param fitMap - Pre-computed children fit values
+ * @param uniqMap - Pre-computed children uniqueness values
+ * @param cache - Memoization cache for subtree results
+ * @returns Aggregated subtree scores for the node
+ * @kuralPure
  */
 function memoizedCollectSubtree(
   key: string,

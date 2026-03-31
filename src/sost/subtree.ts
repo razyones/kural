@@ -22,6 +22,12 @@ type SubtreeResult = {
  * Collects childrenFit and childrenUniqueness values across a node's
  * subtree using iterative post-order traversal. Skips leaves and util
  * subtrees. Excludes N/A sentinels from uniqueness.
+ * @param key - The root node key to start collection from
+ * @param nodes - The flat node map for traversal
+ * @param childrenFitMap - Pre-computed children fit values per node
+ * @param childrenUniqMap - Pre-computed children uniqueness values per node
+ * @returns Aggregated childrenFit and childrenUniqueness arrays across the subtree
+ * @kuralPure
  */
 function collectSubtree(
   key: string,
@@ -74,6 +80,10 @@ function collectSubtree(
 
 /**
  * Builds a post-order traversal sequence, skipping leaves and util nodes.
+ * @param key - The root node key to start traversal from
+ * @param nodes - The flat node map for traversal
+ * @returns Array of node keys in post-order
+ * @kuralPure
  */
 function postOrder(key: string, nodes: NodeMap): string[] {
   const stack: string[] = [key];
@@ -112,6 +122,11 @@ function postOrder(key: string, nodes: NodeMap): string[] {
 
 /**
  * Extracts descendant-only subtree scores (excludes self).
+ * @param sub - The aggregated subtree result containing fit and uniqueness arrays
+ * @param localFit - The node's own children fit value, or null
+ * @param localUniq - The node's own children uniqueness value
+ * @returns Subtree fit and uniqueness averages excluding the node itself
+ * @kuralPure
  */
 function descendantScores(
   sub: SubtreeResult,

@@ -15,6 +15,7 @@ const CONFIG_FILENAME = "kural.config.json";
  * Returns an empty partial config if the file is missing or invalid.
  * @param root - Project root directory (defaults to cwd)
  * @returns Partial config with values from the file
+ * @kuralCauses reads kural.config.json from disk
  */
 function loadProjectConfig(root: string = process.cwd()): Partial<KuralConfig> {
   const configPath = join(root, CONFIG_FILENAME);

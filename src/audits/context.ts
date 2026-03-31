@@ -11,12 +11,14 @@ import { collectSiblingPairs } from "./siblings.ts";
 import { findRootNode } from "./types.ts";
 import { upperFence } from "./fence.ts";
 
+/** Sibling-pair similarities partitioned by level. */
 type PartitionedSims = { leaf: number[]; file: number[] };
 
 /**
  * Partitions sibling-pair similarities into leaf-level and file-level buckets.
  * @param pairs - All sibling pairs to partition
  * @returns Object with leaf and file similarity arrays
+ * @kuralPure
  */
 function partitionSims(pairs: SiblingPair[]): PartitionedSims {
   const leaf: number[] = [];
@@ -36,6 +38,7 @@ function partitionSims(pairs: SiblingPair[]): PartitionedSims {
  * @param nodes - The code tree
  * @param config - Audit sensitivity and tuning parameters
  * @returns Object with lazy siblingPairs, leafMergeFence, fileMergeFence
+ * @kuralPure
  */
 function buildLazyAccessors(
   nodes: NodeMap,
@@ -75,6 +78,7 @@ function buildLazyAccessors(
  * @param config - Audit sensitivity and tuning parameters
  * @param axisScores - Pre-computed is-does axis scores (optional)
  * @returns A fully initialized AuditContext
+ * @kuralPure
  */
 function createContext(
   nodes: NodeMap,
@@ -111,6 +115,7 @@ function createContext(
  * @param node - The node to check
  * @param auditName - The audit to check suppression for
  * @returns True if the node suppresses the given audit
+ * @kuralPure
  */
 function isSuppressed(node: CodeNode, auditName: string): boolean {
   for (const r of node.residuals) {

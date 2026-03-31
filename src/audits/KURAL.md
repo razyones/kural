@@ -1,0 +1,1 @@
+The stethoscope. Detects specific structural issues that aggregate scores cannot surface — outliers, duplicates, misplacements, vocabulary drift, and documentation gaps. It is the only part of the system that inspects the tree for localized anomalies — no other module produces audit findings.

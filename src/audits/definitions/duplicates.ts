@@ -15,7 +15,12 @@ import { isSuppressed } from "../context.ts";
 const NONE = 0;
 const NEXT = 1;
 
-/** Shared formatter for both duplicates and duplicate-utils audits. */
+/**
+ * Shared formatter for both duplicates and duplicate-utils audits.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatDuplicate({ finding, label, labelNode }: FormatCtx): ListItem {
   const pairLabel =
     finding.pairKey === undefined ? (finding.pairName ?? "") : `"${labelNode(finding.pairKey)}"`;
@@ -25,6 +30,14 @@ function formatDuplicate({ finding, label, labelNode }: FormatCtx): ListItem {
   };
 }
 
+/**
+ * Finds functions or types in separate files whose embeddings are statistically closer than any same-parent siblings.
+ * @param entries - Leaf node entries to compare pairwise
+ * @param nodes - The code tree node map
+ * @param fence - The similarity threshold above which a pair is flagged
+ * @returns Findings for cross-file leaf duplicates
+ * @kuralPure
+ */
 function scanLeafCrossFile(
   entries: [string, CodeNode][],
   nodes: Map<string, CodeNode>,
@@ -66,6 +79,14 @@ function scanLeafCrossFile(
   return findings;
 }
 
+/**
+ * Finds structurally similar units that straddle the util-domain boundary, surfacing misclassified utilities.
+ * @param nonUtil - Non-util leaf node entries
+ * @param util - Util leaf node entries
+ * @param fence - The similarity threshold above which a pair is flagged
+ * @returns Findings for cross-population duplicates
+ * @kuralPure
+ */
 function scanCrossPopDuplicates(
   nonUtil: [string, CodeNode][],
   util: [string, CodeNode][],
@@ -102,6 +123,13 @@ function scanCrossPopDuplicates(
   return findings;
 }
 
+/**
+ * Finds files in separate directories whose embeddings are statistically closer than any same-parent siblings.
+ * @param entries - File node entries to compare pairwise
+ * @param fence - The similarity threshold above which a pair is flagged
+ * @returns Findings for cross-directory file duplicates
+ * @kuralPure
+ */
 function scanFileCrossDir(entries: [string, CodeNode][], fence: number): Finding[] {
   const findings: Finding[] = [];
   for (let i = NONE; i < entries.length; i++) {

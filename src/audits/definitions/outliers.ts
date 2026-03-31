@@ -16,6 +16,12 @@ import { robustLowerFence } from "../fence.ts";
 const NONE = 0;
 const NEXT = 1;
 
+/**
+ * Renders the sibling similarity gap showing how semantically distant a child is from its group.
+ * @param ctx - The formatting context with finding and display data
+ * @returns The formatted list item
+ * @kuralPure
+ */
 function formatOutlier({ finding, prefix, label, location }: FormatCtx): ListItem {
   return {
     heading: `${prefix} ${label}${location} has weak relevance`,

@@ -17,7 +17,10 @@ const MIN_PAIR_COUNT = 2;
 /**
  * Computes fit as a child: how well this node's content matches its
  * parent's declared identity.
+ * @param node - The node to compute fit for
+ * @param nodes - The flat node map for parent lookup
  * @returns cosineSimilarity(parent.identity, N.leaf), or null if no parent or util container
+ * @kuralPure
  */
 function computeFit(node: CodeNode, nodes: NodeMap): number | null {
   if (node.util && (node.kind === "file" || node.kind === "directory")) {
@@ -39,7 +42,9 @@ function computeFit(node: CodeNode, nodes: NodeMap): number | null {
 /**
  * Computes childrenFit as a parent: how well this container's content
  * matches its own declared identity.
+ * @param node - The node to compute children fit for
  * @returns cosineSimilarity(N.identity, N.leaf), or null for leaves/util containers
+ * @kuralPure
  */
 function computeChildrenFit(node: CodeNode): number | null {
   if (node.kind === "type" || node.kind === "function") {
@@ -60,6 +65,9 @@ type IdentityRef = { name: string; identity: number[] };
 /**
  * Deduplicates children by pattern or companion group, replacing groups
  * with their identity centroid.
+ * @param children - Array of child nodes to deduplicate
+ * @returns Array of identity references with groups collapsed to centroids
+ * @kuralPure
  */
 function deduplicateByGroup(children: CodeNode[]): IdentityRef[] {
   const groups = new Map<string, CodeNode[]>();
@@ -97,6 +105,7 @@ function deduplicateByGroup(children: CodeNode[]): IdentityRef[] {
  * @param parent - The parent node
  * @param children - All eligible children of the parent
  * @returns Map from child key to uniqueness score
+ * @kuralPure
  */
 function computeUniqueness(parent: CodeNode, children: CodeNode[]): Map<string, number> {
   const result = new Map<string, number>();
@@ -137,7 +146,10 @@ function computeUniqueness(parent: CodeNode, children: CodeNode[]): Map<string, 
 /**
  * Computes childrenUniqueness (CV) for a parent's children.
  * Measures spread quality — how evenly distributed children are.
+ * @param parent - The parent node
+ * @param children - All eligible children of the parent
  * @returns CV score and the closest child pair names
+ * @kuralPure
  */
 function computeChildrenUniqueness(
   parent: CodeNode,
@@ -185,6 +197,10 @@ function computeChildrenUniqueness(
 
 /**
  * Finds the best-fitting uncle for a node.
+ * @param node - The node to find the best uncle for
+ * @param nodes - The flat node map for parent and grandparent lookups
+ * @returns The best uncle's name and fit score, or null if none found
+ * @kuralPure
  */
 function findBestUncle(node: CodeNode, nodes: NodeMap): { name: string; score: number } | null {
   if (node.parentKey === null) {

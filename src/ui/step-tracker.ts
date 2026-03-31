@@ -23,6 +23,7 @@ type TrackedStep = <T>(work: (onProgress: OnProgress) => Promise<T>) => Promise<
  * @param label - Verb prefix for spinner text (e.g., "Embedding")
  * @param stepNames - Ordered names for each step
  * @returns A function that wraps each call with the next step's spinner
+ * @kuralCauses creates spinner-based progress tracking
  */
 function createStepTracker(label: string, stepNames: string[]): TrackedStep {
   let stepIndex = NONE;

@@ -1,0 +1,1 @@
+The memory. Persists and retrieves all application state in branch-scoped SQLite snapshot databases. It is the only part of the system that touches the .kural-db directory — no other module creates, reads, rotates, or cleans up database files.

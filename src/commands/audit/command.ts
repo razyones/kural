@@ -19,6 +19,13 @@ const DEFAULT_CONTAINMENT_FLOOR = 0.9;
 const DEFAULT_MIN_GROUP = 4;
 const RADIX = 10;
 
+/**
+ * Resolves the final audit sensitivity by layering CLI overrides on top of the project's persisted tuning parameters.
+ * @param values - Raw string values from CLI argument parsing
+ * @param projectAudits - Partial audit config loaded from the project config file
+ * @returns A fully resolved AuditsConfig with defaults applied
+ * @kuralPure
+ */
 function resolveConfig(
   values: { sensitivity?: string; containmentFloor?: string; minGroup?: string },
   projectAudits: Partial<AuditsConfig>,
@@ -35,6 +42,12 @@ function resolveConfig(
   };
 }
 
+/**
+ * Normalizes the user's filter input into lookup-ready terms for selecting which audit categories to display.
+ * @param filterInput - Comma-separated string of filter terms
+ * @returns Array of trimmed, lowercased, non-empty filter terms
+ * @kuralPure
+ */
 function parseFilterTerms(filterInput: string): string[] {
   return filterInput
     .split(",")
@@ -44,6 +57,12 @@ function parseFilterTerms(filterInput: string): string[] {
 
 const SHOW_ALL = 0;
 
+/**
+ * Orchestrates the full audit flow — loads the stored snapshot, runs detection, filters results, and renders the diagnostic report.
+ * @param values - Parsed CLI argument values for the audit command
+ * @returns Resolves when audit output has been printed to stdout
+ * @kuralCauses orchestrates audit pipeline with database I/O and stdout
+ */
 async function runAuditCommand(values: {
   sensitivity?: string;
   containmentFloor?: string;
