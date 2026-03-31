@@ -69,9 +69,10 @@ type CodeNode = FunctionNode | TypeNode | FileNode | DirectoryNode;
 type NodeMap = Map<string, CodeNode>;
 
 /**
- * Detects helper functions: unexported functions called by 2+ siblings.
+ * Analyzes intra-file call graphs to identify unexported functions
+ * referenced by two or more siblings — marking them as shared helpers.
  * @param nodes - The flat node map to scan for helpers
- * @kuralCauses mutates helper flags on function nodes in place
+ * @kuralCauses marks functions as helpers based on caller count threshold
  */
 function detectHelpers(nodes: NodeMap): void {
   for (const node of nodes.values()) {
@@ -101,9 +102,10 @@ function detectHelpers(nodes: NodeMap): void {
 }
 
 /**
- * Propagates util flag upward: if all children are util, parent becomes util.
+ * Bubbles the util designation upward through the hierarchy — a
+ * container becomes util when every one of its children is util.
  * @param nodes - The flat node map to propagate util flags on
- * @kuralCauses mutates util flags on container nodes in place
+ * @kuralCauses elevates containers to util status by child consensus
  */
 function propagateUtil(nodes: NodeMap): void {
   for (const node of nodes.values()) {
