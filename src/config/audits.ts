@@ -12,6 +12,8 @@ type AuditsConfig = {
   containmentFloor: number;
   /** Minimum group size for per-group statistical tests. Default: 4 */
   minGroup: number;
+  /** Audit names to skip (e.g. ["incomplete-docs", "identity-language"]) */
+  disable?: string[];
 };
 
 export type { AuditsConfig };

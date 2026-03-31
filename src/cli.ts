@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import audit from "./commands/audit/command.ts";
 import { cli } from "gunshi";
 import { existsSync } from "node:fs";
 import generate from "./commands/generate/command.ts";
@@ -15,5 +16,5 @@ if (existsSync(".env")) {
 await cli(process.argv.slice(ARGV_START), generate, {
   name: "kural",
   version: "0.0.0",
-  subCommands: { score },
+  subCommands: { audit, score },
 });
