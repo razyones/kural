@@ -1,9 +1,9 @@
 /**
- * The gatherer. Walks a parsed codebase and collects text facets for
- * every unit — names, descriptions, paths, signatures, and causes —
- * into parallel arrays ready for batch embedding. It is the only module
- * that extracts embedding inputs from parsed structures — no other
- * module builds the text that enters the embedding pipeline.
+ * The gatherer. Assembles text facets into parallel arrays ready for
+ * batch vectorization — names, descriptions, paths, signatures, and
+ * causes. It is the only module that prepares raw inputs for the
+ * embedding pipeline — no other module marshals the text that becomes
+ * numerical vectors.
  */
 
 import type { KuralDirectory, KuralUnit } from "../parse/types.ts";

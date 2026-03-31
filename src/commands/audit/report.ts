@@ -1,8 +1,8 @@
 /**
- * The narrator. Builds display context and delegates to each audit's own
- * formatter. It is the only module that bridges audit results to terminal
- * output — no other module knows how to resolve node labels or build
- * formatting context.
+ * The narrator. Builds display context and delegates to each rule's own
+ * formatter. It is the only module that bridges diagnostic results to
+ * terminal output — no other module knows how to resolve node labels
+ * or build formatting context.
  */
 
 import type { CodeNode, NodeMap } from "../../sost/tree.ts";

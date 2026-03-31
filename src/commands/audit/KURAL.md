@@ -1,1 +1,2 @@
-The inspector's office. Wires CLI arguments to the health-check engine and renders its output for the terminal. It is the only command that presents anomaly reports — no other command reads snapshot data to surface deviations.
+The inspector's office. Wires the diagnostic CLI arguments to the issue display pipeline. It is the only command that reads and renders localized issues — no other command queries snapshot data for structural diagnostics.
+@kuralResidual misplaced [ab944cdf]

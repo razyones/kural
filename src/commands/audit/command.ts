@@ -1,7 +1,8 @@
 /**
- * The stethoscope. Defines the CLI argument schema and wires user input
- * into the audit pipeline. It is the only module that speaks the Gunshi
- * command protocol for audits — no other module defines audit CLI arguments.
+ * The console. Defines the CLI argument schema and wires user input
+ * to the diagnostic engine. It is the only module that speaks the Gunshi
+ * command protocol for issue inspection — no other module defines
+ * diagnostic CLI arguments.
  */
 
 import { countListItems, printListSections } from "../../ui/list.ts";

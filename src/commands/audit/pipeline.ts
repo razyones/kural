@@ -1,7 +1,8 @@
 /**
- * The lens. Reads a stored snapshot and runs structural detection to produce
- * an audit report. It is the only module that bridges database state to audit
- * findings — no other module orchestrates the read-detect flow.
+ * The lens. Reads a stored snapshot and runs the diagnostic engine to
+ * produce a report. It is the only module that bridges database state
+ * to the issue pipeline — no other module orchestrates the
+ * read-evaluate flow.
  */
 
 import type {
