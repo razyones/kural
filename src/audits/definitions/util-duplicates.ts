@@ -16,8 +16,8 @@ const NONE = 0;
 const NEXT = 1;
 
 export default defineAudit({
-  name: "duplicate-utils",
-  title: "Duplicate Utils",
+  name: "util-duplicates",
+  title: "Util Duplicates",
   format: formatDuplicate,
   detect: (ctx: AuditContext): Finding[] => {
     const { nodes, leafMergeFence } = ctx;
@@ -42,11 +42,11 @@ export default defineAudit({
         const sim = cosineSimilarity(a.leaf, b.leaf);
         if (
           sim > leafMergeFence &&
-          !isSuppressed(a, "duplicate-utils") &&
-          !isSuppressed(b, "duplicate-utils")
+          !isSuppressed(a, "util-duplicates") &&
+          !isSuppressed(b, "util-duplicates")
         ) {
           findings.push({
-            audit: "duplicate-utils",
+            audit: "util-duplicates",
             key: a.key,
             name: a.name,
             hash: a.hash,

@@ -17,7 +17,7 @@ const NONE = 0;
 const NEXT = 1;
 
 /**
- * Shared formatter for both duplicates and duplicate-utils audits.
+ * Shared formatter for both duplicates and util-duplicates audits.
  * @param ctx - The formatting context with finding and display data
  * @returns The formatted list item
  * @kuralPatterns formatAudit

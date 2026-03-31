@@ -14,7 +14,7 @@ import {
 import { describe, expect, test } from "vite-plus/test";
 import { makeFile, makeFunction, suppress, toNodeMap } from "../../../tests/helpers/audits.ts";
 import { createContext } from "../context.ts";
-import duplicateUtils from "./duplicate-utils.ts";
+import duplicateUtils from "./util-duplicates.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
   containmentFloor: CONTAINMENT_FLOOR,
@@ -228,7 +228,7 @@ describe("duplicate-utils detect — suppression", () => {
       leaf: EMB_UTIL_A,
       parentKey: "file:/src/a.ts",
       util: true,
-      residuals: [suppress("duplicate-utils")],
+      residuals: [suppress("util-duplicates")],
     });
     const fnB = makeFunction({
       key: "func:/src/b.ts:utilB",

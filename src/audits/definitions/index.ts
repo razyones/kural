@@ -9,7 +9,7 @@ import { bloatedDirectories, bloatedFiles } from "./bloated.ts";
 import { incoherent, incoherentUtils } from "./incoherent.ts";
 import type { AuditDefinition } from "../types.ts";
 import containments from "./containments.ts";
-import duplicateUtils from "./duplicate-utils.ts";
+import duplicateUtils from "./util-duplicates.ts";
 import duplicates from "./duplicates.ts";
 import identityLanguage from "./identity-language.ts";
 import incompleteDocs from "./incomplete-docs.ts";
