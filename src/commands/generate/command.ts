@@ -128,6 +128,7 @@ function printGenerateFooter(): void {
 /**
  * Orchestrates the full generate flow — resolves the embedding provider, runs the pipeline, and renders either human or JSON output.
  * @param values - Parsed CLI arguments for the generate command
+ * @returns Resolves when generation and output have completed
  * @kuralCauses orchestrates the full parse-embed-score-store pipeline with I/O
  */
 async function handleGenerate(values: {
