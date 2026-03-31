@@ -138,6 +138,13 @@ function printAuditFooter(): void {
 
 /**
  * Builds the audit banner metadata from run context.
+ * @param root - Absolute project root for relative path display
+ * @param dbPath - Path to the snapshot database
+ * @param createdAt - Snapshot creation timestamp (ms since epoch) or null
+ * @param total - Total number of identified issues
+ * @param filterTerms - Active category filter terms
+ * @param disabledAudits - Set of audit names that were skipped
+ * @returns Key-value record of banner fields for display
  * @kuralPure
  */
 function buildBanner(
