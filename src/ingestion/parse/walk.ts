@@ -1,8 +1,8 @@
 /**
- * The scout. Discovers which .ts files and directories exist under a root path.
- * It is the only module that touches the filesystem for directory enumeration —
- * no other part of the parse pipeline decides what to read.
- * @kuralResidual outliers [14d4edea]
+ * The scout. Enumerates source files and directories to determine which
+ * code units the parser will turn into structured representations. It is
+ * the only module that touches the filesystem for source discovery — no
+ * other part of the pipeline decides what code exists.
  */
 
 import { readdir } from "node:fs/promises";

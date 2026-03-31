@@ -1,6 +1,7 @@
 /**
- * The registry. Exports all audit definitions in display order.
- * Adding or removing an audit means editing this barrel file.
+ * The roster. Assembles every detection rule and its formatting
+ * function into display order. It is the only module that decides
+ * which rules run and in what sequence they appear in output.
  */
 
 /* eslint-disable max-dependencies */

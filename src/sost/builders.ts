@@ -1,7 +1,8 @@
 /**
- * Node builders. Constructs FunctionNode, TypeNode, FileNode, and
- * DirectoryNode instances from parsed units. These are pure factory
- * functions with no side effects.
+ * The assembler. Constructs the scored node structures that carry
+ * embedding vectors, identity hashes, and placement metadata. It is the
+ * only module that shapes the raw material the scoring engine evaluates —
+ * no other module creates the nodes that metrics are computed over.
  */
 
 import type { DirectoryNode, FileNode, FunctionNode, TypeNode } from "./tree.ts";

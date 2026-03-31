@@ -1,6 +1,7 @@
 /**
- * Detects cross-file util pairs with similarity above the merge fence —
- * duplicated utility code across modules.
+ * Detects util-scoped units whose embeddings exceed the merge fence
+ * across file boundaries — surfacing duplicated logic in the utility
+ * sandbox that the main duplicates rule does not cover.
  */
 
 import type { AuditContext, Finding } from "../types.ts";

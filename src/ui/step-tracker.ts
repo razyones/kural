@@ -1,8 +1,8 @@
 /**
- * The pace-keeper. Wraps sequential async steps with animated progress
- * spinners that auto-advance through a named step list. It is the only
- * module that owns multi-step progress animation — no other module
- * tracks numbered step completion.
+ * The pace-keeper. Renders animated spinner displays that cycle through
+ * a named step list, printing styled progress text to the terminal.
+ * It is the only module that owns multi-step progress rendering — no
+ * other module prints numbered step banners.
  */
 
 import { logger } from "./log.ts";

@@ -1,6 +1,7 @@
 /**
- * Detects units missing required JSDoc: description, @param, @returns,
- * or purity annotation. No statistical fence — purely deterministic.
+ * Detects units missing required documentation — description, parameter
+ * docs, return docs, or purity annotations. It surfaces gaps that weaken
+ * the embedding signal before they affect scoring accuracy.
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
