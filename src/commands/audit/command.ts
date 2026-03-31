@@ -11,6 +11,7 @@ import { define } from "gunshi";
 import { formatReport } from "./report.ts";
 import { loadProjectConfig } from "../../config/loader.ts";
 import { relative } from "node:path";
+import { renderFooter } from "../../ui/footer.ts";
 import { runAudits } from "./pipeline.ts";
 
 const NONE = 0;
@@ -58,6 +59,67 @@ function parseFilterTerms(filterInput: string): string[] {
 const SHOW_ALL = 0;
 
 /**
+ * Closes the audit output with term definitions and suggested follow-up commands.
+ * @kuralCauses writes footer sections to stdout
+ */
+function printAuditFooter(): void {
+  renderFooter(
+    [
+      { term: "Similarity", definition: "cosine similarity between embedding vectors (0–100%)" },
+      {
+        term: "Dominant / next",
+        definition: "highest and second-highest child-to-parent similarity",
+      },
+      {
+        term: "Identity-content",
+        definition: "alignment between a container's name and its actual contents",
+      },
+      { term: "Axis score", definition: "is-does linguistic measurement for descriptions" },
+      {
+        term: "clusters",
+        definition: "groups of semantically similar children suggesting a split",
+      },
+      { term: "fence", definition: "statistical threshold computed from group distribution" },
+      { term: "group", definition: "the peer set used as baseline for comparison" },
+    ],
+    [
+      { command: "kural audit -f <category>", description: "filter by audit category" },
+      { command: "kural audit -e", description: "show all findings per audit (no truncation)" },
+      { command: "kural audit -d <name>", description: "disable specific audits" },
+      { command: "kural audit -k <n>", description: "adjust sensitivity threshold" },
+      { command: "kural generate", description: "regenerate snapshot after fixing issues" },
+    ],
+  );
+}
+
+/**
+ * Builds the audit banner metadata from run context.
+ * @kuralPure
+ */
+function buildBanner(
+  root: string,
+  dbPath: string,
+  createdAt: number | null,
+  total: number,
+  filterTerms: string[],
+  disabledAudits: Set<string>,
+): Record<string, string> {
+  const takenOn = createdAt === null ? "unknown" : new Date(createdAt).toLocaleString();
+  const banner: Record<string, string> = {
+    "on snapshot": relative(root, dbPath) || dbPath,
+    "taken on": takenOn,
+  };
+  if (filterTerms.length > NONE) {
+    banner["filter by"] = filterTerms.join(", ");
+  }
+  if (disabledAudits.size > NONE) {
+    banner["disabled"] = [...disabledAudits].join(", ");
+  }
+  banner["identified issues"] = String(total);
+  return banner;
+}
+
+/**
  * Orchestrates the full audit flow — loads the stored snapshot, runs detection, filters results, and renders the diagnostic report.
  * @param values - Parsed CLI argument values for the audit command
  * @returns Resolves when audit output has been printed to stdout
@@ -92,25 +154,14 @@ async function runAuditCommand(values: {
       : allSections;
 
   const total = countListItems(filtered);
-  const takenOn = createdAt === null ? "unknown" : new Date(createdAt).toLocaleString();
-  const banner: Record<string, string> = {
-    "on snapshot": relative(root, dbPath) || dbPath,
-    "taken on": takenOn,
-  };
-  if (filterTerms.length > NONE) {
-    banner["filter by"] = filterTerms.join(", ");
-  }
-  if (disabledAudits.size > NONE) {
-    banner["disabled"] = [...disabledAudits].join(", ");
-  }
-  banner["identified issues"] = String(total);
-  logBanner("audit", banner);
-
+  logBanner("audit", buildBanner(root, dbPath, createdAt, total, filterTerms, disabledAudits));
   printListSections(filtered);
 
   if (total === NONE) {
     logger.success("No structural issues detected");
   }
+
+  printAuditFooter();
 }
 
 export default define({
