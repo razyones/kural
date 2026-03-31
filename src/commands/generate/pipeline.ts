@@ -14,10 +14,10 @@ import {
   currentCommitHash,
   rotateActive,
 } from "../../db/snapshot.ts";
-import type { EmbeddingCache } from "../../ingestion/embed/types.ts";
 import type { ScoreCard } from "../../sost/score.ts";
 import type { SnapshotCollections } from "../../db/collections.ts";
 import { embed } from "../../ingestion/embed/pipeline.ts";
+import { loadEmbeddingCache } from "../../db/cache.ts";
 import { parse } from "../../ingestion/parse/pipeline.ts";
 import { score } from "../../sost/score.ts";
 
@@ -244,7 +244,6 @@ async function writeScoreCards(
  * @param embedder - Function that converts text to embedding vectors
  * @param embedOptions - Embedding configuration
  * @param modelId - Embedding model ID for cache validation
- * @param cache - Optional embedding cache from previous snapshot
  * @param callbacks - Optional progress callbacks
  * @returns Counts and database path from the completed run
  */
@@ -254,7 +253,6 @@ async function generate(
   embedder: Embedder,
   embedOptions: EmbedOptions,
   modelId: string,
-  cache?: EmbeddingCache,
   callbacks?: GenerateCallbacks,
 ): Promise<GenerateResult> {
   const result = await parse(targetPath);
@@ -262,13 +260,14 @@ async function generate(
   const dirCount = Object.keys(result.directories).length;
   callbacks?.onParsed?.(fileCount, dirCount);
 
+  const branch = currentBranch();
+  const cache = await loadEmbeddingCache(root, branch, modelId);
   const { total: unitCount, cacheHits } = await embed(result, embedder, embedOptions, cache);
   callbacks?.onEmbedded?.(unitCount, cacheHits);
 
   const cards = score(result);
   callbacks?.onScored?.(cards.length);
 
-  const branch = currentBranch();
   await rotateActive(root, branch);
   const snapshot = await createActive(root, branch);
   const dbPath = `${root}/.kural-db/${branch}/active.db`;

@@ -169,7 +169,6 @@ async function handleGenerate(values: {
     createTrackedEmbedder(embedFn),
     embedOptions,
     modelId,
-    undefined,
     callbacks,
   );
 
