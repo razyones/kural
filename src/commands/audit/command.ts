@@ -6,6 +6,7 @@
 
 import { countListItems, printListSections } from "../../ui/list.ts";
 import { logBanner, logger } from "../../ui/log.ts";
+import type { AuditReport } from "../../audits/detect.ts";
 import type { AuditsConfig } from "../../config/audits.ts";
 import { define } from "gunshi";
 import { formatReport } from "./report.ts";
@@ -15,6 +16,7 @@ import { renderFooter } from "../../ui/footer.ts";
 import { runAudits } from "./pipeline.ts";
 
 const NONE = 0;
+const JSON_INDENT = 2;
 const DEFAULT_SENSITIVITY = 2.0;
 const DEFAULT_CONTAINMENT_FLOOR = 0.9;
 const DEFAULT_MIN_GROUP = 4;
@@ -59,6 +61,47 @@ function parseFilterTerms(filterInput: string): string[] {
 const SHOW_ALL = 0;
 
 /**
+ * Serializes the audit report into a machine-readable JSON structure for programmatic consumers.
+ * @param root - Absolute project root for relative path display
+ * @param dbPath - Path to the snapshot database
+ * @param createdAt - Snapshot creation timestamp (ms since epoch) or null
+ * @param report - Ordered audit results with definitions and findings
+ * @param filterTerms - Category filter terms to apply before output
+ * @kuralCauses writes JSON to stdout
+ */
+function printJson(
+  root: string,
+  dbPath: string,
+  createdAt: number | null,
+  report: AuditReport,
+  filterTerms: string[],
+): void {
+  const filtered =
+    filterTerms.length > NONE
+      ? report.filter(({ definition }) =>
+          filterTerms.some((term) => definition.title.toLowerCase().includes(term)),
+        )
+      : report;
+
+  const audits = filtered.map(({ definition, findings }) => ({
+    name: definition.name,
+    title: definition.title,
+    count: findings.length,
+    findings,
+  }));
+
+  const total = audits.reduce((sum, a) => sum + a.count, NONE);
+  const output = {
+    snapshot: relative(root, dbPath) || dbPath,
+    createdAt: createdAt === null ? null : new Date(createdAt).toISOString(),
+    total,
+    audits,
+  };
+
+  console.log(JSON.stringify(output, null, JSON_INDENT));
+}
+
+/**
  * Closes the audit output with term definitions and suggested follow-up commands.
  * @kuralCauses writes footer sections to stdout
  */
@@ -87,6 +130,7 @@ function printAuditFooter(): void {
       { command: "kural audit -e", description: "show all findings per audit (no truncation)" },
       { command: "kural audit -d <name>", description: "disable specific audits" },
       { command: "kural audit -k <n>", description: "adjust sensitivity threshold" },
+      { command: "kural audit --json", description: "output result as JSON" },
       { command: "kural generate", description: "regenerate snapshot after fixing issues" },
     ],
   );
@@ -132,6 +176,7 @@ async function runAuditCommand(values: {
   filter?: string;
   disable?: string;
   expand?: boolean;
+  json?: boolean;
 }): Promise<void> {
   const projectConfig = loadProjectConfig();
   const config = resolveConfig(values, projectConfig.audits ?? {});
@@ -139,12 +184,18 @@ async function runAuditCommand(values: {
   const cliDisabled = parseFilterTerms(values.disable ?? "");
   const configDisabled = config.disable ?? [];
   const disabledAudits = new Set([...cliDisabled, ...configDisabled]);
-  const limit = values.expand === true ? SHOW_ALL : undefined;
+  const jsonMode = values.json === true;
 
   const root = process.cwd();
   const { report, nodes, dbPath, createdAt } = await runAudits(root, config, disabledAudits);
-
   const filterTerms = parseFilterTerms(values.filter ?? "");
+
+  if (jsonMode) {
+    printJson(root, dbPath, createdAt, report, filterTerms);
+    return;
+  }
+
+  const limit = values.expand === true ? SHOW_ALL : undefined;
   const allSections = formatReport(report, nodes, limit);
   const filtered =
     filterTerms.length > NONE
@@ -195,6 +246,10 @@ export default define({
       type: "boolean" as const,
       short: "e",
       description: "Show all findings per audit (no truncation)",
+    },
+    json: {
+      type: "boolean" as const,
+      description: "Output result as JSON",
     },
   },
   run: async (ctx) => {
