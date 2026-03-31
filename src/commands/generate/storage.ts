@@ -11,6 +11,24 @@ import { parse } from "../../ingestion/parse/pipeline.ts";
 const NONE = 0;
 
 /**
+ * Inserts an array of mapped rows into a collection if non-empty.
+ * @param collection - The target collection to insert into
+ * @param rows - The mapped rows to persist
+ * @returns Resolves when rows are persisted
+ * @kuralHelper
+ * @kuralCauses persists rows to the snapshot database
+ */
+async function persistRows<T extends object>(
+  collection: { insert: (rows: T[]) => { isPersisted: { promise: Promise<unknown> } } },
+  rows: T[],
+): Promise<void> {
+  if (rows.length > NONE) {
+    const tx = collection.insert(rows);
+    await tx.isPersisted.promise;
+  }
+}
+
+/**
  * Records the model identity and creation timestamp so downstream commands can validate cache coherence and display snapshot provenance.
  * @param collections - Snapshot collections to write into
  * @param modelId - Embedding model ID to record
@@ -23,12 +41,11 @@ async function writeMetadata(
   modelId: string,
   createdAt: number,
 ): Promise<void> {
-  const tx = collections.metadata.insert([
+  await persistRows(collections.metadata, [
     { key: "created_at", value: String(createdAt) },
     { key: "model_id", value: modelId },
     { key: "schema_version", value: "1" },
   ]);
-  await tx.isPersisted.promise;
 }
 
 /**
@@ -60,22 +77,21 @@ async function writeFiles(
   collections: SnapshotCollections,
   files: Awaited<ReturnType<typeof parse>>["files"][string][],
 ): Promise<void> {
-  const rows = files.map((f) => ({
-    path: f.path,
-    name: f.name,
-    description: f.description,
-    identityEmbedding: f.identityEmbedding,
-    leafEmbedding: f.leafEmbedding,
-    facetHash: f.facetHash,
-    importsInternal: f.imports.internalImports,
-    importsExternal: f.imports.externalImports,
-    companion: f.companion,
-    residuals: f.residuals,
-  }));
-  if (rows.length > NONE) {
-    const tx = collections.files.insert(rows);
-    await tx.isPersisted.promise;
-  }
+  await persistRows(
+    collections.files,
+    files.map((f) => ({
+      path: f.path,
+      name: f.name,
+      description: f.description,
+      identityEmbedding: f.identityEmbedding,
+      leafEmbedding: f.leafEmbedding,
+      facetHash: f.facetHash,
+      importsInternal: f.imports.internalImports,
+      importsExternal: f.imports.externalImports,
+      companion: f.companion,
+      residuals: f.residuals,
+    })),
+  );
 }
 
 /**
@@ -89,27 +105,26 @@ async function writeTypes(
   collections: SnapshotCollections,
   files: Awaited<ReturnType<typeof parse>>["files"][string][],
 ): Promise<void> {
-  const rows = files.flatMap((f) =>
-    Object.values(f.types).map((t) => ({
-      path: t.path,
-      name: t.name,
-      description: t.description,
-      fields: t.fields,
-      exported: t.exported,
-      refs: t.references,
-      util: t.util,
-      helper: t.helper,
-      residuals: t.residuals,
-      identityEmbedding: t.identityEmbedding,
-      leafEmbedding: t.leafEmbedding,
-      facetHash: t.facetHash,
-      patterns: t.patterns,
-    })),
+  await persistRows(
+    collections.types,
+    files.flatMap((f) =>
+      Object.values(f.types).map((t) => ({
+        path: t.path,
+        name: t.name,
+        description: t.description,
+        fields: t.fields,
+        exported: t.exported,
+        refs: t.references,
+        util: t.util,
+        helper: t.helper,
+        residuals: t.residuals,
+        identityEmbedding: t.identityEmbedding,
+        leafEmbedding: t.leafEmbedding,
+        facetHash: t.facetHash,
+        patterns: t.patterns,
+      })),
+    ),
   );
-  if (rows.length > NONE) {
-    const tx = collections.types.insert(rows);
-    await tx.isPersisted.promise;
-  }
 }
 
 /**
@@ -123,33 +138,32 @@ async function writeFunctions(
   collections: SnapshotCollections,
   files: Awaited<ReturnType<typeof parse>>["files"][string][],
 ): Promise<void> {
-  const rows = files.flatMap((f) =>
-    Object.values(f.functions).map((fn) => ({
-      path: fn.path,
-      name: fn.name,
-      description: fn.description,
-      params: fn.params,
-      paramNames: fn.paramNames,
-      returnsType: fn.returns,
-      exported: fn.exported,
-      pure: fn.pure,
-      util: fn.util,
-      helper: fn.helper,
-      residuals: fn.residuals,
-      causes: fn.causes,
-      calls: fn.calls,
-      identityEmbedding: fn.identityEmbedding,
-      leafEmbedding: fn.leafEmbedding,
-      facetHash: fn.facetHash,
-      patterns: fn.patterns,
-      documentedParams: fn.documentedParams,
-      hasReturnDoc: fn.hasReturnDoc,
-    })),
+  await persistRows(
+    collections.functions,
+    files.flatMap((f) =>
+      Object.values(f.functions).map((fn) => ({
+        path: fn.path,
+        name: fn.name,
+        description: fn.description,
+        params: fn.params,
+        paramNames: fn.paramNames,
+        returnsType: fn.returns,
+        exported: fn.exported,
+        pure: fn.pure,
+        util: fn.util,
+        helper: fn.helper,
+        residuals: fn.residuals,
+        causes: fn.causes,
+        calls: fn.calls,
+        identityEmbedding: fn.identityEmbedding,
+        leafEmbedding: fn.leafEmbedding,
+        facetHash: fn.facetHash,
+        patterns: fn.patterns,
+        documentedParams: fn.documentedParams,
+        hasReturnDoc: fn.hasReturnDoc,
+      })),
+    ),
   );
-  if (rows.length > NONE) {
-    const tx = collections.functions.insert(rows);
-    await tx.isPersisted.promise;
-  }
 }
 
 /**
@@ -163,20 +177,19 @@ async function writeDirectories(
   collections: SnapshotCollections,
   result: Awaited<ReturnType<typeof parse>>,
 ): Promise<void> {
-  const rows = Object.values(result.directories).map((d) => ({
-    path: d.path,
-    name: d.name,
-    description: d.description,
-    children: d.children,
-    identityEmbedding: d.identityEmbedding,
-    leafEmbedding: d.leafEmbedding,
-    facetHash: d.facetHash,
-    residuals: d.residuals,
-  }));
-  if (rows.length > NONE) {
-    const tx = collections.directories.insert(rows);
-    await tx.isPersisted.promise;
-  }
+  await persistRows(
+    collections.directories,
+    Object.values(result.directories).map((d) => ({
+      path: d.path,
+      name: d.name,
+      description: d.description,
+      children: d.children,
+      identityEmbedding: d.identityEmbedding,
+      leafEmbedding: d.leafEmbedding,
+      facetHash: d.facetHash,
+      residuals: d.residuals,
+    })),
+  );
 }
 
 /**
@@ -190,28 +203,27 @@ async function writeScoreCards(
   collections: SnapshotCollections,
   cards: ScoreCard[],
 ): Promise<void> {
-  const rows = cards.map((c) => ({
-    key: c.key,
-    kind: c.kind,
-    name: c.name,
-    fit: c.fit ?? undefined,
-    uniqueness: c.uniqueness,
-    score: c.score ?? undefined,
-    childrenFit: c.childrenFit ?? undefined,
-    childrenUniqueness: c.childrenUniqueness ?? undefined,
-    childrenScore: c.childrenScore ?? undefined,
-    subtreeFit: c.subtreeFit ?? undefined,
-    subtreeUniqueness: c.subtreeUniqueness ?? undefined,
-    subtreeScore: c.subtreeScore ?? undefined,
-    overallScore: c.overallScore ?? undefined,
-    worstPair: c.worstPair ? JSON.stringify(c.worstPair) : undefined,
-    bestUncleName: c.bestUncle?.name,
-    bestUncleScore: c.bestUncle?.score,
-  }));
-  if (rows.length > NONE) {
-    const tx = collections.scores.insert(rows);
-    await tx.isPersisted.promise;
-  }
+  await persistRows(
+    collections.scores,
+    cards.map((c) => ({
+      key: c.key,
+      kind: c.kind,
+      name: c.name,
+      fit: c.fit ?? undefined,
+      uniqueness: c.uniqueness,
+      score: c.score ?? undefined,
+      childrenFit: c.childrenFit ?? undefined,
+      childrenUniqueness: c.childrenUniqueness ?? undefined,
+      childrenScore: c.childrenScore ?? undefined,
+      subtreeFit: c.subtreeFit ?? undefined,
+      subtreeUniqueness: c.subtreeUniqueness ?? undefined,
+      subtreeScore: c.subtreeScore ?? undefined,
+      overallScore: c.overallScore ?? undefined,
+      worstPair: c.worstPair ? JSON.stringify(c.worstPair) : undefined,
+      bestUncleName: c.bestUncle?.name,
+      bestUncleScore: c.bestUncle?.score,
+    })),
+  );
 }
 
 export { writeMetadata, writeScoreCards, writeUnits };

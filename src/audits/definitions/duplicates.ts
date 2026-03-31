@@ -87,6 +87,7 @@ function scanLeafCrossFile(
  * @param util - Util leaf node entries
  * @param fence - The similarity threshold above which a pair is flagged
  * @returns Findings for cross-population duplicates
+ * @kuralPatterns crossScan
  * @kuralPure
  */
 function scanCrossPopDuplicates(

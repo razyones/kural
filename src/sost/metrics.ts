@@ -107,6 +107,7 @@ function deduplicateByGroup(children: CodeNode[]): IdentityRef[] {
  * @param parent - The parent node
  * @param children - All eligible children of the parent
  * @returns Map from child key to uniqueness score
+ * @kuralPatterns uniquenessMetric
  * @kuralPure
  */
 function computeUniqueness(parent: CodeNode, children: CodeNode[]): Map<string, number> {
@@ -151,6 +152,7 @@ function computeUniqueness(parent: CodeNode, children: CodeNode[]): Map<string, 
  * @param parent - The parent node
  * @param children - All eligible children of the parent
  * @returns CV score and the closest child pair names
+ * @kuralPatterns uniquenessMetric
  * @kuralPure
  */
 function computeChildrenUniqueness(

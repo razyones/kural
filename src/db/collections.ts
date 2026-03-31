@@ -85,6 +85,7 @@ function createSnapshotCollections(database: Database.Database): SnapshotCollect
  * Must be called before reading from any collection.
  * @param collections - The snapshot collections to preload
  * @returns Promise that resolves when all collections are preloaded
+ * @kuralPatterns collectionBatch
  * @kuralCauses reads all collection data from SQLite into memory
  */
 async function preloadAll(collections: SnapshotCollections): Promise<void> {
@@ -102,6 +103,7 @@ async function preloadAll(collections: SnapshotCollections): Promise<void> {
  * Cleans up all collections. Call before closing the database.
  * @param collections - The snapshot collections to clean up
  * @returns Promise that resolves when all collections are cleaned up
+ * @kuralPatterns collectionBatch
  * @kuralCauses releases collection resources
  */
 async function cleanupAll(collections: SnapshotCollections): Promise<void> {

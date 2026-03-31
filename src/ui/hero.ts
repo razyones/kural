@@ -10,6 +10,7 @@ const GOOD_THRESHOLD = 0.7;
 const MODERATE_THRESHOLD = 0.4;
 const UNCHANGED = 0;
 const SCORE_DECIMALS = 2;
+const DELTA_DECIMALS = 8;
 
 /** Delta arrows for score comparison. */
 const ARROW_UP = "\u25B4";
@@ -65,7 +66,7 @@ function verdict(value: number): string {
  */
 function formatDelta(delta: number): string {
   const sign = delta > UNCHANGED ? "+" : "";
-  const formatted = `${sign}${delta.toFixed(SCORE_DECIMALS)}`;
+  const formatted = `${sign}${delta.toFixed(DELTA_DECIMALS)}`;
   if (delta > UNCHANGED) {
     return ` ${colors.green(`${ARROW_UP} ${formatted}`)}`;
   }
