@@ -6,7 +6,14 @@
  */
 
 import type { EmbedOptions, Embedder } from "../../ingestion/embed/pipeline.ts";
-import { closeSnapshot, createActive, currentBranch, rotateActive } from "../../db/snapshot.ts";
+import {
+  buildSnapshotId,
+  closeSnapshot,
+  createActive,
+  currentBranch,
+  currentCommitHash,
+  rotateActive,
+} from "../../db/snapshot.ts";
 import type { EmbeddingCache } from "../../ingestion/embed/types.ts";
 import type { ScoreCard } from "../../sost/score.ts";
 import type { SnapshotCollections } from "../../db/collections.ts";
@@ -21,7 +28,7 @@ type GenerateCallbacks = {
   onParsed?: (fileCount: number, dirCount: number) => void;
   onEmbedded?: (unitCount: number, cacheHits: number) => void;
   onScored?: (cardCount: number) => void;
-  onStored?: (dbPath: string) => void;
+  onStored?: (dbPath: string, snapshotId: string) => void;
 };
 
 /** Counts and path from a completed generation run. */
@@ -31,6 +38,7 @@ type GenerateResult = {
   unitCount: number;
   branch: string;
   dbPath: string;
+  snapshotId: string;
 };
 
 /**
@@ -39,9 +47,13 @@ type GenerateResult = {
  * @param modelId - Embedding model ID to record
  * @kuralCauses persists metadata rows to the snapshot database
  */
-async function writeMetadata(collections: SnapshotCollections, modelId: string): Promise<void> {
+async function writeMetadata(
+  collections: SnapshotCollections,
+  modelId: string,
+  createdAt: number,
+): Promise<void> {
   const tx = collections.metadata.insert([
-    { key: "created_at", value: String(Date.now()) },
+    { key: "created_at", value: String(createdAt) },
     { key: "model_id", value: modelId },
     { key: "schema_version", value: "1" },
   ]);
@@ -261,11 +273,14 @@ async function generate(
   const snapshot = await createActive(root, branch);
   const dbPath = `${root}/.kural-db/${branch}/active.db`;
 
-  await writeMetadata(snapshot.collections, modelId);
+  const createdAt = Date.now();
+  const snapshotId = buildSnapshotId(createdAt, currentCommitHash());
+
+  await writeMetadata(snapshot.collections, modelId, createdAt);
   await writeUnits(snapshot.collections, result);
   await writeScoreCards(snapshot.collections, cards);
   await closeSnapshot(snapshot);
-  callbacks?.onStored?.(dbPath);
+  callbacks?.onStored?.(dbPath, snapshotId);
 
   return {
     fileCount,
@@ -273,6 +288,7 @@ async function generate(
     unitCount,
     branch,
     dbPath,
+    snapshotId,
   };
 }
 

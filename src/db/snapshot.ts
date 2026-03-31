@@ -281,10 +281,12 @@ function deleteAdvise(root: string, branch: string): void {
 
 export {
   activePath,
+  buildSnapshotId,
   cloneActiveToAdvise,
   closeSnapshot,
   createActive,
   currentBranch,
+  currentCommitHash,
   deleteAdvise,
   getHistorySnapshots,
   openSnapshot,

@@ -50,8 +50,9 @@ function buildCallbacks(): GenerateCallbacks {
     onScored: (count) => {
       logger.success(`Scored ${String(count)} nodes`);
     },
-    onStored: (dbPath) => {
+    onStored: (dbPath, snapshotId) => {
       logger.success(`Saved to ${relative(process.cwd(), dbPath)}`);
+      logger.success(`Snapshot ${snapshotId}`);
     },
   };
 }
@@ -75,6 +76,7 @@ function printJson(
     provider,
     model: modelId,
     branch: result.branch,
+    snapshotId: result.snapshotId,
     fileCount: result.fileCount,
     dirCount: result.dirCount,
     unitCount: result.unitCount,
