@@ -46,10 +46,11 @@ function resolveConfig(
 }
 
 /**
- * Normalizes the user's filter input into lookup-ready terms for selecting which audit categories to display.
+ * Splits the CLI filter flag into normalized category names so the report renderer can selectively show matching sections.
  * @param filterInput - Comma-separated string of filter terms
  * @returns Array of trimmed, lowercased, non-empty filter terms
  * @kuralPure
+ * @kuralHelper
  */
 function parseFilterTerms(filterInput: string): string[] {
   return filterInput

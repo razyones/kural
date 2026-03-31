@@ -71,6 +71,7 @@ async function writeUnits(
  * @param collections - Snapshot collections to write into
  * @param files - Parsed file objects to persist
  * @returns Resolves when file rows are persisted
+ * @kuralPatterns writeCollection
  * @kuralCauses persists file rows to the snapshot database
  */
 async function writeFiles(
@@ -99,6 +100,7 @@ async function writeFiles(
  * @param collections - Snapshot collections to write into
  * @param files - Parsed file objects containing types to persist
  * @returns Resolves when type rows are persisted
+ * @kuralPatterns writeCollection
  * @kuralCauses persists type rows to the snapshot database
  */
 async function writeTypes(
@@ -132,6 +134,7 @@ async function writeTypes(
  * @param collections - Snapshot collections to write into
  * @param files - Parsed file objects containing functions to persist
  * @returns Resolves when function rows are persisted
+ * @kuralPatterns writeCollection
  * @kuralCauses persists function rows to the snapshot database
  */
 async function writeFunctions(

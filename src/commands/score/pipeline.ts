@@ -16,7 +16,7 @@ import type { ScoreRow } from "../../db/schemas.ts";
 const NONE = 0;
 const PREFIX_OFFSET = 1;
 
-/** A loaded score card with parsed fields. */
+/** A loaded score card with parsed fields. @kuralPatterns scoreShape */
 type LoadedScore = {
   key: string;
   kind: string;
@@ -77,7 +77,7 @@ function extractPath(key: string): string {
 }
 
 /**
- * Parses a JSON-encoded worst pair string into a tuple.
+ * Restores the closest-sibling pair from its stored JSON form so the score display can highlight the weakest separation.
  * @param raw - optional JSON string representing a two-element array
  * @returns a two-element tuple of strings, or null if input is missing or invalid
  * @kuralPure

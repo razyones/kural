@@ -21,7 +21,7 @@ import { harmonicMean } from "../utils/vectors.ts";
 
 const NONE = 0;
 
-/** Structural health metrics for a single node. */
+/** Structural health metrics for a single node. @kuralPatterns scoreShape */
 type ScoreCard = {
   key: string;
   kind: CodeNode["kind"];

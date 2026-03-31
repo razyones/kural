@@ -1,6 +1,7 @@
 /**
- * Detects cross-parent pairs that exceed the sibling merge fence —
- * duplicated code across module boundaries.
+ * Detects semantically identical units separated by module boundaries —
+ * cross-file leaves, cross-directory files, and cross-population
+ * util-domain straddles that exceed the sibling merge fence.
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";

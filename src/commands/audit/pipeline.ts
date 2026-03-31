@@ -29,10 +29,11 @@ type AuditPipelineResult = {
 };
 
 /**
- * Deserializes stored axis scores from their JSON metadata representation back into a typed numeric map.
+ * Restores axis scores from snapshot metadata so the identity-language audit can evaluate is-does balance.
  * @param text - JSON string to parse
  * @returns A record of string keys to number values, or null if input is not a valid object
  * @kuralPure
+ * @kuralHelper
  */
 function parseNumberRecord(text: string): Record<string, number> | null {
   const parsed: unknown = JSON.parse(text);

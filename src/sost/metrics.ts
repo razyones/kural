@@ -61,7 +61,7 @@ function computeChildrenFit(node: CodeNode): number | null {
   return cosineSimilarity(node.identity, node.leaf);
 }
 
-/** Lightweight projection for uniqueness computation. */
+/** Lightweight projection for uniqueness computation. @kuralHelper */
 type IdentityRef = { name: string; identity: number[] };
 
 /**

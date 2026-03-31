@@ -89,6 +89,7 @@ function printJson(
  * Wraps the raw embedding function with a multi-step spinner that visualizes progress through each facet pass.
  * @param embedFn - Raw embedding function to wrap with progress tracking
  * @returns An embedder that displays step-by-step spinner progress
+ * @kuralHelper
  * @kuralCauses wraps embedFn with animated progress spinners
  */
 function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]>): Embedder {
