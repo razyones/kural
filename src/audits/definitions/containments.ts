@@ -65,7 +65,7 @@ function collectDominanceGaps(nodes: Map<string, CodeNode>): DominanceEntry[] {
     if (node.leaf.length === NONE) {
       continue;
     }
-    const cwk = getChildrenWithKeys(node, nodes);
+    const cwk = getChildrenWithKeys(node, nodes).filter(({ node: c }) => !c.util && !c.helper);
     const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
     if (valid.length < HALF) {
       continue;
