@@ -10,6 +10,7 @@ import { avg } from "../utils/vectors.ts";
 const NONE = 0;
 const MIN_SAMPLE = 2;
 const BESSEL = 1;
+const MIN_MAD = 0.01;
 
 /** 1/Φ⁻¹(¾) — makes MAD consistent with σ for normal data. */
 const MAD_SCALE = 1.4826;
@@ -92,7 +93,7 @@ function robustLowerFence(values: number[], sensitivity: number): number {
   }
   const med = median(values);
   const deviations = values.map((v) => Math.abs(v - med));
-  const madValue = median(deviations);
+  const madValue = Math.max(median(deviations), MIN_MAD);
   return med - sensitivity * MAD_SCALE * madValue;
 }
 
@@ -110,7 +111,7 @@ function robustUpperFence(values: number[], sensitivity: number): number {
   }
   const med = median(values);
   const deviations = values.map((v) => Math.abs(v - med));
-  const madValue = median(deviations);
+  const madValue = Math.max(median(deviations), MIN_MAD);
   return med + sensitivity * MAD_SCALE * madValue;
 }
 

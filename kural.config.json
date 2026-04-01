@@ -1,0 +1,11 @@
+{
+  "audits": {
+    "sensitivity": 2.0
+  },
+  "dictionary": {
+    "Kural": "structural intelligence tool for TypeScript codebases",
+    "Unit": "a function, type, module, or directory in the codebase tree",
+    "Snapshot": "serialized tree of all units with embeddings and quality scores"
+  },
+  "domainKeywords": ["TypeScript", "CLI", "gunshi", "codebase analysis", "text embedding"]
+}

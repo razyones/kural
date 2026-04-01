@@ -1,6 +1,8 @@
 /**
  * Detects directories whose KURAL.md description leans toward "is"
- * instead of "does" — identity-focused rather than behavior-focused.
+ * instead of "does" — a linguistic anti-pattern where static identity
+ * crowds out dynamic purpose. Uses pre-computed axis scores and a
+ * robust lower fence to find descriptions that fall below peers.
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";

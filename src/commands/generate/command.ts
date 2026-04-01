@@ -13,6 +13,7 @@ import { relative, resolve } from "node:path";
 import { createStepTracker } from "../../ui/step-tracker.ts";
 import { define } from "gunshi";
 import { generate } from "./pipeline.ts";
+import { loadProjectConfig } from "../../config/loader.ts";
 import { renderFooter } from "../../ui/footer.ts";
 
 const NONE = 0;
@@ -158,10 +159,11 @@ async function handleGenerate(values: {
     });
   }
 
+  const projectConfig = loadProjectConfig();
   const embedOptions: EmbedOptions = {
     rootPath: targetPath,
-    domainKeywords: [],
-    dictionary: {},
+    domainKeywords: projectConfig.domainKeywords ?? [],
+    dictionary: projectConfig.dictionary ?? {},
   };
 
   const root = process.cwd();

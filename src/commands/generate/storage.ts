@@ -176,9 +176,9 @@ async function writeFunctions(
 }
 
 /**
- * Persists directory units with their child lists and embeddings so the snapshot captures the hierarchical container structure.
+ * Persists directory units with their child lists and embeddings so the snapshot captures the hierarchical container structure. Takes the full parse result to access the directories map, unlike sibling write functions which receive extracted unit arrays.
  * @param collections - Snapshot collections to write into
- * @param result - Parsed codebase with directory objects to persist
+ * @param result - Full parse result with directory objects to persist
  * @returns Resolves when directory rows are persisted
  * @kuralCauses persists directory rows to the snapshot database
  * @kuralPatterns writeCollection

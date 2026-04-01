@@ -1,7 +1,8 @@
 /**
  * Detects util-scoped units whose embeddings exceed the merge fence
  * across file boundaries — surfacing duplicated logic in the utility
- * sandbox that the main duplicates rule does not cover.
+ * sandbox. Complements the main duplicates audit, which excludes util
+ * leaves, by covering the util-to-util gap separately.
  */
 
 import type { AuditContext, Finding } from "../types.ts";

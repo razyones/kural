@@ -1,7 +1,9 @@
 /**
  * Detects units missing required documentation — description, parameter
- * docs, return docs, or purity annotations. It surfaces gaps that weaken
- * the embedding signal before they affect scoring accuracy.
+ * docs, return docs, or purity annotations. Unlike sibling audits that
+ * analyze embeddings and structure, this validates documentation
+ * completeness via discrete property checks before gaps weaken the
+ * embedding signal.
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";

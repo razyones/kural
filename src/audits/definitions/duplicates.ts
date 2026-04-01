@@ -2,6 +2,7 @@
  * Detects semantically identical units separated by module boundaries —
  * cross-file leaves, cross-directory files, and cross-population
  * util-domain straddles that exceed the sibling merge fence.
+ * @kuralResidual containments [98edd1c4]
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
