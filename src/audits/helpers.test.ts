@@ -1,4 +1,4 @@
-import type { CodeNode, FunctionNode, TypeNode } from "../sost/tree.ts";
+import type { CodeNode, FunctionNode, NodeMap, PatternNode, TypeNode } from "../sost/tree.ts";
 import { describe, expect, test } from "vite-plus/test";
 import { getCalls, isCallerCallee } from "./helpers.ts";
 
@@ -134,5 +134,74 @@ describe("isCallerCallee — negative cases", () => {
     const ty: CodeNode = makeTypeNode({ name: "Style" });
 
     expect(isCallerCallee(fn, ty)).toBe(false);
+  });
+});
+
+function makePatternNode(overrides: Partial<PatternNode> = {}): PatternNode {
+  return {
+    key: "pattern:file:/src/app.ts:group",
+    kind: "pattern",
+    name: "group",
+    identity: [],
+    leaf: [],
+    childKeys: [],
+    parentKey: "file:/src/app.ts",
+    patterns: null,
+    companion: null,
+    util: false,
+    helper: false,
+    residuals: [],
+    hash: "pat12345",
+    exported: false,
+    description: undefined,
+    ...overrides,
+  };
+}
+
+describe("isCallerCallee — pattern nodes", () => {
+  test("returns true when function calls a child of the pattern node", () => {
+    const child = makeFunctionNode({ key: "func:/src/app.ts:writeFiles", name: "writeFiles" });
+    const pattern = makePatternNode({ childKeys: [child.key] });
+    const caller = makeFunctionNode({ name: "writeUnits", calls: ["writeFiles"] });
+    const nodes: NodeMap = new Map<string, CodeNode>([
+      [child.key, child],
+      [pattern.key, pattern],
+      [caller.key, caller],
+    ]);
+
+    expect(isCallerCallee(caller, pattern, nodes)).toBe(true);
+  });
+
+  test("returns true regardless of argument order", () => {
+    const child = makeFunctionNode({ key: "func:/src/app.ts:writeFiles", name: "writeFiles" });
+    const pattern = makePatternNode({ childKeys: [child.key] });
+    const caller = makeFunctionNode({ name: "writeUnits", calls: ["writeFiles"] });
+    const nodes: NodeMap = new Map<string, CodeNode>([
+      [child.key, child],
+      [pattern.key, pattern],
+      [caller.key, caller],
+    ]);
+
+    expect(isCallerCallee(pattern, caller, nodes)).toBe(true);
+  });
+
+  test("returns false when function does not call any pattern children", () => {
+    const child = makeFunctionNode({ key: "func:/src/app.ts:writeFiles", name: "writeFiles" });
+    const pattern = makePatternNode({ childKeys: [child.key] });
+    const caller = makeFunctionNode({ name: "readAll", calls: ["readFiles"] });
+    const nodes: NodeMap = new Map<string, CodeNode>([
+      [child.key, child],
+      [pattern.key, pattern],
+      [caller.key, caller],
+    ]);
+
+    expect(isCallerCallee(caller, pattern, nodes)).toBe(false);
+  });
+
+  test("returns false without nodes map", () => {
+    const pattern = makePatternNode({ childKeys: ["func:/src/app.ts:writeFiles"] });
+    const caller = makeFunctionNode({ name: "writeUnits", calls: ["writeFiles"] });
+
+    expect(isCallerCallee(caller, pattern)).toBe(false);
   });
 });

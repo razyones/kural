@@ -32,14 +32,14 @@ export default defineAudit({
   title: "Merge Candidates",
   format: formatMerge,
   detect: (ctx: AuditContext): Finding[] => {
-    const { siblingPairs, fileMergeFence, leafMergeFence } = ctx;
+    const { siblingPairs, fileMergeFence, leafMergeFence, nodes } = ctx;
     const findings: Finding[] = [];
 
     for (const p of siblingPairs) {
       const fence = p.level === "file" ? fileMergeFence : leafMergeFence;
       if (
         p.similarity > fence &&
-        !isCallerCallee(p.aNode, p.bNode) &&
+        !isCallerCallee(p.aNode, p.bNode, nodes) &&
         !isSuppressed(p.aNode, "merge-candidates") &&
         !isSuppressed(p.bNode, "merge-candidates")
       ) {
