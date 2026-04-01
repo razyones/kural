@@ -1,13 +1,8 @@
 import type { ContainerData, LeafData } from "./collect.ts";
-import {
-  applyParentSignal,
-  applySignatureSignals,
-  blend,
-  centroid,
-  cosineSimilarity,
-} from "./blend.ts";
+import { applyParentSignal, applySignatureSignals, blend, cosineSimilarity } from "./blend.ts";
 import { blendDirectories, blendFiles, buildContainerIdentities } from "./containers.ts";
 import { describe, expect, it } from "vite-plus/test";
+import { centroid } from "../../utils/vectors.ts";
 
 const HALF = 0.5;
 const TOLERANCE = 1e-6;

@@ -240,52 +240,5 @@ function collectContainers(
   return data;
 }
 
-const PATTERN_NONE = 0;
-
-/**
- * Collapses leaf embeddings by pattern group: members sharing a
- * `patterns` tag are averaged into a single centroid so each concept
- * contributes equally to the file's leaf regardless of instance count.
- * @param indices - Child leaf indices for this file
- * @param leafEmbeddings - Computed leaf embeddings for leaf units
- * @param leaves - Leaf data for pattern tag lookup
- * @param meanFn - Function that computes element-wise mean of vectors
- * @returns One representative vector per distinct concept
- * @kuralPure
- */
-function collapseByPattern(
-  indices: number[],
-  leafEmbeddings: number[][],
-  leaves: LeafData,
-  meanFn: (vecs: number[][]) => number[],
-): number[][] {
-  const groups = new Map<string, number[][]>();
-  const ungrouped: number[][] = [];
-
-  for (const idx of indices) {
-    const patternId = leaves.patternIds[idx];
-    const vec = leafEmbeddings[idx];
-    if (vec === undefined || vec.length === PATTERN_NONE) {
-      continue;
-    }
-    if (patternId !== undefined && patternId !== "") {
-      const bucket = groups.get(patternId);
-      if (bucket) {
-        bucket.push(vec);
-      } else {
-        groups.set(patternId, [vec]);
-      }
-    } else {
-      ungrouped.push(vec);
-    }
-  }
-
-  const reps = [...ungrouped];
-  for (const vecs of groups.values()) {
-    reps.push(meanFn(vecs));
-  }
-  return reps;
-}
-
-export { collapseByPattern, collectContainers, collectLeaves };
+export { collectContainers, collectLeaves };
 export type { ContainerData, LeafData };

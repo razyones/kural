@@ -1,8 +1,8 @@
 import type { KuralDirectory, KuralFile, KuralFunction, KuralType } from "../parse/types.ts";
-import { collapseByPattern, collectContainers, collectLeaves } from "./collect.ts";
+import { collectContainers, collectLeaves } from "./collect.ts";
 import { describe, expect, it } from "vite-plus/test";
 import type { ParseResult } from "../parse/pipeline.ts";
-import { centroid } from "./blend.ts";
+import { collapseByPattern } from "./containers.ts";
 
 const EMPTY: number[] = [];
 const ROOT_PATH = "/src";
@@ -426,7 +426,7 @@ describe("collapseByPattern", () => {
       DICTIONARY,
     );
     const embeddings = [[SINGLE, PAIR]];
-    const result = collapseByPattern([NONE], embeddings, leaves, centroid);
+    const result = collapseByPattern([NONE], embeddings, leaves);
 
     expect(result).toEqual([[SINGLE, PAIR]]);
   });
@@ -444,7 +444,7 @@ describe("collapseByPattern", () => {
     const VEC_B = 4;
     const EXPECTED_MEAN = 3;
     const embeddings = [[VEC_A], [VEC_B]];
-    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves, centroid);
+    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves);
 
     expect(result.length).toBe(SINGLE);
     expect(result[NONE]).toEqual([EXPECTED_MEAN]);
@@ -461,7 +461,7 @@ describe("collapseByPattern", () => {
       DICTIONARY,
     );
     const embeddings = [[SINGLE], [PAIR], [QUADRUPLE]];
-    const result = collapseByPattern([NONE, SINGLE, PAIR], embeddings, leaves, centroid);
+    const result = collapseByPattern([NONE, SINGLE, PAIR], embeddings, leaves);
 
     expect(result.length).toBe(PAIR);
   });
@@ -477,7 +477,7 @@ describe("collapseByPattern", () => {
     );
     const VEC_A = 5;
     const embeddings: number[][] = [[VEC_A], []];
-    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves, centroid);
+    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves);
 
     expect(result.length).toBe(SINGLE);
     expect(result[NONE]).toEqual([VEC_A]);

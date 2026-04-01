@@ -1,11 +1,11 @@
 /**
- * The blender. Mixes separately-embedded facets into identity and leaf
- * vectors at fixed weights. It is the only module that performs weighted
- * vector addition on embeddings — no other module blends embedding dimensions.
+ * The arithmetic. Weighted vector addition primitives for embedding
+ * facets — blend, signal application, and identity fusion. It is the
+ * only module that defines the weight constants and mixing rules — no
+ * other module decides how facets combine.
  */
 
-import { centroid, cosineSimilarity } from "../../utils/vectors.ts";
-import type { LeafData } from "./collect.ts";
+import { cosineSimilarity } from "../../utils/vectors.ts";
 
 const NONE = 0;
 
@@ -108,56 +108,4 @@ function computeIdentity(nameVec: number[], pathVec: number[], descVec: number[]
   return blend(nameFacet, IDENTITY_WEIGHT, descVec, IDENTITY_WEIGHT);
 }
 
-/**
- * Produces the full leaf embeddings array for all leaf units. Uncached
- * leaves are blended from fresh identity and signature vectors; cached
- * leaves are copied from their previously stored embeddings.
- * @param leaves - Collected leaf data with units for write-back
- * @param cached - Indices of cached leaf units
- * @param uLeaf - Indices of uncached leaf units
- * @param nameVecs - Embedded name vectors aligned with uncached leaves
- * @param descVecs - Embedded description vectors aligned with uncached leaves
- * @param pathVecs - Embedded path vectors aligned with uncached leaves
- * @param sigVecs - Embedded signature vectors aligned with uncached leaves
- * @param causesVecs - Embedded causes vectors aligned with uncached leaves
- * @param callsVecs - Embedded calls vectors aligned with uncached leaves
- * @returns Full leaf embeddings array with both cached and fresh entries
- * @kuralPure
- * @kuralPatterns blendUnit
- */
-function blendLeaves(
-  leaves: LeafData,
-  cached: Set<number>,
-  uLeaf: number[],
-  nameVecs: number[][],
-  descVecs: number[][],
-  pathVecs: number[][],
-  sigVecs: number[][],
-  causesVecs: number[][],
-  callsVecs: number[][],
-): number[][] {
-  const allLeafEmbs = Array.from<number[]>({ length: leaves.units.length });
-  for (let j = NONE; j < uLeaf.length; j++) {
-    const i = uLeaf[j];
-    const identity = computeIdentity(nameVecs[j], pathVecs[j], descVecs[j]);
-    const adjustedSig = applySignatureSignals(sigVecs[j], causesVecs[j], callsVecs[j]);
-    const leaf = blend(identity, IDENTITY_WEIGHT, adjustedSig, IDENTITY_WEIGHT);
-    leaves.units[i].identityEmbedding = identity;
-    leaves.units[i].leafEmbedding = leaf;
-    allLeafEmbs[i] = leaf;
-  }
-  for (const i of cached) {
-    allLeafEmbs[i] = leaves.units[i].leafEmbedding;
-  }
-  return allLeafEmbs;
-}
-
-export {
-  applyParentSignal,
-  applySignatureSignals,
-  blend,
-  blendLeaves,
-  centroid,
-  computeIdentity,
-  cosineSimilarity,
-};
+export { applyParentSignal, applySignatureSignals, blend, computeIdentity, cosineSimilarity };

@@ -1,17 +1,107 @@
 /**
- * The assembler. Blends file and directory container embeddings from their
- * children's leaf vectors. It is the only module that computes container
- * leaf embeddings — no other module aggregates children upward.
+ * The assembler. Blends all unit embeddings from facet vectors — leaves
+ * from identity and signature, files from children, directories bottom-up.
+ * It is the only module that produces final embedding vectors — no other
+ * module aggregates facets into identity and leaf embeddings.
  */
 
 import type { ContainerData, LeafData } from "./collect.ts";
-import { blend, centroid, computeIdentity } from "./blend.ts";
+import { applySignatureSignals, blend, computeIdentity } from "./blend.ts";
 import type { CacheResolution } from "./hash.ts";
 import type { KuralDirectory } from "../parse/types.ts";
-import { collapseByPattern } from "./collect.ts";
+import { centroid } from "../../utils/vectors.ts";
 
 const NONE = 0;
 const IDENTITY_WEIGHT = 0.5;
+const PATTERN_NONE = 0;
+
+/**
+ * Collapses leaf embeddings by pattern group: members sharing a
+ * `patterns` tag are averaged into a single centroid so each concept
+ * contributes equally to the file's leaf regardless of instance count.
+ * @param indices - Child leaf indices for this file
+ * @param leafEmbeddings - Computed leaf embeddings for leaf units
+ * @param leaves - Leaf data for pattern tag lookup
+ * @returns One representative vector per distinct concept
+ * @kuralPure
+ * @kuralHelper
+ */
+function collapseByPattern(
+  indices: number[],
+  leafEmbeddings: number[][],
+  leaves: LeafData,
+): number[][] {
+  const groups = new Map<string, number[][]>();
+  const ungrouped: number[][] = [];
+
+  for (const idx of indices) {
+    const patternId = leaves.patternIds[idx];
+    const vec = leafEmbeddings[idx];
+    if (vec === undefined || vec.length === PATTERN_NONE) {
+      continue;
+    }
+    if (patternId !== undefined && patternId !== "") {
+      const bucket = groups.get(patternId);
+      if (bucket) {
+        bucket.push(vec);
+      } else {
+        groups.set(patternId, [vec]);
+      }
+    } else {
+      ungrouped.push(vec);
+    }
+  }
+
+  const reps = [...ungrouped];
+  for (const vecs of groups.values()) {
+    reps.push(centroid(vecs));
+  }
+  return reps;
+}
+
+/**
+ * Produces the full leaf embeddings array for all leaf units. Uncached
+ * leaves are blended from fresh identity and signature vectors; cached
+ * leaves are copied from their previously stored embeddings.
+ * @param leaves - Collected leaf data with units for write-back
+ * @param cached - Indices of cached leaf units
+ * @param uLeaf - Indices of uncached leaf units
+ * @param nameVecs - Embedded name vectors aligned with uncached leaves
+ * @param descVecs - Embedded description vectors aligned with uncached leaves
+ * @param pathVecs - Embedded path vectors aligned with uncached leaves
+ * @param sigVecs - Embedded signature vectors aligned with uncached leaves
+ * @param causesVecs - Embedded causes vectors aligned with uncached leaves
+ * @param callsVecs - Embedded calls vectors aligned with uncached leaves
+ * @returns Full leaf embeddings array with both cached and fresh entries
+ * @kuralPure
+ * @kuralPatterns blendUnit
+ */
+function blendLeaves(
+  leaves: LeafData,
+  cached: Set<number>,
+  uLeaf: number[],
+  nameVecs: number[][],
+  descVecs: number[][],
+  pathVecs: number[][],
+  sigVecs: number[][],
+  causesVecs: number[][],
+  callsVecs: number[][],
+): number[][] {
+  const allLeafEmbs = Array.from<number[]>({ length: leaves.units.length });
+  for (let j = NONE; j < uLeaf.length; j++) {
+    const i = uLeaf[j];
+    const identity = computeIdentity(nameVecs[j], pathVecs[j], descVecs[j]);
+    const adjustedSig = applySignatureSignals(sigVecs[j], causesVecs[j], callsVecs[j]);
+    const leaf = blend(identity, IDENTITY_WEIGHT, adjustedSig, IDENTITY_WEIGHT);
+    leaves.units[i].identityEmbedding = identity;
+    leaves.units[i].leafEmbedding = leaf;
+    allLeafEmbs[i] = leaf;
+  }
+  for (const i of cached) {
+    allLeafEmbs[i] = leaves.units[i].leafEmbedding;
+  }
+  return allLeafEmbs;
+}
 
 /**
  * Collapses patterns and gives outward-bound children 2x weight.
@@ -27,7 +117,7 @@ function computeFileSigFacet(
   leafEmbeddings: number[][],
   leaves: LeafData,
 ): number[] {
-  const reps = collapseByPattern(childIndices, leafEmbeddings, leaves, centroid);
+  const reps = collapseByPattern(childIndices, leafEmbeddings, leaves);
   for (const idx of childIndices) {
     if (leaves.boundIds[idx] === "outward" && leafEmbeddings[idx].length > NONE) {
       reps.push(leafEmbeddings[idx]);
@@ -188,4 +278,4 @@ function buildContainerIdentities(
   return identities;
 }
 
-export { blendDirectories, blendFiles, buildContainerIdentities };
+export { blendDirectories, blendFiles, blendLeaves, buildContainerIdentities, collapseByPattern };
