@@ -7,6 +7,7 @@
 
 import type { ContainerData, LeafData } from "./collect.ts";
 import type { CacheResolution } from "./hash.ts";
+import { collapseByPattern } from "./collect.ts";
 import { cosineSimilarity } from "../../utils/vectors.ts";
 
 const NONE = 0;
@@ -180,7 +181,9 @@ function blendLeaves(
 
 /**
  * Blends each file's identity with the mean of its children's leaf
- * embeddings to produce the file's leaf embedding.
+ * embeddings to produce the file's leaf embedding. Children sharing
+ * a `@kuralPatterns` tag are collapsed to their centroid first so
+ * each concept contributes equally.
  * @param containers - Collected container data with file units
  * @param leaves - Collected leaf data with file-to-child mapping
  * @param identities - Pre-computed identity embeddings for containers
@@ -196,7 +199,8 @@ function blendFiles(
 ): void {
   for (let i = NONE; i < containers.fileCount; i++) {
     const childIndices = leaves.fileChildIndices.get(containers.unitPaths[i]) ?? [];
-    const sigFacet = mean(childIndices.map((idx) => leafEmbeddings[idx]));
+    const reps = collapseByPattern(childIndices, leafEmbeddings, leaves, mean);
+    const sigFacet = mean(reps);
     const leaf = blend(identities[i], IDENTITY_WEIGHT, sigFacet, IDENTITY_WEIGHT);
     containers.units[i].identityEmbedding = identities[i];
     containers.units[i].leafEmbedding = leaf;

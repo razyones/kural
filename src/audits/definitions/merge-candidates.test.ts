@@ -235,6 +235,58 @@ describe("merge-candidates format", () => {
   });
 });
 
+describe("merge-candidates detect — file-level pairs", () => {
+  test("uses fileMergeFence for directory-level sibling pairs", () => {
+    const fileA = makeFile({
+      key: "file:/src/a.ts",
+      name: "a.ts",
+      leaf: [E095, E005, E0, E0, E0, E0],
+    });
+    const fileB = makeFile({
+      key: "file:/src/b.ts",
+      name: "b.ts",
+      leaf: [E094, E006, E0, E0, E0, E0],
+    });
+    const fileC = makeFile({
+      key: "file:/src/c.ts",
+      name: "c.ts",
+      leaf: [E0, E0, E1, E0, E0, E0],
+    });
+    const fileD = makeFile({
+      key: "file:/src/d.ts",
+      name: "d.ts",
+      leaf: [E0, E0, E0, E1, E0, E0],
+    });
+    const dir = {
+      key: "dir:/src",
+      kind: "directory" as const,
+      name: "src",
+      identity: [],
+      leaf: [],
+      childKeys: [fileA.key, fileB.key, fileC.key, fileD.key],
+      parentKey: null,
+      patterns: null,
+      companion: null,
+      util: false,
+      helper: false,
+      residuals: [],
+      hash: "dir12345",
+      exported: false,
+      description: undefined,
+    };
+    for (const f of [fileA, fileB, fileC, fileD]) {
+      f.parentKey = dir.key;
+    }
+    const nodes = toNodeMap(dir, fileA, fileB, fileC, fileD);
+    const ctx = createContext(nodes, CONFIG);
+    const findings = mergeCandidates.detect(ctx);
+
+    const pairKeys = findings.map((f) => [f.key, f.pairKey]).flat();
+    expect(pairKeys).toContain(fileA.key);
+    expect(pairKeys).toContain(fileB.key);
+  });
+});
+
 describe("merge-candidates detect — sorted by descending similarity", () => {
   test("findings are sorted highest similarity first", () => {
     const fnA = makeFunction({ key: "func:/src/a.ts:a", name: "a", leaf: EMB_NEAR_A });

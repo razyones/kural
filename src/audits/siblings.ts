@@ -61,9 +61,6 @@ function collectSiblingPairs(nodes: Map<string, CodeNode>): SiblingPair[] {
         if (a.companion !== null && a.companion === b.companion) {
           continue;
         }
-        if (a.patterns !== null && b.patterns !== null) {
-          continue;
-        }
         if (a.helper || b.helper) {
           continue;
         }

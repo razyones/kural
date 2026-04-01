@@ -95,6 +95,37 @@ describe("computeDeltas", () => {
 
     expect(deltas[NONE].overallDelta).toBe(NONE);
   });
+
+  it("computes children and subtree deltas", () => {
+    const current = [
+      makeScore({
+        key: "file:/a.ts",
+        kind: "file",
+        childrenScore: 0.9,
+        subtreeFit: 0.8,
+      }),
+    ];
+    const comparison = [
+      makeScore({
+        key: "file:/a.ts",
+        kind: "file",
+        childrenScore: 0.7,
+        subtreeFit: 0.6,
+      }),
+    ];
+    const deltas = computeDeltas(current, comparison);
+
+    expect(deltas[NONE].childrenDelta).toBeCloseTo(DELTA_POSITIVE);
+    expect(deltas[NONE].subtreeDelta).toBeCloseTo(DELTA_POSITIVE);
+  });
+
+  it("returns zero children delta when one side is null", () => {
+    const current = [makeScore({ key: "func:/a.ts:foo", childrenScore: null })];
+    const comparison = [makeScore({ key: "func:/a.ts:foo", childrenScore: 0.5 })];
+    const deltas = computeDeltas(current, comparison);
+
+    expect(deltas[NONE].childrenDelta).toBe(NONE);
+  });
 });
 
 describe("countChildren", () => {

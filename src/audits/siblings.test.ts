@@ -247,7 +247,7 @@ describe("collectSiblingPairs — exclusion: companions", () => {
 });
 
 describe("collectSiblingPairs — exclusion: both patterned", () => {
-  test("excludes pairs where both nodes have patterns", () => {
+  test("compares cross-pattern siblings (pattern members are reparented by tree)", () => {
     const fnA = makeFn({
       name: "handleA",
       key: "func:/src/app.ts:handleA",
@@ -267,7 +267,7 @@ describe("collectSiblingPairs — exclusion: both patterned", () => {
 
     const pairs = collectSiblingPairs(nodes);
 
-    expect(pairs.length).toBe(NONE);
+    expect(pairs.length).toBe(ONE);
   });
 });
 

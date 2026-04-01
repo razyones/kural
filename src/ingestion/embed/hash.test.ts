@@ -30,6 +30,7 @@ function makeLeafData(unit: KuralUnit): LeafData {
     calls: ["calls-text"],
     units: [unit],
     fileChildIndices: new Map<string, number[]>(),
+    patternIds: [undefined],
   };
 }
 
@@ -43,6 +44,7 @@ const EMPTY_LEAVES: LeafData = {
   calls: [],
   units: [],
   fileChildIndices: new Map<string, number[]>(),
+  patternIds: [],
 };
 
 function makeContainerData(
@@ -106,6 +108,7 @@ describe("resolveCache without cache — leaf units", () => {
       calls: ["clA", "clB"],
       units: [unitA, unitB],
       fileChildIndices: new Map<string, number[]>(),
+      patternIds: [undefined, undefined],
     };
     resolveCache(leaves, makeContainerData([], [], ZERO));
     expect(unitA.facetHash).not.toBe(unitB.facetHash);
@@ -275,6 +278,7 @@ describe("resolveCache mixed cached and uncached", () => {
       calls: ["clA", "clB"],
       units: [cached, fresh],
       fileChildIndices: new Map<string, number[]>(),
+      patternIds: [undefined, undefined],
     };
     const hash = leafHash(leaves, ZERO);
     const cache: EmbeddingCache = new Map([

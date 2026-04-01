@@ -5,13 +5,21 @@
  * no other module creates the nodes that metrics are computed over.
  */
 
-import type { DirectoryNode, FileNode, FunctionNode, TypeNode } from "./tree.ts";
+import type {
+  DirectoryNode,
+  FileNode,
+  FunctionNode,
+  NodeMap,
+  PatternNode,
+  TypeNode,
+} from "./tree.ts";
 import type {
   KuralDirectory,
   KuralFile,
   KuralFunction,
   KuralType,
 } from "../ingestion/parse/types.ts";
+import { centroid } from "../utils/vectors.ts";
 import { sha256 } from "../ingestion/embed/hash.ts";
 
 const HASH_LENGTH = 8;
@@ -145,4 +153,41 @@ function directoryNode(dir: KuralDirectory, dirPath: string, childKeys: string[]
   };
 }
 
-export { directoryNode, fileNode, functionNode, typeNode };
+/**
+ * Builds a PatternNode from a pattern group.
+ * @param patternId - The @kuralPatterns tag value
+ * @param fileKey - The parent file's key
+ * @param memberKeys - Keys of the grouped leaf nodes
+ * @param nodes - The full node map for centroid computation
+ * @returns A fully constructed PatternNode
+ * @kuralPure
+ */
+function patternNode(
+  patternId: string,
+  fileKey: string,
+  memberKeys: string[],
+  nodes: NodeMap,
+): PatternNode {
+  const identities = memberKeys
+    .map((k) => nodes.get(k)?.identity)
+    .filter((v): v is number[] => v !== undefined && v.length > NONE);
+  return {
+    key: `pattern:${fileKey}:${patternId}`,
+    kind: "pattern",
+    name: patternId,
+    identity: identities.length > NONE ? centroid(identities) : [],
+    leaf: [],
+    childKeys: memberKeys,
+    parentKey: fileKey,
+    patterns: null,
+    companion: null,
+    util: false,
+    helper: false,
+    residuals: [],
+    hash: computeHash("pattern", patternId, ...memberKeys),
+    exported: false,
+    description: undefined,
+  };
+}
+
+export { directoryNode, fileNode, functionNode, patternNode, typeNode };

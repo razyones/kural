@@ -1,5 +1,5 @@
-import { colorByHealth, formatDelta, verdict } from "./hero.ts";
-import { describe, expect, it } from "vite-plus/test";
+import { colorByHealth, formatDelta, renderHero, verdict } from "./hero.ts";
+import { describe, expect, it, vi } from "vite-plus/test";
 
 const GOOD = 0.85;
 const MODERATE = 0.55;
@@ -35,6 +35,20 @@ describe("colorByHealth", () => {
   it("applies red for weak scores", () => {
     const result = colorByHealth(WEAK, "test");
     expect(result).toContain("test");
+  });
+});
+
+describe("renderHero", () => {
+  it("renders without delta or childCount", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    renderHero({ score: GOOD, kind: "file" });
+    spy.mockRestore();
+  });
+
+  it("renders with delta and childCount", () => {
+    const spy = vi.spyOn(console, "log").mockImplementation(() => {});
+    renderHero({ score: GOOD, kind: "directory", delta: ZERO, childCount: 3 });
+    spy.mockRestore();
   });
 });
 

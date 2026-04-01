@@ -4,6 +4,7 @@
  */
 
 import type {
+  CodeNode,
   DirectoryNode,
   FileNode,
   FunctionNode,
@@ -125,7 +126,7 @@ function suppress(audit: string, hash?: string): ResidualEntry {
 }
 
 /** Builds a NodeMap from an array of CodeNode objects. */
-function toNodeMap(...nodes: (FunctionNode | TypeNode | FileNode | DirectoryNode)[]): NodeMap {
+function toNodeMap(...nodes: CodeNode[]): NodeMap {
   const map: NodeMap = new Map();
   for (const node of nodes) {
     map.set(node.key, node);

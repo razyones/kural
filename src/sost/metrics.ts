@@ -6,7 +6,7 @@
  */
 
 import type { CodeNode, NodeMap } from "./tree.ts";
-import { avg, centroid, cosineSimilarity, subtract } from "../utils/vectors.ts";
+import { avg, cosineSimilarity, subtract } from "../utils/vectors.ts";
 import { getChildren } from "./tree.ts";
 
 const NO_SIBLINGS = 2;
@@ -61,49 +61,10 @@ function computeChildrenFit(node: CodeNode): number | null {
   return cosineSimilarity(node.identity, node.leaf);
 }
 
-/** Lightweight projection for uniqueness computation. @kuralHelper */
-type IdentityRef = { name: string; identity: number[] };
-
-/**
- * Deduplicates children by pattern or companion group, replacing groups
- * with their identity centroid.
- * @param children - Array of child nodes to deduplicate
- * @returns Array of identity references with groups collapsed to centroids
- * @kuralPure
- */
-function deduplicateByGroup(children: CodeNode[]): IdentityRef[] {
-  const groups = new Map<string, CodeNode[]>();
-  const ungrouped: IdentityRef[] = [];
-
-  for (const child of children) {
-    const groupId = child.patterns ?? child.companion;
-    if (groupId === null) {
-      ungrouped.push({ name: child.name, identity: child.identity });
-    } else {
-      const group = groups.get(groupId);
-      if (group) {
-        group.push(child);
-      } else {
-        groups.set(groupId, [child]);
-      }
-    }
-  }
-
-  const reps: IdentityRef[] = [...ungrouped];
-  for (const group of groups.values()) {
-    const identities = group.map((n) => n.identity).filter((v) => v.length > NONE);
-    reps.push({
-      name: group[NONE].name,
-      identity: identities.length > NONE ? centroid(identities) : group[NONE].identity,
-    });
-  }
-
-  return reps;
-}
-
 /**
  * Computes per-node uniqueness: mean cosine distance from this node to
- * all siblings, after subtracting parent identity.
+ * all siblings, after subtracting parent identity. Pattern groups are
+ * already materialised as tree nodes, so no deduplication is needed.
  * @param parent - The parent node
  * @param children - All eligible children of the parent
  * @returns Map from child key to uniqueness score
@@ -112,29 +73,25 @@ function deduplicateByGroup(children: CodeNode[]): IdentityRef[] {
  */
 function computeUniqueness(parent: CodeNode, children: CodeNode[]): Map<string, number> {
   const result = new Map<string, number>();
-  const reps = deduplicateByGroup(children);
-  const validReps = reps.filter((r) => r.identity.length > NONE);
+  const valid = children.filter((c) => c.identity.length > NONE);
 
-  if (validReps.length < MIN_PAIR_COUNT) {
+  if (valid.length < MIN_PAIR_COUNT) {
     for (const child of children) {
       result.set(child.key, NO_SIBLINGS);
     }
     return result;
   }
 
-  const deltas = validReps.map((r) => subtract(r.identity, parent.identity));
+  const deltas = valid.map((c) => subtract(c.identity, parent.identity));
 
-  for (let i = NONE; i < validReps.length; i++) {
+  for (let i = NONE; i < valid.length; i++) {
     const distances: number[] = [];
     for (let j = NONE; j < deltas.length; j++) {
       if (i !== j) {
         distances.push(NEXT - cosineSimilarity(deltas[i], deltas[j]));
       }
     }
-    const child = children.find((c) => c.name === validReps[i].name);
-    if (child) {
-      result.set(child.key, distances.length > NONE ? avg(distances) : NO_SIBLINGS);
-    }
+    result.set(valid[i].key, distances.length > NONE ? avg(distances) : NO_SIBLINGS);
   }
 
   for (const child of children) {
@@ -149,6 +106,8 @@ function computeUniqueness(parent: CodeNode, children: CodeNode[]): Map<string, 
 /**
  * Computes childrenUniqueness (CV) for a parent's children.
  * Measures spread quality — how evenly distributed children are.
+ * Pattern groups are already materialised as tree nodes, so no
+ * deduplication is needed.
  * @param parent - The parent node
  * @param children - All eligible children of the parent
  * @returns CV score and the closest child pair names
@@ -159,14 +118,13 @@ function computeChildrenUniqueness(
   parent: CodeNode,
   children: CodeNode[],
 ): { score: number; worstPair: [string, string] | null } {
-  const reps = deduplicateByGroup(children);
-  const validReps = reps.filter((r) => r.identity.length > NONE);
+  const valid = children.filter((c) => c.identity.length > NONE);
 
-  if (validReps.length < MIN_PAIR_COUNT) {
+  if (valid.length < MIN_PAIR_COUNT) {
     return { score: NO_SIBLINGS, worstPair: null };
   }
 
-  const deltas = validReps.map((r) => subtract(r.identity, parent.identity));
+  const deltas = valid.map((c) => subtract(c.identity, parent.identity));
   const distances: number[] = [];
   let minDistance = Infinity;
   let worstPair: [string, string] | null = null;
@@ -177,7 +135,7 @@ function computeChildrenUniqueness(
       distances.push(distance);
       if (distance < minDistance) {
         minDistance = distance;
-        worstPair = [validReps[i].name, validReps[j].name];
+        worstPair = [valid[i].name, valid[j].name];
       }
     }
   }

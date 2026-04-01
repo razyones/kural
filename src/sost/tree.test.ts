@@ -368,14 +368,14 @@ describe("getEligibleChildren", () => {
     expect(eligible.length).toBe(TWO);
   });
 
-  it("returns empty when all children are util", () => {
+  it("returns all children for util parent (sandbox)", () => {
     const fnA = makeFunction({ name: "a", util: true });
     const fnB = makeFunction({ name: "b", util: true });
     const file = makeFile({ functions: { a: fnA, b: fnB } });
     const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
     const eligible = getEligibleChildren(getNode(nodes, "file:/src/app.ts"), nodes);
 
-    expect(eligible.length).toBe(NONE);
+    expect(eligible.length).toBe(TWO);
   });
 });
 
@@ -428,6 +428,101 @@ describe("buildTree — discriminated union narrowing", () => {
     if (node?.kind === "file") {
       expect(node.childKeys.length).toBe(ONE);
     }
+  });
+});
+
+describe("materializePatterns", () => {
+  it("creates a pattern node for 2+ leaves sharing the same pattern", () => {
+    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
+    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+
+    expect(nodes.has("pattern:file:/src/app.ts:fitMetric")).toBe(true);
+    const pNode = getNode(nodes, "pattern:file:/src/app.ts:fitMetric");
+    expect(pNode.kind).toBe("pattern");
+    expect(pNode.name).toBe("fitMetric");
+  });
+
+  it("reparents pattern members under the pattern node", () => {
+    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
+    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+
+    const memberA = getNode(nodes, "func:/src/app.ts:fitA");
+    const memberB = getNode(nodes, "func:/src/app.ts:fitB");
+    expect(memberA.parentKey).toBe("pattern:file:/src/app.ts:fitMetric");
+    expect(memberB.parentKey).toBe("pattern:file:/src/app.ts:fitMetric");
+  });
+
+  it("replaces members in file childKeys with the pattern node key", () => {
+    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
+    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const fnC = makeFunction({ name: "other" });
+    const file = makeFile({ functions: { fitA: fnA, fitB: fnB, other: fnC } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+
+    const fileNode = getNode(nodes, "file:/src/app.ts");
+    expect(fileNode.childKeys).toContain("pattern:file:/src/app.ts:fitMetric");
+    expect(fileNode.childKeys).toContain("func:/src/app.ts:other");
+    expect(fileNode.childKeys).not.toContain("func:/src/app.ts:fitA");
+    expect(fileNode.childKeys).not.toContain("func:/src/app.ts:fitB");
+    expect(fileNode.childKeys.length).toBe(TWO);
+  });
+
+  it("computes centroid identity for the pattern node", () => {
+    const fnA = makeFunction({
+      name: "fitA",
+      patterns: "fitMetric",
+      identityEmbedding: [TWO, FOUR],
+    });
+    const fnB = makeFunction({
+      name: "fitB",
+      patterns: "fitMetric",
+      identityEmbedding: [FOUR, TWO],
+    });
+    const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+
+    const pNode = getNode(nodes, "pattern:file:/src/app.ts:fitMetric");
+    const THREE = 3;
+    expect(pNode.identity).toEqual([THREE, THREE]);
+  });
+
+  it("does not create a pattern node for a single-member group", () => {
+    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
+    const fnB = makeFunction({ name: "other" });
+    const file = makeFile({ functions: { fitA: fnA, other: fnB } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+
+    expect(nodes.has("pattern:file:/src/app.ts:fitMetric")).toBe(false);
+    const memberA = getNode(nodes, "func:/src/app.ts:fitA");
+    expect(memberA.parentKey).toBe("file:/src/app.ts");
+  });
+
+  it("creates separate pattern nodes for different pattern IDs", () => {
+    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
+    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const fnC = makeFunction({ name: "uniqA", patterns: "uniquenessMetric" });
+    const fnD = makeFunction({ name: "uniqB", patterns: "uniquenessMetric" });
+    const file = makeFile({ functions: { fitA: fnA, fitB: fnB, uniqA: fnC, uniqB: fnD } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+
+    expect(nodes.has("pattern:file:/src/app.ts:fitMetric")).toBe(true);
+    expect(nodes.has("pattern:file:/src/app.ts:uniquenessMetric")).toBe(true);
+    const fileNode = getNode(nodes, "file:/src/app.ts");
+    expect(fileNode.childKeys.length).toBe(TWO);
+  });
+});
+
+describe("isLeaf — pattern nodes", () => {
+  it("returns false for pattern nodes", () => {
+    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
+    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+    expect(isLeaf(getNode(nodes, "pattern:file:/src/app.ts:fitMetric"))).toBe(false);
   });
 });
 

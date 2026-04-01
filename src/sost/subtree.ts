@@ -51,9 +51,10 @@ function collectSubtree(
 
     const localFit = childrenFitMap.get(nodeKey) ?? null;
     const localUniq = childrenUniqMap.get(nodeKey) ?? NO_SIBLINGS;
+    const isPattern = node.kind === "pattern";
 
-    const fitValues: number[] = localFit === null ? [] : [localFit];
-    const uniqValues: number[] = localUniq === NO_SIBLINGS ? [] : [localUniq];
+    const fitValues: number[] = localFit === null || isPattern ? [] : [localFit];
+    const uniqValues: number[] = localUniq === NO_SIBLINGS || isPattern ? [] : [localUniq];
 
     for (const childKey of node.childKeys) {
       const child = nodes.get(childKey);

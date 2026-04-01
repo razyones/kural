@@ -250,4 +250,10 @@ describe("score card count", () => {
       expect(card.subtreeUniqueness).toBeNull();
     }
   });
+
+  it("childrenScore is null when file has a single child", () => {
+    const cards = score(singleFileResult());
+    const fileCard = cards.find((c) => c.kind === "file");
+    expect(fileCard?.childrenScore).toBeNull();
+  });
 });

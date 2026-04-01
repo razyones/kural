@@ -555,3 +555,39 @@ describe("findBestUncle among multiple uncles", () => {
     expect(result?.score).toBeGreaterThan(HALF);
   });
 });
+
+describe("computeFit — edge cases", () => {
+  it("returns 1 when parent identity is empty", () => {
+    const parent = makeFileNode({
+      key: "file:parent",
+      name: "parent",
+      childKeys: ["func:child"],
+      identity: V_EMPTY,
+    });
+    const child = makeFunctionNode({
+      key: "func:child",
+      name: "child",
+      parentKey: "file:parent",
+      leaf: V_UNIT_X,
+    });
+    const nodes = buildNodeMap([parent, child]);
+    expect(computeFit(child, nodes)).toBe(NEXT);
+  });
+
+  it("returns 1 when node leaf is empty", () => {
+    const parent = makeFileNode({
+      key: "file:parent",
+      name: "parent",
+      childKeys: ["func:child"],
+      identity: V_UNIT_X,
+    });
+    const child = makeFunctionNode({
+      key: "func:child",
+      name: "child",
+      parentKey: "file:parent",
+      leaf: V_EMPTY,
+    });
+    const nodes = buildNodeMap([parent, child]);
+    expect(computeFit(child, nodes)).toBe(NEXT);
+  });
+});

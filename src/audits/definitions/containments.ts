@@ -7,7 +7,6 @@ import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import { num, str } from "../../utils/record.ts";
 import type { CodeNode } from "../../sost/tree.ts";
 import { cosineSimilarity } from "../../utils/vectors.ts";
-import { deduplicateByGroup } from "../groups.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../utils/format.ts";
 import { getChildrenWithKeys } from "../children.ts";
@@ -66,8 +65,7 @@ function collectDominanceGaps(nodes: Map<string, CodeNode>): DominanceEntry[] {
       continue;
     }
     const cwk = getChildrenWithKeys(node, nodes);
-    const { reps } = deduplicateByGroup(cwk);
-    const valid = reps.filter(({ node: c }) => c.leaf.length > NONE);
+    const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
     if (valid.length < HALF) {
       continue;
     }

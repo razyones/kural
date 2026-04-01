@@ -5,7 +5,6 @@
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import { avg, cosineSimilarity } from "../../utils/vectors.ts";
-import { deduplicateByGroup } from "../groups.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../utils/format.ts";
 import { getChildrenWithKeys } from "../children.ts";
@@ -32,6 +31,22 @@ function formatOutlier({ finding, prefix, label, location }: FormatCtx): ListIte
   };
 }
 
+/** Computes mean pairwise similarity for each child against its siblings. @kuralHelper */
+function meanSiblingSimPerChild(leaves: number[][]): number[] {
+  const n = leaves.length;
+  const means: number[] = [];
+  for (let i = NONE; i < n; i++) {
+    let totalSim = NONE;
+    for (let j = NONE; j < n; j++) {
+      if (i !== j) {
+        totalSim += cosineSimilarity(leaves[i], leaves[j]);
+      }
+    }
+    means.push(totalSim / (n - NEXT));
+  }
+  return means;
+}
+
 export default defineAudit({
   name: "outliers",
   title: "Outliers",
@@ -44,28 +59,18 @@ export default defineAudit({
       if (isLeaf(parentNode) || parentNode.util) {
         continue;
       }
-      const cwk = getChildrenWithKeys(parentNode, nodes).filter(({ node: c }) => !c.util);
-      const { reps } = deduplicateByGroup(cwk);
-      const valid = reps.filter(({ node: c }) => c.leaf.length > NONE);
+      const cwk = getChildrenWithKeys(parentNode, nodes).filter(
+        ({ node: c }) => !c.util && !c.helper,
+      );
+      const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
       if (valid.length < minGroup) {
         continue;
       }
 
-      const n = valid.length;
-      const perChildMeans: number[] = [];
-      for (let i = NONE; i < n; i++) {
-        let totalSim = NONE;
-        for (let j = NONE; j < n; j++) {
-          if (i !== j) {
-            totalSim += cosineSimilarity(valid[i].node.leaf, valid[j].node.leaf);
-          }
-        }
-        perChildMeans.push(totalSim / (n - NEXT));
-      }
-
+      const perChildMeans = meanSiblingSimPerChild(valid.map(({ node: c }) => c.leaf));
       const fence = robustLowerFence(perChildMeans, sensitivity);
       const groupMean = avg(perChildMeans);
-      for (let i = NONE; i < n; i++) {
+      for (let i = NONE; i < valid.length; i++) {
         if (perChildMeans[i] < fence && !isSuppressed(valid[i].node, "outliers")) {
           findings.push({
             audit: "outliers",

@@ -7,7 +7,6 @@
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import { buildDendrogram, hasSignificantGap } from "../cluster.ts";
 import type { CodeNode } from "../../sost/tree.ts";
-import { deduplicateByGroup } from "../groups.ts";
 import { defineAudit } from "../types.ts";
 import { getChildrenWithKeys } from "../children.ts";
 import { isSuppressed } from "../context.ts";
@@ -68,9 +67,8 @@ function detectBloated(
   );
 
   for (const [key, node] of entries) {
-    const cwk = getChildrenWithKeys(node, nodes).filter(({ node: c }) => !c.util);
-    const { reps } = deduplicateByGroup(cwk);
-    const valid = reps.filter(({ node: c }) => c.leaf.length > NONE);
+    const cwk = getChildrenWithKeys(node, nodes).filter(({ node: c }) => !c.util && !c.helper);
+    const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
     if (valid.length < minGroup) {
       continue;
     }
@@ -93,7 +91,6 @@ function detectBloated(
       clusters: result.clusters.map((c) => c.map((idx) => valid[idx].node.name)),
       details: {
         rawCount: cwk.length,
-        effectiveCount: reps.length,
         clusterCount: result.clusters.length,
       },
     });

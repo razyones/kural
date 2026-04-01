@@ -54,9 +54,6 @@ function scanLeafCrossFile(
       if (a.parentKey === b.parentKey) {
         continue;
       }
-      if (a.patterns !== null && b.patterns !== null) {
-        continue;
-      }
       if (isCallerCallee(a, b)) {
         continue;
       }
@@ -102,9 +99,6 @@ function scanCrossPopDuplicates(
       const [, a] = nonUtil[i];
       const [, b] = util[j];
       if (a.parentKey === b.parentKey) {
-        continue;
-      }
-      if (a.patterns !== null && b.patterns !== null) {
         continue;
       }
       if (isCallerCallee(a, b)) {

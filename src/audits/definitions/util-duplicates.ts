@@ -33,9 +33,6 @@ export default defineAudit({
         if (a.parentKey === b.parentKey) {
           continue;
         }
-        if (a.patterns !== null && b.patterns !== null) {
-          continue;
-        }
         if (isCallerCallee(a, b)) {
           continue;
         }
