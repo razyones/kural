@@ -10,7 +10,7 @@ import { avg } from "../utils/vectors.ts";
 const NONE = 0;
 const MIN_SAMPLE = 2;
 const BESSEL = 1;
-const MIN_MAD = 0.01;
+const MIN_MAD = 0.015;
 
 /** 1/Φ⁻¹(¾) — makes MAD consistent with σ for normal data. */
 const MAD_SCALE = 1.4826;
