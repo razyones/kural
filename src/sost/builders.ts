@@ -171,12 +171,15 @@ function patternNode(
   const identities = memberKeys
     .map((k) => nodes.get(k)?.identity)
     .filter((v): v is number[] => v !== undefined && v.length > NONE);
+  const leaves = memberKeys
+    .map((k) => nodes.get(k)?.leaf)
+    .filter((v): v is number[] => v !== undefined && v.length > NONE);
   return {
     key: `pattern:${fileKey}:${patternId}`,
     kind: "pattern",
     name: patternId,
     identity: identities.length > NONE ? centroid(identities) : [],
-    leaf: [],
+    leaf: leaves.length > NONE ? centroid(leaves) : [],
     childKeys: memberKeys,
     parentKey: fileKey,
     patterns: null,
