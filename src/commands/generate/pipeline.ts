@@ -75,9 +75,10 @@ async function generate(
   const dbPath = `${root}/.kural-db/${branch}/active.db`;
 
   const createdAt = Date.now();
-  const snapshotId = buildSnapshotId(createdAt, currentCommitHash());
+  const commitHash = currentCommitHash();
+  const snapshotId = buildSnapshotId(createdAt, commitHash);
 
-  await writeMetadata(snapshot.collections, modelId, createdAt);
+  await writeMetadata(snapshot.collections, modelId, createdAt, commitHash);
   await writeUnits(snapshot.collections, result);
   await writeScoreCards(snapshot.collections, cards);
   await closeSnapshot(snapshot);

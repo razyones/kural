@@ -161,32 +161,6 @@ async function closeSnapshot(snapshot: OpenSnapshot): Promise<void> {
 }
 
 /**
- * Reads the creation timestamp from an active database's metadata.
- * Falls back to the current time if unavailable.
- * @param root - The project root directory
- * @param branch - The git branch name
- * @returns The creation timestamp in milliseconds
- * @kuralCauses reads metadata from a snapshot database
- */
-async function readCreatedAt(root: string, branch: string): Promise<number> {
-  const path = activePath(root, branch);
-  if (!existsSync(path)) {
-    return Date.now();
-  }
-  try {
-    const snapshot = await openSnapshot(path);
-    const meta = snapshot.collections.metadata.get("created_at");
-    await closeSnapshot(snapshot);
-    if (meta !== undefined) {
-      return Number(meta.value);
-    }
-  } catch {
-    // Legacy or corrupt DB — fall back
-  }
-  return Date.now();
-}
-
-/**
  * Rotates the active database into the history directory with a
  * snapshot ID of `<timestamp>-<commit-hash>`.
  * Evicts the oldest history file if the count exceeds the maximum.
@@ -201,8 +175,13 @@ async function rotateActive(root: string, branch: string): Promise<void> {
     return;
   }
 
-  const timestamp = await readCreatedAt(root, branch);
-  const commitHash = currentCommitHash();
+  const snapshot = await openSnapshot(active);
+  const metaTimestamp = snapshot.collections.metadata.get("created_at");
+  const metaCommitHash = snapshot.collections.metadata.get("commit_hash");
+  await closeSnapshot(snapshot);
+
+  const timestamp = metaTimestamp === undefined ? Date.now() : Number(metaTimestamp.value);
+  const commitHash = metaCommitHash === undefined ? currentCommitHash() : metaCommitHash.value;
   const snapshotId = buildSnapshotId(timestamp, commitHash);
   const historyPath = join(historyDir(root, branch), `${snapshotId}${HISTORY_SUFFIX}`);
 

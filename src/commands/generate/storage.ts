@@ -40,9 +40,11 @@ async function writeMetadata(
   collections: SnapshotCollections,
   modelId: string,
   createdAt: number,
+  commitHash: string,
 ): Promise<void> {
   await persistRows(collections.metadata, [
     { key: "created_at", value: String(createdAt) },
+    { key: "commit_hash", value: commitHash },
     { key: "model_id", value: modelId },
     { key: "schema_version", value: "1" },
   ]);
