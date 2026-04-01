@@ -29,10 +29,11 @@ async function persistRows<T extends object>(
 }
 
 /**
- * Records the model identity and creation timestamp so downstream commands can validate cache coherence and display snapshot provenance.
+ * Records the model identity, creation timestamp, and commit hash so downstream commands can validate cache coherence and display snapshot provenance.
  * @param collections - Snapshot collections to write into
  * @param modelId - Embedding model ID to record
  * @param createdAt - Timestamp in milliseconds since epoch to record
+ * @param commitHash - Short git commit hash to record for snapshot identity
  * @returns Resolves when metadata rows are persisted
  * @kuralCauses persists metadata rows to the snapshot database
  */
