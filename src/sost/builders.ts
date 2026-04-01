@@ -193,4 +193,83 @@ function patternNode(
   };
 }
 
-export { directoryNode, fileNode, functionNode, patternNode, typeNode };
+const NEXT = 1;
+const MIN_GROUP = 2;
+
+/**
+ * Groups children by a specific depth in their patterns array and
+ * creates pattern nodes for groups with 2+ members. Recurses for
+ * deeper nesting levels.
+ * @param parentKey - Key of the parent node to group under
+ * @param childKeys - Keys of children to consider for grouping
+ * @param depth - Current nesting depth (index into the patterns array)
+ * @param nodes - The flat node map to mutate
+ * @returns Updated child keys with pattern nodes replacing grouped members
+ * @kuralCauses inserts pattern nodes and rewires parent/child pointers
+ */
+function groupAtDepth(
+  parentKey: string,
+  childKeys: string[],
+  depth: number,
+  nodes: NodeMap,
+): string[] {
+  const groups = new Map<string, string[]>();
+  const ungrouped: string[] = [];
+
+  for (const childKey of childKeys) {
+    const child = nodes.get(childKey);
+    if (child === undefined || child.patterns === null || depth >= child.patterns.length) {
+      ungrouped.push(childKey);
+      continue;
+    }
+    const tag = child.patterns[depth];
+    const bucket = groups.get(tag);
+    if (bucket) {
+      bucket.push(childKey);
+    } else {
+      groups.set(tag, [childKey]);
+    }
+  }
+
+  const result = [...ungrouped];
+  for (const [patternId, memberKeys] of groups) {
+    if (memberKeys.length < MIN_GROUP) {
+      result.push(...memberKeys);
+      continue;
+    }
+    const pNode = patternNode(patternId, parentKey, memberKeys, nodes);
+    nodes.set(pNode.key, pNode);
+
+    for (const mk of memberKeys) {
+      const member = nodes.get(mk);
+      if (member) {
+        member.parentKey = pNode.key;
+      }
+    }
+
+    const nestedKeys = groupAtDepth(pNode.key, memberKeys, depth + NEXT, nodes);
+    pNode.childKeys = nestedKeys;
+    result.push(pNode.key);
+  }
+
+  return result;
+}
+
+/**
+ * Materializes pattern groups as in-memory container nodes. For each
+ * file, leaves sharing a `patterns` tag are reparented under a synthetic
+ * PatternNode whose identity is the centroid of its members. Supports
+ * nested patterns via multiple `@kuralPatterns` tags.
+ * @param nodes - The flat node map to mutate
+ * @kuralCauses inserts pattern nodes and rewires parent/child pointers
+ */
+function materializePatterns(nodes: NodeMap): void {
+  for (const [, node] of nodes) {
+    if (node.kind !== "file") {
+      continue;
+    }
+    node.childKeys = groupAtDepth(node.key, node.childKeys, NONE, nodes);
+  }
+}
+
+export { directoryNode, fileNode, functionNode, materializePatterns, patternNode, typeNode };

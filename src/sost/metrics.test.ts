@@ -313,13 +313,13 @@ describe("computeChildrenUniqueness pattern deduplication", () => {
       key: "func:a",
       name: "a",
       identity: V_UNIT_X,
-      patterns: "group-1",
+      patterns: ["group-1"],
     });
     const childB = makeFunctionNode({
       key: "func:b",
       name: "b",
       identity: V_UNIT_X,
-      patterns: "group-1",
+      patterns: ["group-1"],
     });
     const childC = makeFunctionNode({ key: "func:c", name: "c", identity: V_UNIT_Y });
     const result = computeChildrenUniqueness(parent, [childA, childB, childC]);

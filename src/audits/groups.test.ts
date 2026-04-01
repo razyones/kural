@@ -64,14 +64,14 @@ function cwk(node: FunctionNode | TypeNode): ChildWithKey {
 
 describe("groupId — patterns priority", () => {
   test("returns patterns when present", () => {
-    const node = makeFunctionNode({ patterns: "handler-group" });
+    const node = makeFunctionNode({ patterns: ["handler-group"] });
 
     expect(groupId(node)).toBe("handler-group");
   });
 
   test("returns patterns even when companion is also set", () => {
     const node = makeFunctionNode({
-      patterns: "handler-group",
+      patterns: ["handler-group"],
       companion: "companion-group",
     });
 
@@ -110,7 +110,7 @@ describe("groupId — type nodes", () => {
   });
 
   test("returns patterns for type node with patterns", () => {
-    const node = makeTypeNode({ patterns: "schema-group" });
+    const node = makeTypeNode({ patterns: ["schema-group"] });
 
     expect(groupId(node)).toBe("schema-group");
   });
@@ -142,17 +142,17 @@ describe("deduplicateByGroup — pattern dedup", () => {
     const a = makeFunctionNode({
       name: "handleA",
       key: "func:/src/app.ts:handleA",
-      patterns: "handlers",
+      patterns: ["handlers"],
     });
     const b = makeFunctionNode({
       name: "handleB",
       key: "func:/src/app.ts:handleB",
-      patterns: "handlers",
+      patterns: ["handlers"],
     });
     const c = makeFunctionNode({
       name: "handleC",
       key: "func:/src/app.ts:handleC",
-      patterns: "handlers",
+      patterns: ["handlers"],
     });
     const items = [cwk(a), cwk(b), cwk(c)];
 
@@ -216,12 +216,12 @@ describe("deduplicateByGroup — mixed groups", () => {
     const patA = makeFunctionNode({
       name: "pA",
       key: "func:/src/app.ts:pA",
-      patterns: "grp",
+      patterns: ["grp"],
     });
     const patB = makeFunctionNode({
       name: "pB",
       key: "func:/src/app.ts:pB",
-      patterns: "grp",
+      patterns: ["grp"],
     });
     const solo = makeFunctionNode({
       name: "solo",

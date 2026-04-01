@@ -129,7 +129,7 @@ function collectFileLeaves(
       sig,
       "",
       "",
-      type.patterns,
+      type.patterns?.[NONE],
     );
   }
   for (const fn of Object.values(file.functions)) {
@@ -146,7 +146,7 @@ function collectFileLeaves(
       sig,
       getCausesText(fn),
       callsText,
-      fn.patterns,
+      fn.patterns?.[NONE],
     );
   }
   data.fileChildIndices.set(file.path, childIndices);

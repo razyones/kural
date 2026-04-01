@@ -8,6 +8,7 @@
 import type { ChildWithKey } from "./children.ts";
 import type { CodeNode } from "../sost/tree.ts";
 
+const FIRST = 0;
 const NEXT = 1;
 
 /**
@@ -17,7 +18,7 @@ const NEXT = 1;
  * @kuralPure
  */
 function groupId(node: CodeNode): string | null {
-  return node.patterns ?? node.companion ?? null;
+  return node.patterns?.[FIRST] ?? node.companion ?? null;
 }
 
 /**

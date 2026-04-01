@@ -81,7 +81,19 @@ describe("getJSDoc kural tag extraction", () => {
 
   it("extracts @kuralPatterns tag", () => {
     const info = jsdocFrom(`/** @kuralPatterns cacheKey */\nfunction foo() {}`);
-    expect(info.patterns).toBe("cacheKey");
+    expect(info.patterns).toEqual(["cacheKey"]);
+  });
+
+  it("accumulates multiple @kuralPatterns tags", () => {
+    const src = [
+      "/**",
+      " * @kuralPatterns outer",
+      " * @kuralPatterns inner",
+      " */",
+      "function foo() {}",
+    ].join("\n");
+    const info = jsdocFrom(src);
+    expect(info.patterns).toEqual(["outer", "inner"]);
   });
 
   it("extracts @kuralCompanion tag", () => {

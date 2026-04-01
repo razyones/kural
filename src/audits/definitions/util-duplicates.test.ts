@@ -163,7 +163,7 @@ describe("duplicate-utils detect — exclusions", () => {
       leaf: EMB_UTIL_A,
       parentKey: "file:/src/a.ts",
       util: true,
-      patterns: "validator",
+      patterns: ["validator"],
     });
     const fnB = makeFunction({
       key: "func:/src/b.ts:utilB",
@@ -171,7 +171,7 @@ describe("duplicate-utils detect — exclusions", () => {
       leaf: EMB_UTIL_B,
       parentKey: "file:/src/b.ts",
       util: true,
-      patterns: "validator",
+      patterns: ["validator"],
     });
     const fileA = makeFile({
       key: "file:/src/a.ts",
@@ -195,7 +195,7 @@ describe("duplicate-utils detect — exclusions", () => {
       leaf: EMB_UTIL_A,
       parentKey: "pattern:file:/src/a.ts:grpA",
       util: true,
-      patterns: "grpA",
+      patterns: ["grpA"],
     });
     const fnB = makeFunction({
       key: "func:/src/a.ts:utilB",
@@ -203,7 +203,7 @@ describe("duplicate-utils detect — exclusions", () => {
       leaf: EMB_UTIL_B,
       parentKey: "pattern:file:/src/a.ts:grpB",
       util: true,
-      patterns: "grpB",
+      patterns: ["grpB"],
     });
     const patA = {
       key: "pattern:file:/src/a.ts:grpA",

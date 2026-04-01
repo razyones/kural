@@ -60,8 +60,8 @@ export type KuralType = KuralUnit & {
   helper: boolean;
   /** Audit-specific suppression annotations from @kuralResidual */
   residuals: ResidualEntry[];
-  /** Pattern group ID from @kuralPatterns */
-  patterns?: string;
+  /** Pattern group IDs from @kuralPatterns (supports nesting) */
+  patterns?: string[];
   /** Structured symbol info from the Language Service */
   symbolInfo?: SymbolInfo;
 };
@@ -94,8 +94,8 @@ export type KuralFunction = KuralUnit & {
   causes?: string;
   /** Names of cross-module functions called from the body */
   calls: string[];
-  /** Pattern group ID from @kuralPatterns */
-  patterns?: string;
+  /** Pattern group IDs from @kuralPatterns (supports nesting) */
+  patterns?: string[];
   /** Number of @param tags with non-empty descriptions */
   documentedParams: number;
   /** Whether a @returns tag with a non-empty description exists */

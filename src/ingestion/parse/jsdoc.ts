@@ -16,7 +16,7 @@ type JSDocInfo = {
   helper: boolean;
   residuals: ResidualEntry[];
   causes?: string;
-  patterns?: string;
+  patterns?: string[];
   companion?: string;
   /** Number of @param tags that have a non-empty description */
   documentedParams: number;
@@ -77,7 +77,8 @@ function processTag(tag: ts.JSDocTag, info: JSDocInfo): void {
   } else if (tagName === "kuralCauses" && typeof tag.comment === "string") {
     info.causes = tag.comment;
   } else if (tagName === "kuralPatterns" && typeof tag.comment === "string") {
-    info.patterns = tag.comment.trim();
+    info.patterns ??= [];
+    info.patterns.push(tag.comment.trim());
   } else if (tagName === "kuralCompanion" && typeof tag.comment === "string") {
     info.companion = tag.comment.trim();
   } else if (tagName === "param" && hasTagComment(tag)) {

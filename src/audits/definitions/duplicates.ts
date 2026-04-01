@@ -16,6 +16,14 @@ import { isSuppressed } from "../context.ts";
 const NONE = 0;
 const NEXT = 1;
 
+/** True when both nodes share at least one pattern ID. @kuralHelper */
+function sharesPattern(a: CodeNode, b: CodeNode): boolean {
+  if (a.patterns === null || b.patterns === null) {
+    return false;
+  }
+  return a.patterns.some((p) => b.patterns?.includes(p) === true);
+}
+
 /**
  * True when both nodes live under different pattern groups in the same file.
  * @param a - First node to check
@@ -69,7 +77,7 @@ function scanLeafCrossFile(
       if (a.parentKey === b.parentKey) {
         continue;
       }
-      if (a.patterns !== null && a.patterns === b.patterns) {
+      if (sharesPattern(a, b)) {
         continue;
       }
       if (isCallerCallee(a, b)) {
@@ -124,7 +132,7 @@ function scanCrossPopDuplicates(
       if (a.parentKey === b.parentKey) {
         continue;
       }
-      if (a.patterns !== null && a.patterns === b.patterns) {
+      if (sharesPattern(a, b)) {
         continue;
       }
       if (isCallerCallee(a, b)) {

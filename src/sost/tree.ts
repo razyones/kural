@@ -5,7 +5,13 @@
  * the node graph.
  */
 
-import { directoryNode, fileNode, functionNode, patternNode, typeNode } from "./builders.ts";
+import {
+  directoryNode,
+  fileNode,
+  functionNode,
+  materializePatterns,
+  typeNode,
+} from "./builders.ts";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
 import type { ResidualEntry } from "../ingestion/parse/types.ts";
 
@@ -20,7 +26,7 @@ type BaseNode = {
   identity: number[];
   leaf: number[];
   parentKey: string | null;
-  patterns: string | null;
+  patterns: string[] | null;
   companion: string | null;
   util: boolean;
   helper: boolean;
@@ -143,54 +149,6 @@ function wireParents(nodes: NodeMap, result: ParseResult): void {
       if (child) {
         child.parentKey = dirKey;
       }
-    }
-  }
-}
-
-/**
- * Materializes pattern groups as in-memory container nodes. For each
- * file, leaves sharing a `patterns` tag are reparented under a synthetic
- * PatternNode whose identity is the centroid of its members.
- * @param nodes - The flat node map to mutate
- * @kuralCauses inserts pattern nodes and rewires parent/child pointers
- */
-function materializePatterns(nodes: NodeMap): void {
-  const MIN_GROUP = 2;
-  for (const [, node] of nodes) {
-    if (node.kind !== "file") {
-      continue;
-    }
-    const groups = new Map<string, string[]>();
-    for (const childKey of node.childKeys) {
-      const child = nodes.get(childKey);
-      if (child === undefined || child.patterns === null) {
-        continue;
-      }
-      const bucket = groups.get(child.patterns);
-      if (bucket) {
-        bucket.push(childKey);
-      } else {
-        groups.set(child.patterns, [childKey]);
-      }
-    }
-
-    for (const [patternId, memberKeys] of groups) {
-      if (memberKeys.length < MIN_GROUP) {
-        continue;
-      }
-      const pNode = patternNode(patternId, node.key, memberKeys, nodes);
-      nodes.set(pNode.key, pNode);
-
-      for (const mk of memberKeys) {
-        const member = nodes.get(mk);
-        if (member) {
-          member.parentKey = pNode.key;
-        }
-      }
-
-      const kept = node.childKeys.filter((k) => !memberKeys.includes(k));
-      kept.push(pNode.key);
-      node.childKeys = kept;
     }
   }
 }

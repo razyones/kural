@@ -251,13 +251,13 @@ describe("collectSiblingPairs — exclusion: both patterned", () => {
     const fnA = makeFn({
       name: "handleA",
       key: "func:/src/app.ts:handleA",
-      patterns: "grpA",
+      patterns: ["grpA"],
       leaf: [EMB_A1, EMB_A2, EMB_A3],
     });
     const fnB = makeFn({
       name: "handleB",
       key: "func:/src/app.ts:handleB",
-      patterns: "grpB",
+      patterns: ["grpB"],
       leaf: [EMB_B1, EMB_B2, EMB_B3],
     });
     const file = makeFile({

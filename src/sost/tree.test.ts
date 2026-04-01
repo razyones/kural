@@ -433,8 +433,8 @@ describe("buildTree — discriminated union narrowing", () => {
 
 describe("materializePatterns", () => {
   it("creates a pattern node for 2+ leaves sharing the same pattern", () => {
-    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
-    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const fnA = makeFunction({ name: "fitA", patterns: ["fitMetric"] });
+    const fnB = makeFunction({ name: "fitB", patterns: ["fitMetric"] });
     const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
     const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
 
@@ -445,8 +445,8 @@ describe("materializePatterns", () => {
   });
 
   it("reparents pattern members under the pattern node", () => {
-    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
-    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const fnA = makeFunction({ name: "fitA", patterns: ["fitMetric"] });
+    const fnB = makeFunction({ name: "fitB", patterns: ["fitMetric"] });
     const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
     const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
 
@@ -457,8 +457,8 @@ describe("materializePatterns", () => {
   });
 
   it("replaces members in file childKeys with the pattern node key", () => {
-    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
-    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const fnA = makeFunction({ name: "fitA", patterns: ["fitMetric"] });
+    const fnB = makeFunction({ name: "fitB", patterns: ["fitMetric"] });
     const fnC = makeFunction({ name: "other" });
     const file = makeFile({ functions: { fitA: fnA, fitB: fnB, other: fnC } });
     const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
@@ -474,12 +474,12 @@ describe("materializePatterns", () => {
   it("computes centroid identity for the pattern node", () => {
     const fnA = makeFunction({
       name: "fitA",
-      patterns: "fitMetric",
+      patterns: ["fitMetric"],
       identityEmbedding: [TWO, FOUR],
     });
     const fnB = makeFunction({
       name: "fitB",
-      patterns: "fitMetric",
+      patterns: ["fitMetric"],
       identityEmbedding: [FOUR, TWO],
     });
     const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
@@ -491,7 +491,7 @@ describe("materializePatterns", () => {
   });
 
   it("does not create a pattern node for a single-member group", () => {
-    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
+    const fnA = makeFunction({ name: "fitA", patterns: ["fitMetric"] });
     const fnB = makeFunction({ name: "other" });
     const file = makeFile({ functions: { fitA: fnA, other: fnB } });
     const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
@@ -502,10 +502,10 @@ describe("materializePatterns", () => {
   });
 
   it("creates separate pattern nodes for different pattern IDs", () => {
-    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
-    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
-    const fnC = makeFunction({ name: "uniqA", patterns: "uniquenessMetric" });
-    const fnD = makeFunction({ name: "uniqB", patterns: "uniquenessMetric" });
+    const fnA = makeFunction({ name: "fitA", patterns: ["fitMetric"] });
+    const fnB = makeFunction({ name: "fitB", patterns: ["fitMetric"] });
+    const fnC = makeFunction({ name: "uniqA", patterns: ["uniquenessMetric"] });
+    const fnD = makeFunction({ name: "uniqB", patterns: ["uniquenessMetric"] });
     const file = makeFile({ functions: { fitA: fnA, fitB: fnB, uniqA: fnC, uniqB: fnD } });
     const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
 
@@ -516,10 +516,37 @@ describe("materializePatterns", () => {
   });
 });
 
+describe("materializePatterns — nested", () => {
+  it("creates nested pattern nodes for units with multiple pattern tags", () => {
+    const fnA = makeFunction({ name: "a", patterns: ["outer", "inner"] });
+    const fnB = makeFunction({ name: "b", patterns: ["outer", "inner"] });
+    const fnC = makeFunction({ name: "c", patterns: ["outer"] });
+    const file = makeFile({ functions: { a: fnA, b: fnB, c: fnC } });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
+
+    const outerKey = "pattern:file:/src/app.ts:outer";
+    const innerKey = "pattern:" + outerKey + ":inner";
+    expect(nodes.has(outerKey)).toBe(true);
+    expect(nodes.has(innerKey)).toBe(true);
+
+    const outer = getNode(nodes, outerKey);
+    expect(outer.childKeys).toContain(innerKey);
+    expect(outer.childKeys).toContain("func:/src/app.ts:c");
+    expect(outer.childKeys.length).toBe(TWO);
+
+    const inner = getNode(nodes, innerKey);
+    expect(inner.childKeys).toContain("func:/src/app.ts:a");
+    expect(inner.childKeys).toContain("func:/src/app.ts:b");
+
+    const memberA = getNode(nodes, "func:/src/app.ts:a");
+    expect(memberA.parentKey).toBe(innerKey);
+  });
+});
+
 describe("isLeaf — pattern nodes", () => {
   it("returns false for pattern nodes", () => {
-    const fnA = makeFunction({ name: "fitA", patterns: "fitMetric" });
-    const fnB = makeFunction({ name: "fitB", patterns: "fitMetric" });
+    const fnA = makeFunction({ name: "fitA", patterns: ["fitMetric"] });
+    const fnB = makeFunction({ name: "fitB", patterns: ["fitMetric"] });
     const file = makeFile({ functions: { fitA: fnA, fitB: fnB } });
     const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, {}));
     expect(isLeaf(getNode(nodes, "pattern:file:/src/app.ts:fitMetric"))).toBe(false);

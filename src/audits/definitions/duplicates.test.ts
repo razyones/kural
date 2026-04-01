@@ -190,14 +190,14 @@ describe("duplicates detect — exclusions", () => {
       name: "fnA",
       leaf: EMB_ALPHA,
       parentKey: "file:/src/a.ts",
-      patterns: "handler",
+      patterns: ["handler"],
     });
     const fnB = makeFunction({
       key: "func:/src/b.ts:fnB",
       name: "fnB",
       leaf: EMB_ALPHA_TWIN,
       parentKey: "file:/src/b.ts",
-      patterns: "handler",
+      patterns: ["handler"],
     });
     const fileA = makeFile({
       key: "file:/src/a.ts",
@@ -223,14 +223,14 @@ describe("duplicates detect — same-file cross-pattern exclusion", () => {
       name: "fnA",
       leaf: EMB_ALPHA,
       parentKey: "pattern:file:/src/a.ts:grpA",
-      patterns: "grpA",
+      patterns: ["grpA"],
     });
     const fnB = makeFunction({
       key: "func:/src/a.ts:fnB",
       name: "fnB",
       leaf: EMB_ALPHA_TWIN,
       parentKey: "pattern:file:/src/a.ts:grpB",
-      patterns: "grpB",
+      patterns: ["grpB"],
     });
     const patA = {
       key: "pattern:file:/src/a.ts:grpA",
@@ -531,7 +531,7 @@ describe("duplicates detect — cross-pop exclusions", () => {
       name: "fnA",
       leaf: EMB_ALPHA,
       parentKey: "file:/src/a.ts",
-      patterns: "handler",
+      patterns: ["handler"],
     });
     const fnU = makeFunction({
       key: "func:/src/b.ts:fnU",
@@ -539,7 +539,7 @@ describe("duplicates detect — cross-pop exclusions", () => {
       leaf: EMB_ALPHA_TWIN,
       parentKey: "file:/src/b.ts",
       util: true,
-      patterns: "handler",
+      patterns: ["handler"],
     });
     const fileA = makeFile({
       key: "file:/src/a.ts",

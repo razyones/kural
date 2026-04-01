@@ -32,7 +32,7 @@ const typeSchema = z.object({
   identityEmbedding: z.array(z.number()),
   leafEmbedding: z.array(z.number()),
   facetHash: z.string().optional(),
-  patterns: z.string().optional(),
+  patterns: z.array(z.string()).optional(),
 });
 
 const functionSchema = z.object({
@@ -52,7 +52,7 @@ const functionSchema = z.object({
   identityEmbedding: z.array(z.number()),
   leafEmbedding: z.array(z.number()),
   facetHash: z.string().optional(),
-  patterns: z.string().optional(),
+  patterns: z.array(z.string()).optional(),
   documentedParams: z.number(),
   hasReturnDoc: z.boolean(),
 });

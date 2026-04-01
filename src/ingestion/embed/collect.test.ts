@@ -445,8 +445,8 @@ describe("collapseByPattern", () => {
   });
 
   it("collapses pattern-tagged leaves to their centroid", () => {
-    const fn1 = makeFunction({ name: "a", patterns: "grp" });
-    const fn2 = makeFunction({ name: "b", patterns: "grp" });
+    const fn1 = makeFunction({ name: "a", patterns: ["grp"] });
+    const fn2 = makeFunction({ name: "b", patterns: ["grp"] });
     const leaves = collectLeaves(
       { files: { "/src/a.ts": makeFile("a.ts", {}, { a: fn1, b: fn2 }) }, directories: {} },
       ROOT_PATH,
@@ -464,8 +464,8 @@ describe("collapseByPattern", () => {
   });
 
   it("returns centroids and ungrouped separately", () => {
-    const fn1 = makeFunction({ name: "a", patterns: "grp" });
-    const fn2 = makeFunction({ name: "b", patterns: "grp" });
+    const fn1 = makeFunction({ name: "a", patterns: ["grp"] });
+    const fn2 = makeFunction({ name: "b", patterns: ["grp"] });
     const fn3 = makeFunction({ name: "c" });
     const leaves = collectLeaves(
       { files: { "/src/a.ts": makeFile("a.ts", {}, { a: fn1, b: fn2, c: fn3 }) }, directories: {} },
@@ -480,8 +480,8 @@ describe("collapseByPattern", () => {
   });
 
   it("skips empty embedding vectors during collapse", () => {
-    const fn1 = makeFunction({ name: "a", patterns: "grp" });
-    const fn2 = makeFunction({ name: "b", patterns: "grp" });
+    const fn1 = makeFunction({ name: "a", patterns: ["grp"] });
+    const fn2 = makeFunction({ name: "b", patterns: ["grp"] });
     const leaves = collectLeaves(
       { files: { "/src/a.ts": makeFile("a.ts", {}, { a: fn1, b: fn2 }) }, directories: {} },
       ROOT_PATH,
@@ -497,7 +497,7 @@ describe("collapseByPattern", () => {
   });
 
   it("collects patternIds aligned with units", () => {
-    const fn1 = makeFunction({ name: "a", patterns: "grp" });
+    const fn1 = makeFunction({ name: "a", patterns: ["grp"] });
     const fn2 = makeFunction({ name: "b" });
     const leaves = collectLeaves(
       { files: { "/src/a.ts": makeFile("a.ts", {}, { a: fn1, b: fn2 }) }, directories: {} },
