@@ -59,6 +59,7 @@ function functionNode(fn: KuralFunction, filePath: string): FunctionNode {
     hash: computeHash(fn.name, fn.path, ...fn.params),
     exported: fn.exported,
     description: fn.description,
+    bound: fn.bound ?? null,
     calls: fn.calls,
     returnsType: fn.returns,
     documentedParams: fn.documentedParams,
@@ -94,6 +95,7 @@ function typeNode(type: KuralType, filePath: string): TypeNode {
     hash: computeHash(type.name, type.path, ...Object.keys(type.fields)),
     exported: type.exported,
     description: type.description,
+    bound: type.bound ?? null,
   };
 }
 
@@ -122,6 +124,7 @@ function fileNode(file: KuralFile, filePath: string, childKeys: string[]): FileN
     hash: computeHash(file.name, filePath),
     exported: false,
     description: file.description,
+    bound: file.bound ?? null,
   };
 }
 
@@ -150,6 +153,7 @@ function directoryNode(dir: KuralDirectory, dirPath: string, childKeys: string[]
     hash: computeHash(dir.name, dirPath),
     exported: false,
     description: dir.description,
+    bound: null,
   };
 }
 
@@ -190,6 +194,7 @@ function patternNode(
     hash: computeHash("pattern", patternId, ...memberKeys),
     exported: false,
     description: undefined,
+    bound: null,
   };
 }
 

@@ -73,7 +73,9 @@ function computeMetrics(nodes: NodeMap): NodeMetrics {
           uniqMap.set(childKey, val);
         }
 
-        const cvResult = computeChildrenUniqueness(node, children);
+        // Exclude outward-bound children from CV computation
+        const forCV = children.filter((c) => c.bound !== "outward");
+        const cvResult = computeChildrenUniqueness(node, forCV.length > NONE ? forCV : children);
         childrenUniqMap.set(key, cvResult.score);
         worstPairs.set(key, cvResult.worstPair);
       }

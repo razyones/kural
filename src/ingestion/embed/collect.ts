@@ -1,9 +1,7 @@
 /**
- * The gatherer. Assembles text facets into parallel arrays ready for
- * batch vectorization — names, descriptions, paths, signatures, and
- * causes. It is the only module that prepares raw inputs for the
- * embedding pipeline — no other module marshals the text that becomes
- * numerical vectors.
+ * The gatherer. Assembles text facets into parallel arrays ready for batch
+ * vectorization. It is the only module that prepares raw inputs for the
+ * embedding pipeline — no other module marshals the text that becomes vectors.
  */
 
 import type { KuralDirectory, KuralFile, KuralUnit } from "../parse/types.ts";
@@ -37,6 +35,8 @@ type LeafData = {
   fileChildIndices: Map<string, number[]>;
   /** Pattern group IDs aligned with units (undefined if no pattern) */
   patternIds: (string | undefined)[];
+  /** Bound direction IDs aligned with units (undefined if no bound) */
+  boundIds: (string | undefined)[];
 };
 
 /** Collected data for container units (files and directories). @kuralPatterns dataShape */
@@ -55,45 +55,43 @@ type ContainerData = {
   fileCount: number;
   /** Directory objects for bottom-up traversal */
   dirs: KuralDirectory[];
+  /** Bound direction for each unit (undefined if no bound) */
+  fileBounds: (string | undefined)[];
+};
+
+/** Facets for a single leaf unit ready for batch embedding. */
+type LeafFacets = {
+  unit: KuralUnit;
+  desc: string;
+  fileDesc: string;
+  rootPath: string;
+  keywords: string[];
+  sig: string;
+  causes: string;
+  calls: string;
+  patternId: string | undefined;
+  boundId: string | undefined;
 };
 
 /**
  * Appends one leaf unit's facets to the shared accumulator arrays so
  * a single function or type becomes a row in the batch-embedding input.
  * @param data - The leaf data accumulator to push into
- * @param unit - The unit object for write-back reference
- * @param desc - The unit's description text
- * @param fileDesc - The parent file's description for anchoring
- * @param rootPath - Absolute path to the generation root
- * @param keywords - Top domain keywords for path signal
- * @param sig - Structural signature text
- * @param causes - Causes description for impure functions
- * @param calls - Call-graph text
- * @param patternId - Pattern group ID from @kuralPatterns
+ * @param facets - Text facets and metadata for the leaf unit
  * @kuralPure
  * @kuralHelper
  */
-function pushLeaf(
-  data: LeafData,
-  unit: KuralUnit,
-  desc: string,
-  fileDesc: string,
-  rootPath: string,
-  keywords: string[],
-  sig: string,
-  causes: string,
-  calls: string,
-  patternId: string | undefined,
-): void {
-  data.names.push(unit.name);
-  data.descs.push(desc);
-  data.parentDescs.push(fileDesc);
-  data.paths.push(buildPathSignal(unit.path, rootPath, keywords));
-  data.sigs.push(sig);
-  data.causes.push(causes);
-  data.calls.push(calls);
-  data.units.push(unit);
-  data.patternIds.push(patternId);
+function pushLeaf(data: LeafData, facets: LeafFacets): void {
+  data.names.push(facets.unit.name);
+  data.descs.push(facets.desc);
+  data.parentDescs.push(facets.fileDesc);
+  data.paths.push(buildPathSignal(facets.unit.path, facets.rootPath, facets.keywords));
+  data.sigs.push(facets.sig);
+  data.causes.push(facets.causes);
+  data.calls.push(facets.calls);
+  data.units.push(facets.unit);
+  data.patternIds.push(facets.patternId);
+  data.boundIds.push(facets.boundId);
 }
 
 /**
@@ -119,35 +117,35 @@ function collectFileLeaves(
   for (const type of Object.values(file.types)) {
     const sig = type.symbolInfo ? buildProse(type.symbolInfo, dictionary) : typeSignature(type);
     childIndices.push(data.units.length);
-    pushLeaf(
-      data,
-      type,
-      type.description ?? "",
+    pushLeaf(data, {
+      unit: type,
+      desc: type.description ?? "",
       fileDesc,
       rootPath,
       keywords,
       sig,
-      "",
-      "",
-      type.patterns?.[NONE],
-    );
+      causes: "",
+      calls: "",
+      patternId: type.patterns?.[NONE],
+      boundId: type.bound,
+    });
   }
   for (const fn of Object.values(file.functions)) {
     const sig = fn.symbolInfo ? buildProse(fn.symbolInfo, dictionary) : functionSignature(fn);
     childIndices.push(data.units.length);
     const callsText = fn.calls.length > NONE ? `calls: ${fn.calls.join(", ")}` : "";
-    pushLeaf(
-      data,
-      fn,
-      fn.description ?? "",
+    pushLeaf(data, {
+      unit: fn,
+      desc: fn.description ?? "",
       fileDesc,
       rootPath,
       keywords,
       sig,
-      getCausesText(fn),
-      callsText,
-      fn.patterns?.[NONE],
-    );
+      causes: getCausesText(fn),
+      calls: callsText,
+      patternId: fn.patterns?.[NONE],
+      boundId: fn.bound,
+    });
   }
   data.fileChildIndices.set(file.path, childIndices);
 }
@@ -182,6 +180,7 @@ function collectLeaves(
     units: [],
     fileChildIndices: new Map(),
     patternIds: [],
+    boundIds: [],
   };
 
   for (const file of Object.values(result.files)) {
@@ -215,6 +214,7 @@ function collectContainers(
     unitPaths: [],
     fileCount: NONE,
     dirs: [],
+    fileBounds: [],
   };
 
   for (const file of Object.values(result.files)) {
@@ -223,6 +223,7 @@ function collectContainers(
     data.paths.push(buildPathSignal(file.path, rootPath, keywords));
     data.units.push(file);
     data.unitPaths.push(file.path);
+    data.fileBounds.push(file.bound);
   }
   data.fileCount = data.units.length;
 
@@ -233,6 +234,7 @@ function collectContainers(
     data.units.push(dir);
     data.unitPaths.push(dir.path);
     data.dirs.push(dir);
+    data.fileBounds.push(undefined);
   }
 
   return data;

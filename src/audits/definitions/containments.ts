@@ -42,6 +42,7 @@ function formatContainment({ finding, prefix, label }: FormatCtx): ListItem {
 /** A parent-child dominance measurement for containment detection. */
 type DominanceEntry = {
   parentKey: string;
+  dominantKey: string;
   dominantName: string;
   dominantSim: number;
   secondSim: number;
@@ -69,8 +70,9 @@ function collectDominanceGaps(nodes: Map<string, CodeNode>): DominanceEntry[] {
     if (valid.length < HALF) {
       continue;
     }
-    const childSims: { name: string; similarity: number; node: CodeNode }[] = valid
-      .map(({ node: c }) => ({
+    const childSims: { key: string; name: string; similarity: number; node: CodeNode }[] = valid
+      .map(({ key: childKey, node: c }) => ({
+        key: childKey,
         name: c.name,
         similarity: cosineSimilarity(node.leaf, c.leaf),
         node: c,
@@ -86,6 +88,7 @@ function collectDominanceGaps(nodes: Map<string, CodeNode>): DominanceEntry[] {
     const gap = independent[NONE].similarity - independent[NEXT].similarity;
     entries.push({
       parentKey: key,
+      dominantKey: independent[NONE].key,
       dominantName: independent[NONE].name,
       dominantSim: independent[NONE].similarity,
       secondSim: independent[NEXT].similarity,
@@ -112,10 +115,12 @@ export default defineAudit({
       if (!parent) {
         continue;
       }
+      const dominantChild = nodes.get(e.dominantKey);
       if (
         e.gap > fence &&
         e.dominantSim > containmentFloor &&
-        !isSuppressed(parent, "containments")
+        !isSuppressed(parent, "containments") &&
+        dominantChild?.bound !== "outward"
       ) {
         findings.push({
           audit: "containments",

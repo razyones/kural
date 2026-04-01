@@ -5,6 +5,7 @@
  * the node graph.
  */
 
+import type { BoundDirection, ResidualEntry } from "../ingestion/parse/types.ts";
 import {
   directoryNode,
   fileNode,
@@ -13,7 +14,6 @@ import {
   typeNode,
 } from "./builders.ts";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
-import type { ResidualEntry } from "../ingestion/parse/types.ts";
 
 const NONE = 0;
 const NEXT = 1;
@@ -34,6 +34,7 @@ type BaseNode = {
   hash: string;
   exported: boolean;
   description: string | undefined;
+  bound: BoundDirection | null;
 };
 
 /** A function node in the scoring tree. */
@@ -209,8 +210,9 @@ function getChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
 }
 
 /**
- * Returns eligible children for domain scoring: excludes util nodes
- * from domain parents. Util parents include all children (sandbox).
+ * Returns eligible children for domain scoring: excludes util and
+ * inward-bound nodes from domain parents. Util parents include all
+ * children (sandbox).
  * @param node - The parent node whose eligible children to resolve
  * @param nodes - The flat node map to look up children in
  * @returns Array of eligible child CodeNode instances
@@ -218,7 +220,7 @@ function getChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
  */
 function getEligibleChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
   const children = getChildren(node, nodes);
-  return node.util ? children : children.filter((c) => !c.util);
+  return node.util ? children : children.filter((c) => !c.util && c.bound !== "inward");
 }
 
 /**

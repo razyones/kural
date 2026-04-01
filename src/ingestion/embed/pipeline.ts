@@ -6,13 +6,8 @@
  */
 
 import type { ContainerData, LeafData } from "./collect.ts";
-import {
-  applyParentSignal,
-  blendDirectories,
-  blendFiles,
-  blendLeaves,
-  buildContainerIdentities,
-} from "./blend.ts";
+import { applyParentSignal, blendLeaves } from "./blend.ts";
+import { blendDirectories, blendFiles, buildContainerIdentities } from "./containers.ts";
 import { collectContainers, collectLeaves } from "./collect.ts";
 import type { EmbeddingCache } from "./types.ts";
 import type { ParseResult } from "../parse/pipeline.ts";

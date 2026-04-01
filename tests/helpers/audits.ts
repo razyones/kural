@@ -42,6 +42,7 @@ function makeFunction(overrides: Partial<FunctionNode> = {}): FunctionNode {
     hash: overrides.hash ?? mockHash(name),
     exported: overrides.exported ?? true,
     description: overrides.description ?? undefined,
+    bound: overrides.bound ?? null,
     calls: overrides.calls ?? [],
     returnsType: overrides.returnsType ?? "void",
     documentedParams: overrides.documentedParams ?? NONE,
@@ -73,6 +74,7 @@ function makeType(overrides: Partial<TypeNode> = {}): TypeNode {
     hash: overrides.hash ?? mockHash(name),
     exported: overrides.exported ?? true,
     description: overrides.description ?? undefined,
+    bound: overrides.bound ?? null,
   };
 }
 
@@ -95,6 +97,7 @@ function makeFile(overrides: Partial<FileNode> = {}): FileNode {
     hash: overrides.hash ?? mockHash(name),
     exported: overrides.exported ?? false,
     description: overrides.description ?? undefined,
+    bound: overrides.bound ?? null,
   };
 }
 
@@ -117,6 +120,7 @@ function makeDir(overrides: Partial<DirectoryNode> = {}): DirectoryNode {
     hash: overrides.hash ?? mockHash(name),
     exported: overrides.exported ?? false,
     description: overrides.description ?? undefined,
+    bound: overrides.bound ?? null,
   };
 }
 

@@ -6,7 +6,7 @@
  */
 
 import type { CodeNode, NodeMap } from "./tree.ts";
-import { avg, cosineSimilarity, subtract } from "../utils/vectors.ts";
+import { avg, centroid, cosineSimilarity, subtract } from "../utils/vectors.ts";
 import { getChildren } from "./tree.ts";
 
 const NO_SIBLINGS = 2;
@@ -37,6 +37,18 @@ function computeFit(node: CodeNode, nodes: NodeMap): number | null {
   }
   if (parent.identity.length === NONE || node.leaf.length === NONE) {
     return NEXT;
+  }
+  if (node.bound === "inward") {
+    // Representativeness: how well does this node represent its siblings?
+    const siblings = getChildren(parent, nodes).filter(
+      (c) => c.key !== node.key && !c.util && c.bound !== "inward" && c.identity.length > NONE,
+    );
+    if (siblings.length === NONE) {
+      return NEXT;
+    }
+    const siblingIdentities = siblings.map((s) => s.identity);
+    const sibCentroid = centroid(siblingIdentities);
+    return cosineSimilarity(sibCentroid, node.identity);
   }
   return cosineSimilarity(parent.identity, node.leaf);
 }

@@ -1,11 +1,12 @@
-/**
- * The dissector. Breaks a single source file into its structural parts —
- * record types, functions, imports, and kural annotations. It is the only
- * module that speaks the TypeScript compiler API; nothing else in the system
- * reads AST nodes.
- */
+/** The dissector. Breaks a source file into structural parts — the only module that reads AST nodes. */
 
-import type { KuralFunction, KuralType, ModuleImports, ResidualEntry } from "./types.ts";
+import type {
+  BoundDirection,
+  KuralFunction,
+  KuralType,
+  ModuleImports,
+  ResidualEntry,
+} from "./types.ts";
 import { getJSDoc, hasExportModifier, isUtilModule } from "./jsdoc.ts";
 import type { JSDocInfo } from "./jsdoc.ts";
 import { basename } from "node:path";
@@ -21,6 +22,7 @@ type ExtractedFile = {
   types: Record<string, KuralType>;
   imports: ModuleImports;
   companion?: string;
+  bound?: BoundDirection;
   residuals: ResidualEntry[];
 };
 
@@ -28,6 +30,8 @@ const EMPTY_EMBEDDING: number[] = [];
 
 const FIRST = 0;
 const AFTER_FIRST = 1;
+const NO_LEAVES = 0;
+const INDEX_FILENAME = "index.ts";
 
 /** Fallback JSDocInfo for files with no statements. */
 const EMPTY_JSDOC: JSDocInfo = {
@@ -43,15 +47,10 @@ const EMPTY_JSDOC: JSDocInfo = {
  * Converts a function declaration AST node into a KuralFunction.
  * @param node - The function declaration AST node
  * @param filePath - Absolute path to the source file
- * @param imports - Resolved imports from the containing file
  * @returns A KuralFunction with params, return type, JSDoc tags, and calls
  * @kuralPure
  */
-function extractFunction(
-  node: ts.FunctionDeclaration,
-  filePath: string,
-  imports: ModuleImports,
-): KuralFunction {
+function extractFunction(node: ts.FunctionDeclaration, filePath: string): KuralFunction {
   const name = node.name?.text ?? "";
   const jsdoc = getJSDoc(node);
   const exported = hasExportModifier(node);
@@ -64,7 +63,7 @@ function extractFunction(
   }
 
   const returns = node.type ? node.type.getText() : "void";
-  const calls = extractCalls(node, imports);
+  const calls = extractCalls(node);
 
   return {
     name,
@@ -85,6 +84,7 @@ function extractFunction(
     patterns: jsdoc.patterns,
     documentedParams: jsdoc.documentedParams,
     hasReturnDoc: jsdoc.hasReturnDoc,
+    bound: jsdoc.bound,
   };
 }
 
@@ -119,6 +119,7 @@ function buildKuralType(
     helper: jsdoc.helper,
     residuals: jsdoc.residuals,
     patterns: jsdoc.patterns,
+    bound: jsdoc.bound,
   };
 }
 
@@ -211,13 +212,11 @@ function extractFieldReferences(fields: Record<string, string>, imports: ModuleI
 /**
  * Collects names of functions called within a function body.
  * @param node - The function declaration AST node to traverse
- * @param _imports - Resolved imports (reserved for future cross-module filtering)
  * @returns Deduplicated names of called functions
  * @kuralPure
  */
-function extractCalls(node: ts.FunctionDeclaration, _imports: ModuleImports): string[] {
+function extractCalls(node: ts.FunctionDeclaration): string[] {
   const calls: string[] = [];
-
   function visit(child: ts.Node): void {
     if (ts.isCallExpression(child) && ts.isIdentifier(child.expression)) {
       const name = child.expression.text;
@@ -225,14 +224,11 @@ function extractCalls(node: ts.FunctionDeclaration, _imports: ModuleImports): st
         calls.push(name);
       }
     }
-
     ts.forEachChild(child, visit);
   }
-
   if (node.body) {
     ts.forEachChild(node.body, visit);
   }
-
   return calls;
 }
 
@@ -255,7 +251,7 @@ function extractFile(filePath: string): ExtractedFile {
 
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isFunctionDeclaration(node) && node.name) {
-      const fn = extractFunction(node, filePath, imports);
+      const fn = extractFunction(node, filePath);
       fn.util = fn.util || moduleIsUtil;
       functions[fn.name] = fn;
     }
@@ -273,6 +269,13 @@ function extractFile(filePath: string): ExtractedFile {
     }
   });
 
+  // Auto-detect: index.ts with no functions or types is an inward-bound barrel export
+  const isBarrelExport =
+    basename(filePath) === INDEX_FILENAME &&
+    Object.keys(functions).length === NO_LEAVES &&
+    Object.keys(types).length === NO_LEAVES;
+  const bound = fileJSDoc.bound ?? (isBarrelExport ? "inward" : undefined);
+
   return {
     name: basename(filePath),
     path: filePath,
@@ -281,6 +284,7 @@ function extractFile(filePath: string): ExtractedFile {
     types,
     imports,
     companion: fileJSDoc.companion,
+    bound,
     residuals: fileJSDoc.residuals,
   };
 }

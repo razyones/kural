@@ -67,7 +67,7 @@ export default defineAudit({
         continue;
       }
       const cwk = getChildrenWithKeys(parentNode, nodes).filter(
-        ({ node: c }) => !c.util && !c.helper,
+        ({ node: c }) => !c.util && !c.helper && c.bound === null,
       );
       const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
       if (valid.length < minGroup) {

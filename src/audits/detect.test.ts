@@ -32,6 +32,7 @@ function makeDir(key: string, name: string, childKeys: string[]): [string, CodeN
       hash: "abcd1234",
       exported: false,
       description: undefined,
+      bound: null,
     },
   ];
 }

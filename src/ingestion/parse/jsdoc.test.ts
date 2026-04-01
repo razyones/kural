@@ -112,6 +112,28 @@ describe("getJSDoc kural tag extraction", () => {
   });
 });
 
+describe("getJSDoc @kuralBound parsing", () => {
+  it("parses @kuralBound inward", () => {
+    const info = jsdocFrom(`/** @kuralBound inward */\nfunction foo() {}`);
+    expect(info.bound).toBe("inward");
+  });
+
+  it("parses @kuralBound outward", () => {
+    const info = jsdocFrom(`/** @kuralBound outward */\nfunction foo() {}`);
+    expect(info.bound).toBe("outward");
+  });
+
+  it("ignores @kuralBound with invalid qualifier", () => {
+    const info = jsdocFrom(`/** @kuralBound sideways */\nfunction foo() {}`);
+    expect(info.bound).toBeUndefined();
+  });
+
+  it("ignores @kuralBound with no comment", () => {
+    const info = jsdocFrom(`/** @kuralBound */\nfunction foo() {}`);
+    expect(info.bound).toBeUndefined();
+  });
+});
+
 describe("getJSDoc param and returns extraction", () => {
   it("counts @param tags with descriptions", () => {
     const source = [

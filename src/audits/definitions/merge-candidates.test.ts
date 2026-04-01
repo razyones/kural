@@ -273,6 +273,7 @@ describe("merge-candidates detect — file-level pairs", () => {
       hash: "dir12345",
       exported: false,
       description: undefined,
+      bound: null,
     };
     for (const f of [fileA, fileB, fileC, fileD]) {
       f.parentKey = dir.key;

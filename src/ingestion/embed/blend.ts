@@ -1,13 +1,10 @@
 /**
  * The blender. Mixes separately-embedded facets into identity and leaf
  * vectors at fixed weights. It is the only module that performs weighted
- * vector addition on embeddings — no other module blends embedding
- * dimensions.
+ * vector addition on embeddings — no other module blends embedding dimensions.
  */
 
-import type { ContainerData, LeafData } from "./collect.ts";
-import type { CacheResolution } from "./hash.ts";
-import { collapseByPattern } from "./collect.ts";
+import type { LeafData } from "./collect.ts";
 import { cosineSimilarity } from "../../utils/vectors.ts";
 
 const NONE = 0;
@@ -179,109 +176,12 @@ function blendLeaves(
   return allLeafEmbs;
 }
 
-/**
- * Blends each file's identity with the mean of its children's leaf
- * embeddings to produce the file's leaf embedding. Children sharing
- * a `@kuralPatterns` tag are collapsed to their centroid first so
- * each concept contributes equally.
- * @param containers - Collected container data with file units
- * @param leaves - Collected leaf data with file-to-child mapping
- * @param identities - Pre-computed identity embeddings for containers
- * @param leafEmbeddings - Computed leaf embeddings for leaf units
- * @kuralPure
- * @kuralPatterns blendUnit
- */
-function blendFiles(
-  containers: ContainerData,
-  leaves: LeafData,
-  identities: number[][],
-  leafEmbeddings: number[][],
-): void {
-  for (let i = NONE; i < containers.fileCount; i++) {
-    const childIndices = leaves.fileChildIndices.get(containers.unitPaths[i]) ?? [];
-    const reps = collapseByPattern(childIndices, leafEmbeddings, leaves, mean);
-    const sigFacet = mean(reps);
-    const leaf = blend(identities[i], IDENTITY_WEIGHT, sigFacet, IDENTITY_WEIGHT);
-    containers.units[i].identityEmbedding = identities[i];
-    containers.units[i].leafEmbedding = leaf;
-  }
-}
-
-/**
- * Blends directory units deepest-first so each directory's leaf embedding
- * reflects the mean of its children's already-computed leaf embeddings.
- * @param containers - Collected container data with directory objects
- * @param identities - Pre-computed identity embeddings for containers
- * @kuralPure
- * @kuralPatterns blendUnit
- */
-function blendDirectories(containers: ContainerData, identities: number[][]): void {
-  const dirStart = containers.fileCount;
-  const dirIndices = containers.dirs.map((_, i) => i);
-  const SEPARATOR = "/";
-  dirIndices.sort((a, b) => {
-    const depthA = containers.dirs[a].path.split(SEPARATOR).length;
-    const depthB = containers.dirs[b].path.split(SEPARATOR).length;
-    return depthB - depthA;
-  });
-
-  const pathToLeaf = new Map<string, number[]>();
-  for (let i = NONE; i < containers.fileCount; i++) {
-    pathToLeaf.set(containers.unitPaths[i], containers.units[i].leafEmbedding);
-  }
-
-  for (const di of dirIndices) {
-    const vi = dirStart + di;
-    const childLeafs = containers.dirs[di].children
-      .map((p) => pathToLeaf.get(p))
-      .filter((e): e is number[] => e !== undefined && e.length > NONE);
-    const leaf = blend(identities[vi], IDENTITY_WEIGHT, mean(childLeafs), IDENTITY_WEIGHT);
-    containers.units[vi].identityEmbedding = identities[vi];
-    containers.units[vi].leafEmbedding = leaf;
-    pathToLeaf.set(containers.dirs[di].path, leaf);
-  }
-}
-
-/**
- * Blends name, path, and description facets into identity embeddings for
- * every container unit. Uncached containers get fresh identities via
- * weighted vector addition; cached ones retain their previous snapshot.
- * @param containers - Collected container data
- * @param cr - Cache resolution with cached/uncached indices
- * @param nameVecs - Embedded name vectors (uncached leaves + containers)
- * @param pathVecs - Embedded path vectors (uncached leaves + containers)
- * @param descVecs - Embedded description vectors (uncached leaves + containers)
- * @returns Identity embeddings aligned with containers.units
- * @kuralPure
- * @kuralHelper
- */
-function buildContainerIdentities(
-  containers: ContainerData,
-  cr: CacheResolution,
-  nameVecs: number[][],
-  pathVecs: number[][],
-  descVecs: number[][],
-): number[][] {
-  const { cachedContainerIds, uCont, uLeaf } = cr;
-  const identities = Array.from<number[]>({ length: containers.units.length });
-  for (let j = NONE; j < uCont.length; j++) {
-    const off = uLeaf.length + j;
-    identities[uCont[j]] = computeIdentity(nameVecs[off], pathVecs[off], descVecs[off]);
-  }
-  for (const [i, identity] of cachedContainerIds) {
-    identities[i] = identity;
-  }
-  return identities;
-}
-
 export {
   applyParentSignal,
   applySignatureSignals,
   blend,
-  blendDirectories,
-  blendFiles,
   blendLeaves,
-  buildContainerIdentities,
+  computeIdentity,
   cosineSimilarity,
   mean,
 };

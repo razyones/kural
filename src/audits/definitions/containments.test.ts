@@ -290,6 +290,61 @@ describe("containments detect — type-producer pair filtering", () => {
   });
 });
 
+describe("containments detect — outward-bound suppression", () => {
+  test("suppresses containment when dominant child is outward-bound", () => {
+    const dom = makeFunction({
+      key: "func:/src/dom.ts:dom",
+      name: "dom",
+      leaf: DOMINANT_EMB,
+      parentKey: "file:/src/dom.ts",
+      bound: "outward",
+    });
+    const wA = makeFunction({
+      key: "func:/src/dom.ts:wA",
+      name: "wA",
+      leaf: WEAK_A,
+      parentKey: "file:/src/dom.ts",
+    });
+    const wB = makeFunction({
+      key: "func:/src/dom.ts:wB",
+      name: "wB",
+      leaf: WEAK_B,
+      parentKey: "file:/src/dom.ts",
+    });
+    const wC = makeFunction({
+      key: "func:/src/dom.ts:wC",
+      name: "wC",
+      leaf: WEAK_C,
+      parentKey: "file:/src/dom.ts",
+    });
+    const file = makeFile({
+      key: "file:/src/dom.ts",
+      name: "dom.ts",
+      leaf: PARENT_EMB,
+      childKeys: [dom.key, wA.key, wB.key, wC.key],
+    });
+    const all: CodeNode[] = [file, dom, wA, wB, wC];
+    for (let i = NONE; i < BALANCED_COUNT; i++) {
+      all.push(...makeBalancedFile(i));
+    }
+    const nodes = toNodeMap(...all);
+    const ctx = createContext(nodes, CONFIG);
+    const findings = containments.detect(ctx);
+    const keys = findings.map((f) => f.key);
+
+    expect(keys).not.toContain("file:/src/dom.ts");
+  });
+
+  test("does NOT suppress when dominant child is not outward-bound", () => {
+    const nodes = buildDominanceTree();
+    const ctx = createContext(nodes, CONFIG);
+    const findings = containments.detect(ctx);
+    const keys = findings.map((f) => f.key);
+
+    expect(keys).toContain("file:/src/dom.ts");
+  });
+});
+
 describe("containments detect — gap below fence", () => {
   test("does not flag when gap is below fence", () => {
     const all: CodeNode[] = [];

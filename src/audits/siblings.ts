@@ -64,6 +64,9 @@ function collectSiblingPairs(nodes: Map<string, CodeNode>): SiblingPair[] {
         if (a.helper || b.helper) {
           continue;
         }
+        if (a.bound === "inward" || b.bound === "inward") {
+          continue;
+        }
         if (isTypeProducerPair(a, b)) {
           continue;
         }

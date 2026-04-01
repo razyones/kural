@@ -49,6 +49,7 @@ function baseProps(
   hash: string;
   exported: boolean;
   description: undefined;
+  bound: null;
 } {
   return {
     key,
@@ -64,6 +65,7 @@ function baseProps(
     hash: STUB_HASH,
     exported: false,
     description: undefined,
+    bound: null,
   };
 }
 

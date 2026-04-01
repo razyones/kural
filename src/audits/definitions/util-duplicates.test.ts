@@ -221,6 +221,7 @@ describe("duplicate-utils detect — exclusions", () => {
       hash: "pat1hash",
       exported: false,
       description: undefined,
+      bound: null,
     };
     const patB = {
       key: "pattern:file:/src/a.ts:grpB",
@@ -238,6 +239,7 @@ describe("duplicate-utils detect — exclusions", () => {
       hash: "pat2hash",
       exported: false,
       description: undefined,
+      bound: null,
     };
     const file = makeFile({
       key: "file:/src/a.ts",

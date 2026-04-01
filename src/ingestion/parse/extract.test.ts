@@ -233,3 +233,17 @@ describe("extractFile declare functions and call dedup", () => {
     expect(fn.calls).toHaveLength(SINGLE);
   });
 });
+
+describe("extractFile auto-detects inward-bound barrel exports", () => {
+  it("sets bound to inward for index.ts with no functions or types", () => {
+    const result = extractFile(resolve(localFixturesDir, "index.ts"));
+
+    expect(result.bound).toBe("inward");
+  });
+
+  it("does not set bound on regular files", () => {
+    const result = extractFile(resolve(localFixturesDir, "sample.ts"));
+
+    expect(result.bound).toBeUndefined();
+  });
+});

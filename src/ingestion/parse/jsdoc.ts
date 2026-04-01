@@ -5,7 +5,7 @@
  * @kuralResidual containments [a1e18864]
  */
 
-import type { ResidualEntry } from "./types.ts";
+import type { BoundDirection, ResidualEntry } from "./types.ts";
 import ts from "typescript";
 
 /** Parsed kural-relevant JSDoc information from an AST node. */
@@ -22,6 +22,8 @@ type JSDocInfo = {
   documentedParams: number;
   /** Whether a @returns tag with a non-empty description exists */
   hasReturnDoc: boolean;
+  /** Bound direction from @kuralBound */
+  bound?: BoundDirection;
 };
 
 const NONE = 0;
@@ -86,6 +88,11 @@ function processTag(tag: ts.JSDocTag, info: JSDocInfo): void {
     }
   } else if (tagName === "kuralCompanion" && typeof tag.comment === "string") {
     info.companion = tag.comment.trim();
+  } else if (tagName === "kuralBound" && typeof tag.comment === "string") {
+    const trimmed = tag.comment.trim();
+    if (trimmed === "inward" || trimmed === "outward") {
+      info.bound = trimmed;
+    }
   } else if (tagName === "param" && hasTagComment(tag)) {
     info.documentedParams++;
   } else if (tagName === "returns" && hasTagComment(tag)) {
@@ -95,7 +102,7 @@ function processTag(tag: ts.JSDocTag, info: JSDocInfo): void {
 
 /**
  * Extracts kural-specific JSDoc tags and description from an AST node.
- * Reads @kuralPure, @kuralUtil, @kuralResidual, @kuralCauses, @param, and @returns.
+ * Reads @kuralPure, @kuralUtil, @kuralResidual, @kuralCauses, @kuralBound, @param, and @returns.
  * @param node - The AST node to inspect for JSDoc comments
  * @returns Parsed JSDoc info with description, kural tags, and doc completeness
  * @kuralPure

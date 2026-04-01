@@ -1,6 +1,6 @@
-import type { CodeNode, DirectoryNode, FileNode, FunctionNode } from "../sost/tree.ts";
 import { createContext, isSuppressed } from "./context.ts";
 import { describe, expect, test } from "vite-plus/test";
+import { makeDir, makeFile, makeFunction, toNodeMap } from "../../tests/helpers/audits.ts";
 import type { AuditsConfig } from "../config/audits.ts";
 
 const NONE = 0;
@@ -25,109 +25,30 @@ function makeConfig(overrides: Partial<AuditsConfig> = {}): AuditsConfig {
   };
 }
 
-function makeFn(overrides: Partial<FunctionNode> = {}): FunctionNode {
-  return {
-    key: "func:/src/app.ts:fn",
-    kind: "function",
-    name: "fn",
-    identity: [],
-    leaf: [EMB_A1, EMB_A2, EMB_A3],
-    childKeys: [],
-    parentKey: "file:/src/app.ts",
-    patterns: null,
-    companion: null,
-    util: false,
-    helper: false,
-    residuals: [],
-    hash: "abc12345",
-    exported: true,
-    description: undefined,
-    calls: [],
-    returnsType: "void",
-    documentedParams: NONE,
-    hasReturnDoc: false,
-    pure: false,
-    causes: undefined,
-    paramNames: [],
-    paramTypes: [],
-    ...overrides,
-  };
-}
-
-function makeFile(overrides: Partial<FileNode> = {}): FileNode {
-  return {
-    key: "file:/src/app.ts",
-    kind: "file",
-    name: "app.ts",
-    identity: [],
-    leaf: [],
-    childKeys: [],
-    parentKey: "dir:/src",
-    patterns: null,
-    companion: null,
-    util: false,
-    helper: false,
-    residuals: [],
-    hash: "file1234",
-    exported: false,
-    description: undefined,
-    ...overrides,
-  };
-}
-
-function makeDir(overrides: Partial<DirectoryNode> = {}): DirectoryNode {
-  return {
-    key: "dir:/src",
-    kind: "directory",
-    name: "src",
-    identity: [],
-    leaf: [],
-    childKeys: [],
-    parentKey: null,
-    patterns: null,
-    companion: null,
-    util: false,
-    helper: false,
-    residuals: [],
-    hash: "dir12345",
-    exported: false,
-    description: undefined,
-    ...overrides,
-  };
-}
-
-function buildMap(nodes: CodeNode[]): Map<string, CodeNode> {
-  const map = new Map<string, CodeNode>();
-  for (const n of nodes) {
-    map.set(n.key, n);
-  }
-  return map;
-}
-
 describe("createContext — basic properties", () => {
   test("exposes sensitivity from config", () => {
-    const nodes = buildMap([]);
+    const nodes = toNodeMap();
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.sensitivity).toBe(SENSITIVITY);
   });
 
   test("exposes containmentFloor from config", () => {
-    const nodes = buildMap([]);
+    const nodes = toNodeMap();
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.containmentFloor).toBe(CONTAINMENT_FLOOR);
   });
 
   test("exposes minGroup from config", () => {
-    const nodes = buildMap([]);
+    const nodes = toNodeMap();
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.minGroup).toBe(MIN_GROUP);
   });
 
   test("initializes outlierKeys as empty set", () => {
-    const nodes = buildMap([]);
+    const nodes = toNodeMap();
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.outlierKeys.size).toBe(NONE);
@@ -137,7 +58,7 @@ describe("createContext — basic properties", () => {
 describe("createContext — rootKey detection", () => {
   test("finds root directory node with null parentKey", () => {
     const dir = makeDir({ parentKey: null });
-    const nodes = buildMap([dir]);
+    const nodes = toNodeMap(dir);
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.rootKey).toBe("dir:/src");
@@ -145,7 +66,7 @@ describe("createContext — rootKey detection", () => {
 
   test("returns null when no root directory exists", () => {
     const file = makeFile();
-    const nodes = buildMap([file]);
+    const nodes = toNodeMap(file);
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.rootKey).toBeNull();
@@ -154,7 +75,7 @@ describe("createContext — rootKey detection", () => {
 
 describe("createContext — axisScores", () => {
   test("defaults axisScores to null", () => {
-    const nodes = buildMap([]);
+    const nodes = toNodeMap();
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.axisScores).toBeNull();
@@ -162,7 +83,7 @@ describe("createContext — axisScores", () => {
 
   test("passes through provided axisScores", () => {
     const scores = { identity: ONE };
-    const nodes = buildMap([]);
+    const nodes = toNodeMap();
     const ctx = createContext(nodes, makeConfig(), scores);
 
     expect(ctx.axisScores).toBe(scores);
@@ -171,12 +92,12 @@ describe("createContext — axisScores", () => {
 
 describe("createContext — lazy siblingPairs", () => {
   test("computes sibling pairs lazily on access", () => {
-    const fnA = makeFn({
+    const fnA = makeFunction({
       name: "a",
       key: "func:/src/app.ts:a",
       leaf: [EMB_A1, EMB_A2, EMB_A3],
     });
-    const fnB = makeFn({
+    const fnB = makeFunction({
       name: "b",
       key: "func:/src/app.ts:b",
       leaf: [EMB_B1, EMB_B2, EMB_B3],
@@ -184,7 +105,7 @@ describe("createContext — lazy siblingPairs", () => {
     const file = makeFile({
       childKeys: [fnA.key, fnB.key],
     });
-    const nodes = buildMap([file, fnA, fnB]);
+    const nodes = toNodeMap(file, fnA, fnB);
     const ctx = createContext(nodes, makeConfig());
 
     const pairs = ctx.siblingPairs;
@@ -193,12 +114,12 @@ describe("createContext — lazy siblingPairs", () => {
   });
 
   test("caches sibling pairs across accesses", () => {
-    const fnA = makeFn({
+    const fnA = makeFunction({
       name: "a",
       key: "func:/src/app.ts:a",
       leaf: [EMB_A1, EMB_A2, EMB_A3],
     });
-    const fnB = makeFn({
+    const fnB = makeFunction({
       name: "b",
       key: "func:/src/app.ts:b",
       leaf: [EMB_B1, EMB_B2, EMB_B3],
@@ -206,7 +127,7 @@ describe("createContext — lazy siblingPairs", () => {
     const file = makeFile({
       childKeys: [fnA.key, fnB.key],
     });
-    const nodes = buildMap([file, fnA, fnB]);
+    const nodes = toNodeMap(file, fnA, fnB);
     const ctx = createContext(nodes, makeConfig());
 
     const first = ctx.siblingPairs;
@@ -218,7 +139,7 @@ describe("createContext — lazy siblingPairs", () => {
 
 describe("createContext — lazy fence values", () => {
   test("returns Infinity fences when too few pairs", () => {
-    const nodes = buildMap([]);
+    const nodes = toNodeMap();
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.leafMergeFence).toBe(Infinity);
@@ -228,7 +149,7 @@ describe("createContext — lazy fence values", () => {
 
 describe("isSuppressed — matching audit name", () => {
   test("returns true when residual matches audit without hash", () => {
-    const node = makeFn({
+    const node = makeFunction({
       residuals: [{ audit: "outliers" }],
     });
 
@@ -236,7 +157,7 @@ describe("isSuppressed — matching audit name", () => {
   });
 
   test("returns true when residual hash matches node hash", () => {
-    const node = makeFn({
+    const node = makeFunction({
       hash: "abc12345",
       residuals: [{ audit: "merge-candidates", hash: "abc12345" }],
     });
@@ -247,7 +168,7 @@ describe("isSuppressed — matching audit name", () => {
 
 describe("isSuppressed — non-matching cases", () => {
   test("returns false when residual hash differs from node hash", () => {
-    const node = makeFn({
+    const node = makeFunction({
       hash: "abc12345",
       residuals: [{ audit: "outliers", hash: "xxxxxxxx" }],
     });
@@ -256,7 +177,7 @@ describe("isSuppressed — non-matching cases", () => {
   });
 
   test("returns false when audit name does not match", () => {
-    const node = makeFn({
+    const node = makeFunction({
       residuals: [{ audit: "different-audit" }],
     });
 
@@ -264,7 +185,7 @@ describe("isSuppressed — non-matching cases", () => {
   });
 
   test("returns false when residuals array is empty", () => {
-    const node = makeFn({ residuals: [] });
+    const node = makeFunction({ residuals: [] });
 
     expect(isSuppressed(node, "outliers")).toBe(false);
   });
@@ -272,7 +193,7 @@ describe("isSuppressed — non-matching cases", () => {
 
 describe("isSuppressed — multiple residuals", () => {
   test("matches the correct audit among multiple residuals", () => {
-    const node = makeFn({
+    const node = makeFunction({
       residuals: [{ audit: "other-audit" }, { audit: "target-audit" }],
     });
 

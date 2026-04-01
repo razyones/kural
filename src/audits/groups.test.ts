@@ -1,6 +1,7 @@
 import type { FunctionNode, TypeNode } from "../sost/tree.ts";
 import { deduplicateByGroup, groupId } from "./groups.ts";
 import { describe, expect, test } from "vite-plus/test";
+import { makeFunction, makeType } from "../../tests/helpers/audits.ts";
 import type { ChildWithKey } from "./children.ts";
 
 const NONE = 0;
@@ -8,69 +9,19 @@ const ONE = 1;
 const TWO = 2;
 const THREE = 3;
 
-function makeFunctionNode(overrides: Partial<FunctionNode> = {}): FunctionNode {
-  return {
-    key: "func:/src/app.ts:doStuff",
-    kind: "function",
-    name: "doStuff",
-    identity: [],
-    leaf: [],
-    childKeys: [],
-    parentKey: "file:/src/app.ts",
-    patterns: null,
-    companion: null,
-    util: false,
-    helper: false,
-    residuals: [],
-    hash: "abc12345",
-    exported: true,
-    description: undefined,
-    calls: [],
-    returnsType: "void",
-    documentedParams: NONE,
-    hasReturnDoc: false,
-    pure: false,
-    causes: undefined,
-    paramNames: [],
-    paramTypes: [],
-    ...overrides,
-  };
-}
-
-function makeTypeNode(overrides: Partial<TypeNode> = {}): TypeNode {
-  return {
-    key: "type:/src/app.ts:MyType",
-    kind: "type",
-    name: "MyType",
-    identity: [],
-    leaf: [],
-    childKeys: [],
-    parentKey: "file:/src/app.ts",
-    patterns: null,
-    companion: null,
-    util: false,
-    helper: false,
-    residuals: [],
-    hash: "def67890",
-    exported: true,
-    description: undefined,
-    ...overrides,
-  };
-}
-
 function cwk(node: FunctionNode | TypeNode): ChildWithKey {
   return { key: node.key, node };
 }
 
 describe("groupId — patterns priority", () => {
   test("returns patterns when present", () => {
-    const node = makeFunctionNode({ patterns: ["handler-group"] });
+    const node = makeFunction({ patterns: ["handler-group"] });
 
     expect(groupId(node)).toBe("handler-group");
   });
 
   test("returns patterns even when companion is also set", () => {
-    const node = makeFunctionNode({
+    const node = makeFunction({
       patterns: ["handler-group"],
       companion: "companion-group",
     });
@@ -81,7 +32,7 @@ describe("groupId — patterns priority", () => {
 
 describe("groupId — companion fallback", () => {
   test("returns companion when patterns is null", () => {
-    const node = makeFunctionNode({
+    const node = makeFunction({
       patterns: null,
       companion: "companion-group",
     });
@@ -90,7 +41,7 @@ describe("groupId — companion fallback", () => {
   });
 
   test("returns null when both are null", () => {
-    const node = makeFunctionNode({
+    const node = makeFunction({
       patterns: null,
       companion: null,
     });
@@ -101,7 +52,7 @@ describe("groupId — companion fallback", () => {
 
 describe("groupId — type nodes", () => {
   test("returns null for type node without patterns or companion", () => {
-    const node = makeTypeNode({
+    const node = makeType({
       patterns: null,
       companion: null,
     });
@@ -110,7 +61,7 @@ describe("groupId — type nodes", () => {
   });
 
   test("returns patterns for type node with patterns", () => {
-    const node = makeTypeNode({ patterns: ["schema-group"] });
+    const node = makeType({ patterns: ["schema-group"] });
 
     expect(groupId(node)).toBe("schema-group");
   });
@@ -118,12 +69,12 @@ describe("groupId — type nodes", () => {
 
 describe("deduplicateByGroup — helper filtering", () => {
   test("skips nodes marked as helper", () => {
-    const helper = makeFunctionNode({
+    const helper = makeFunction({
       name: "validate",
       key: "func:/src/app.ts:validate",
       helper: true,
     });
-    const normal = makeFunctionNode({
+    const normal = makeFunction({
       name: "process",
       key: "func:/src/app.ts:process",
       helper: false,
@@ -139,17 +90,17 @@ describe("deduplicateByGroup — helper filtering", () => {
 
 describe("deduplicateByGroup — pattern dedup", () => {
   test("keeps one representative per pattern group", () => {
-    const a = makeFunctionNode({
+    const a = makeFunction({
       name: "handleA",
       key: "func:/src/app.ts:handleA",
       patterns: ["handlers"],
     });
-    const b = makeFunctionNode({
+    const b = makeFunction({
       name: "handleB",
       key: "func:/src/app.ts:handleB",
       patterns: ["handlers"],
     });
-    const c = makeFunctionNode({
+    const c = makeFunction({
       name: "handleC",
       key: "func:/src/app.ts:handleC",
       patterns: ["handlers"],
@@ -168,12 +119,12 @@ describe("deduplicateByGroup — pattern dedup", () => {
 
 describe("deduplicateByGroup — companion dedup", () => {
   test("keeps one representative per companion group", () => {
-    const a = makeFunctionNode({
+    const a = makeFunction({
       name: "read",
       key: "func:/src/app.ts:read",
       companion: "io-pair",
     });
-    const b = makeFunctionNode({
+    const b = makeFunction({
       name: "write",
       key: "func:/src/app.ts:write",
       companion: "io-pair",
@@ -189,11 +140,11 @@ describe("deduplicateByGroup — companion dedup", () => {
 
 describe("deduplicateByGroup — ungrouped passthrough", () => {
   test("passes through ungrouped non-helper nodes unchanged", () => {
-    const a = makeFunctionNode({
+    const a = makeFunction({
       name: "alpha",
       key: "func:/src/app.ts:alpha",
     });
-    const b = makeFunctionNode({
+    const b = makeFunction({
       name: "beta",
       key: "func:/src/app.ts:beta",
     });
@@ -208,22 +159,22 @@ describe("deduplicateByGroup — ungrouped passthrough", () => {
 
 describe("deduplicateByGroup — mixed groups", () => {
   test("handles mix of grouped, ungrouped, and helper nodes", () => {
-    const helper = makeFunctionNode({
+    const helper = makeFunction({
       name: "h",
       key: "func:/src/app.ts:h",
       helper: true,
     });
-    const patA = makeFunctionNode({
+    const patA = makeFunction({
       name: "pA",
       key: "func:/src/app.ts:pA",
       patterns: ["grp"],
     });
-    const patB = makeFunctionNode({
+    const patB = makeFunction({
       name: "pB",
       key: "func:/src/app.ts:pB",
       patterns: ["grp"],
     });
-    const solo = makeFunctionNode({
+    const solo = makeFunction({
       name: "solo",
       key: "func:/src/app.ts:solo",
     });

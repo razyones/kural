@@ -1,3 +1,4 @@
+import type { ContainerData, LeafData } from "./collect.ts";
 import {
   applyParentSignal,
   applySignatureSignals,
@@ -6,6 +7,7 @@ import {
   mean,
 } from "./blend.ts";
 import { describe, expect, it } from "vite-plus/test";
+import { blendFiles } from "./containers.ts";
 
 const HALF = 0.5;
 const TOLERANCE = 1e-6;
@@ -238,5 +240,168 @@ describe("applyParentSignal", () => {
 
   it("returns description when both are empty", () => {
     expect(applyParentSignal([], [])).toEqual([]);
+  });
+});
+
+const ID_WEIGHT = 0.5;
+
+describe("blendFiles — outward 2x weight", () => {
+  it("gives outward-bound child double weight in file leaf", () => {
+    const outwardLeaf = [ONE, ZERO];
+    const normalLeaf = [ZERO, ONE];
+    const fileIdentity = [ZERO, ZERO];
+
+    const containers: ContainerData = {
+      names: ["a.ts"],
+      descs: [""],
+      paths: ["/src/a.ts"],
+      units: [{ name: "a.ts", path: "/src/a.ts", identityEmbedding: [], leafEmbedding: [] }],
+      unitPaths: ["/src/a.ts"],
+      fileCount: ONE,
+      dirs: [],
+      fileBounds: [undefined],
+    };
+
+    const leaves: LeafData = {
+      names: ["outFn", "normFn"],
+      descs: ["", ""],
+      parentDescs: ["", ""],
+      paths: ["", ""],
+      sigs: ["", ""],
+      causes: ["", ""],
+      calls: ["", ""],
+      units: [
+        { name: "outFn", path: "/src/a.ts", identityEmbedding: [], leafEmbedding: [] },
+        { name: "normFn", path: "/src/a.ts", identityEmbedding: [], leafEmbedding: [] },
+      ],
+      fileChildIndices: new Map([["/src/a.ts", [ZERO, ONE]]]),
+      patternIds: [undefined, undefined],
+      boundIds: ["outward", undefined],
+    };
+
+    const leafEmbs = [outwardLeaf, normalLeaf];
+    const identities = [fileIdentity];
+
+    blendFiles(containers, leaves, identities, leafEmbs);
+
+    const result = containers.units[ZERO].leafEmbedding;
+    // Without outward: mean([1,0], [0,1]) = [0.5, 0.5]
+    // With outward 2x: mean([1,0], [0,1], [1,0]) = [0.667, 0.333]
+    // Then: blend([0,0], 0.5, sigFacet, 0.5) = sigFacet * 0.5
+    const EXPECTED_DIM0 = 0.333;
+    const EXPECTED_DIM1 = 0.167;
+    expect(result[ARRAY_FIRST]).toBeCloseTo(EXPECTED_DIM0, TOLERANCE);
+    expect(result[ARRAY_SECOND]).toBeCloseTo(EXPECTED_DIM1, TOLERANCE);
+  });
+});
+
+describe("blendFiles — inward uses sibling leaves", () => {
+  it("derives inward file leaf from sibling file leaves", () => {
+    const siblingLeaf = [ONE, ZERO];
+    const inwardIdentity = [ZERO, ONE];
+    const siblingIdentity = [ONE, ZERO];
+
+    const containers: ContainerData = {
+      names: ["index.ts", "sibling.ts"],
+      descs: ["", ""],
+      paths: ["/src/index.ts", "/src/sibling.ts"],
+      units: [
+        { name: "index.ts", path: "/src/index.ts", identityEmbedding: [], leafEmbedding: [] },
+        { name: "sibling.ts", path: "/src/sibling.ts", identityEmbedding: [], leafEmbedding: [] },
+      ],
+      unitPaths: ["/src/index.ts", "/src/sibling.ts"],
+      fileCount: TWO,
+      dirs: [
+        {
+          name: "src",
+          path: "/src",
+          children: ["/src/index.ts", "/src/sibling.ts"],
+          identityEmbedding: [],
+          leafEmbedding: [],
+          residuals: [],
+          description: undefined,
+        },
+      ],
+      fileBounds: ["inward", undefined],
+    };
+
+    const leaves: LeafData = {
+      names: ["fn"],
+      descs: [""],
+      parentDescs: [""],
+      paths: [""],
+      sigs: [""],
+      causes: [""],
+      calls: [""],
+      units: [{ name: "fn", path: "/src/sibling.ts", identityEmbedding: [], leafEmbedding: [] }],
+      fileChildIndices: new Map([["/src/sibling.ts", [ZERO]]]),
+      patternIds: [undefined],
+      boundIds: [undefined],
+    };
+
+    const leafEmbs = [siblingLeaf];
+    const identities = [inwardIdentity, siblingIdentity];
+
+    blendFiles(containers, leaves, identities, leafEmbs);
+
+    const result = containers.units[ZERO].leafEmbedding;
+    // Sibling leaf = [1, 0]
+    // Inward sigFacet = mean([[1, 0]]) = [1, 0]
+    // Inward leaf = blend([0, 1], 0.5, [1, 0], 0.5) = [0.5, 0.5]
+    expect(result[ARRAY_FIRST]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
+    expect(result[ARRAY_SECOND]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
+  });
+
+  it("falls back to own children when no siblings exist", () => {
+    const childLeaf = [ONE, ZERO];
+    const inwardIdentity = [ZERO, ONE];
+
+    const containers: ContainerData = {
+      names: ["index.ts"],
+      descs: [""],
+      paths: ["/src/index.ts"],
+      units: [
+        { name: "index.ts", path: "/src/index.ts", identityEmbedding: [], leafEmbedding: [] },
+      ],
+      unitPaths: ["/src/index.ts"],
+      fileCount: ONE,
+      dirs: [
+        {
+          name: "src",
+          path: "/src",
+          children: ["/src/index.ts"],
+          identityEmbedding: [],
+          leafEmbedding: [],
+          residuals: [],
+          description: undefined,
+        },
+      ],
+      fileBounds: ["inward"],
+    };
+
+    const leaves: LeafData = {
+      names: ["fn"],
+      descs: [""],
+      parentDescs: [""],
+      paths: [""],
+      sigs: [""],
+      causes: [""],
+      calls: [""],
+      units: [{ name: "fn", path: "/src/index.ts", identityEmbedding: [], leafEmbedding: [] }],
+      fileChildIndices: new Map([["/src/index.ts", [ZERO]]]),
+      patternIds: [undefined],
+      boundIds: [undefined],
+    };
+
+    const leafEmbs = [childLeaf];
+    const identities = [inwardIdentity];
+
+    blendFiles(containers, leaves, identities, leafEmbs);
+
+    const result = containers.units[ZERO].leafEmbedding;
+    // Falls back to own children: mean([1,0]) = [1,0]
+    // leaf = blend([0,1], 0.5, [1,0], 0.5) = [0.5, 0.5]
+    expect(result[ARRAY_FIRST]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
+    expect(result[ARRAY_SECOND]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
   });
 });

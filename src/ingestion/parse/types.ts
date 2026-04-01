@@ -5,6 +5,9 @@
  * these shapes.
  */
 
+/** Valid directions for the @kuralBound tag. */
+export type BoundDirection = "inward" | "outward";
+
 /** A single audit suppression annotation from @kuralResidual. */
 export type ResidualEntry = {
   /** Which audit to suppress (e.g. "outliers", "merge-candidates") */
@@ -62,6 +65,8 @@ export type KuralType = KuralUnit & {
   residuals: ResidualEntry[];
   /** Pattern group IDs from @kuralPatterns (supports nesting) */
   patterns?: string[];
+  /** Bound direction from @kuralBound */
+  bound?: BoundDirection;
   /** Structured symbol info from the Language Service */
   symbolInfo?: SymbolInfo;
 };
@@ -100,6 +105,8 @@ export type KuralFunction = KuralUnit & {
   documentedParams: number;
   /** Whether a @returns tag with a non-empty description exists */
   hasReturnDoc: boolean;
+  /** Bound direction from @kuralBound */
+  bound?: BoundDirection;
   /** Structured symbol info from the Language Service */
   symbolInfo?: SymbolInfo;
 };
@@ -120,6 +127,8 @@ export type KuralFile = KuralUnit & {
   imports: ModuleImports;
   /** Companion group ID from @kuralCompanion */
   companion?: string;
+  /** Bound direction from @kuralBound */
+  bound?: BoundDirection;
   /** Audit-specific suppression annotations from file-level @kuralResidual */
   residuals: ResidualEntry[];
 };

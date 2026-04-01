@@ -129,6 +129,7 @@ function indexFunctionsByPath(
       patterns: fn.patterns,
       documentedParams: fn.documentedParams,
       hasReturnDoc: fn.hasReturnDoc,
+      bound: fn.bound,
     };
   });
   return fnsByPath;
@@ -164,6 +165,7 @@ function indexTypesByPath(
       helper: t.helper,
       residuals: t.residuals,
       patterns: t.patterns,
+      bound: t.bound,
     };
   });
   return typesByPath;
@@ -199,6 +201,7 @@ function rebuildParseResult(collections: SnapshotCollections): ParseResult {
         externalImports: row.importsExternal,
       },
       companion: row.companion,
+      bound: row.bound,
       residuals: row.residuals,
     };
   });

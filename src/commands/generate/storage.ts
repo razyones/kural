@@ -93,6 +93,7 @@ async function writeFiles(
       importsInternal: f.imports.internalImports,
       importsExternal: f.imports.externalImports,
       companion: f.companion,
+      bound: f.bound,
       residuals: f.residuals,
     })),
   );
@@ -127,6 +128,7 @@ async function writeTypes(
         leafEmbedding: t.leafEmbedding,
         facetHash: t.facetHash,
         patterns: t.patterns,
+        bound: t.bound,
       })),
     ),
   );
@@ -167,6 +169,7 @@ async function writeFunctions(
         patterns: fn.patterns,
         documentedParams: fn.documentedParams,
         hasReturnDoc: fn.hasReturnDoc,
+        bound: fn.bound,
       })),
     ),
   );

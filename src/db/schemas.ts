@@ -16,6 +16,7 @@ const fileSchema = z.object({
   importsInternal: z.array(z.string()),
   importsExternal: z.array(z.string()),
   companion: z.string().optional(),
+  bound: z.enum(["inward", "outward"]).optional(),
   residuals: z.array(z.object({ audit: z.string(), hash: z.string().optional() })),
 });
 
@@ -33,6 +34,7 @@ const typeSchema = z.object({
   leafEmbedding: z.array(z.number()),
   facetHash: z.string().optional(),
   patterns: z.array(z.string()).optional(),
+  bound: z.enum(["inward", "outward"]).optional(),
 });
 
 const functionSchema = z.object({
@@ -55,6 +57,7 @@ const functionSchema = z.object({
   patterns: z.array(z.string()).optional(),
   documentedParams: z.number(),
   hasReturnDoc: z.boolean(),
+  bound: z.enum(["inward", "outward"]).optional(),
 });
 
 const directorySchema = z.object({

@@ -116,6 +116,7 @@ Every unit's description — directory KURAL.md, file-level JSDoc, function JSDo
 | `@kuralPatterns`              | Deduplicated to centroid representative               |
 | `@kuralCompanion`             | Deduplicated to centroid representative               |
 | `@kuralResidual`              | No role in scoring, audit suppression only            |
+| `@kuralBound inward/outward`  | Adjusted scoring + selective audit suppression        |
 | `@kuralPure` / `@kuralCauses` | Influences what gets embedded, not how scores compute |
 
 ## Build & Run

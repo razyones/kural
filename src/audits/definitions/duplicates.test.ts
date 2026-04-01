@@ -248,6 +248,7 @@ describe("duplicates detect — same-file cross-pattern exclusion", () => {
       hash: "pat1hash",
       exported: false,
       description: undefined,
+      bound: null,
     };
     const patB = {
       key: "pattern:file:/src/a.ts:grpB",
@@ -265,6 +266,7 @@ describe("duplicates detect — same-file cross-pattern exclusion", () => {
       hash: "pat2hash",
       exported: false,
       description: undefined,
+      bound: null,
     };
     const file = makeFile({
       key: "file:/src/a.ts",

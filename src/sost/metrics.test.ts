@@ -1,4 +1,4 @@
-import type { CodeNode, DirectoryNode, FileNode, FunctionNode, NodeMap, TypeNode } from "./tree.ts";
+import type { DirectoryNode, FileNode, FunctionNode, TypeNode } from "./tree.ts";
 import {
   NO_SIBLINGS,
   computeChildrenUniqueness,
@@ -6,6 +6,13 @@ import {
   computeUniqueness,
   findBestUncle,
 } from "./metrics.ts";
+import {
+  makeDir as _makeDir,
+  makeFile as _makeFile,
+  makeFunction as _makeFunction,
+  makeType as _makeType,
+  toNodeMap,
+} from "../../tests/helpers/audits.ts";
 import { describe, expect, it } from "vite-plus/test";
 
 const NONE = 0;
@@ -29,81 +36,33 @@ const V_UNIT_Y = [E0, E1, E0];
 const V_UNIT_Z = [E0, E0, E1];
 const V_SIMILAR_X = [E09, E03, E0];
 
-/** Shared base properties for mock nodes. */
-const BASE_FIELDS = {
-  parentKey: null,
-  patterns: null,
-  companion: null,
-  util: false,
-  helper: false,
-  residuals: [],
-  hash: "deadbeef",
-  exported: false,
-  description: undefined,
-};
-
+/** Thin wrapper: defaults identity and leaf to V_UNIT_X. */
 function makeFunctionNode(
   overrides: Partial<FunctionNode> & { key: string; name: string },
 ): FunctionNode {
-  return {
-    kind: "function",
-    identity: V_UNIT_X,
-    leaf: V_UNIT_X,
-    childKeys: [],
-    calls: [],
-    returnsType: "void",
-    documentedParams: NONE,
-    hasReturnDoc: false,
-    pure: false,
-    causes: undefined,
-    paramNames: [],
-    paramTypes: [],
-    ...BASE_FIELDS,
-    ...overrides,
-  };
+  return _makeFunction({ identity: V_UNIT_X, leaf: V_UNIT_X, ...overrides });
 }
 
+/** Thin wrapper: defaults identity and leaf to V_UNIT_X. */
 function makeTypeNode(overrides: Partial<TypeNode> & { key: string; name: string }): TypeNode {
-  return {
-    kind: "type",
-    identity: V_UNIT_X,
-    leaf: V_UNIT_X,
-    childKeys: [],
-    ...BASE_FIELDS,
-    ...overrides,
-  };
+  return _makeType({ identity: V_UNIT_X, leaf: V_UNIT_X, ...overrides });
 }
 
+/** Thin wrapper: defaults identity and leaf to V_UNIT_X. */
 function makeFileNode(overrides: Partial<FileNode> & { key: string; name: string }): FileNode {
-  return {
-    kind: "file",
-    identity: V_UNIT_X,
-    leaf: V_UNIT_X,
-    childKeys: [],
-    ...BASE_FIELDS,
-    ...overrides,
-  };
+  return _makeFile({ identity: V_UNIT_X, leaf: V_UNIT_X, ...overrides });
 }
 
+/** Thin wrapper: defaults identity and leaf to V_UNIT_X. */
 function makeDirectoryNode(
   overrides: Partial<DirectoryNode> & { key: string; name: string },
 ): DirectoryNode {
-  return {
-    kind: "directory",
-    identity: V_UNIT_X,
-    leaf: V_UNIT_X,
-    childKeys: [],
-    ...BASE_FIELDS,
-    ...overrides,
-  };
+  return _makeDir({ identity: V_UNIT_X, leaf: V_UNIT_X, ...overrides });
 }
 
-function buildNodeMap(nodes: CodeNode[]): NodeMap {
-  const map: NodeMap = new Map();
-  for (const node of nodes) {
-    map.set(node.key, node);
-  }
-  return map;
+/** Builds a NodeMap from an array of CodeNode objects. */
+function buildNodeMap(nodes: Parameters<typeof toNodeMap>): ReturnType<typeof toNodeMap> {
+  return toNodeMap(...nodes);
 }
 
 describe("computeFit returns null for util containers", () => {
@@ -622,5 +581,91 @@ describe("computeFit — edge cases", () => {
     });
     const nodes = buildNodeMap([utilDir, utilFile]);
     expect(computeFit(utilFile, nodes)).not.toBeNull();
+  });
+});
+
+describe("computeFit — inward-bound representativeness", () => {
+  it("returns similarity to sibling centroid for inward-bound file", () => {
+    const dir = makeDirectoryNode({
+      key: "dir:src",
+      name: "src",
+      childKeys: ["file:index", "file:a", "file:b"],
+    });
+    const siblingA = makeFileNode({
+      key: "file:a",
+      name: "a.ts",
+      parentKey: "dir:src",
+      identity: V_UNIT_X,
+    });
+    const siblingB = makeFileNode({
+      key: "file:b",
+      name: "b.ts",
+      parentKey: "dir:src",
+      identity: V_UNIT_Y,
+    });
+    const inwardFile = makeFileNode({
+      key: "file:index",
+      name: "index.ts",
+      parentKey: "dir:src",
+      bound: "inward",
+      identity: V_UNIT_X,
+    });
+    const nodes = buildNodeMap([dir, siblingA, siblingB, inwardFile]);
+    const result = computeFit(inwardFile, nodes);
+    expect(result).not.toBeNull();
+    // Centroid of [1,0,0] and [0,1,0] is [0.5,0.5,0]
+    // cosineSim([1,0,0], [0.5,0.5,0]) ≈ 0.707
+    expect(result).toBeGreaterThan(HALF);
+    expect(result).toBeLessThan(NEXT);
+  });
+
+  it("returns 1 when no siblings exist", () => {
+    const dir = makeDirectoryNode({
+      key: "dir:src",
+      name: "src",
+      childKeys: ["file:index"],
+    });
+    const inwardFile = makeFileNode({
+      key: "file:index",
+      name: "index.ts",
+      parentKey: "dir:src",
+      bound: "inward",
+      identity: V_UNIT_X,
+    });
+    const nodes = buildNodeMap([dir, inwardFile]);
+    expect(computeFit(inwardFile, nodes)).toBe(NEXT);
+  });
+
+  it("excludes other inward siblings from centroid", () => {
+    const dir = makeDirectoryNode({
+      key: "dir:src",
+      name: "src",
+      childKeys: ["file:index", "file:barrel", "file:a"],
+    });
+    const otherInward = makeFileNode({
+      key: "file:barrel",
+      name: "barrel.ts",
+      parentKey: "dir:src",
+      bound: "inward",
+      identity: V_UNIT_Z,
+    });
+    const siblingA = makeFileNode({
+      key: "file:a",
+      name: "a.ts",
+      parentKey: "dir:src",
+      identity: V_UNIT_X,
+    });
+    const inwardFile = makeFileNode({
+      key: "file:index",
+      name: "index.ts",
+      parentKey: "dir:src",
+      bound: "inward",
+      identity: V_UNIT_X,
+    });
+    const nodes = buildNodeMap([dir, otherInward, siblingA, inwardFile]);
+    const result = computeFit(inwardFile, nodes);
+    // Only siblingA is in the centroid, which is V_UNIT_X
+    // cosineSim(V_UNIT_X, V_UNIT_X) = 1
+    expect(result).toBeCloseTo(NEXT, TOLERANCE);
   });
 });

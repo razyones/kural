@@ -241,6 +241,13 @@ Helpers (unexported functions called by 2+ siblings). They participate in scorin
 
 Groups are deduplicated to their identity centroid for uniqueness computation. Prevents structurally similar by-design groups from distorting the distribution.
 
+### @kuralBound inward / outward
+
+Units whose identity is inseparable from their hierarchical context. See `docs/bound-nodes.md` for full specification.
+
+- **Inward** (barrel exports, entry points): fit is replaced with representativeness against the centroid of aggregated targets. Excluded from parent's `childrenUniqueness`.
+- **Outward** (dominant primary exports): fit is normal. Parent's `childrenUniqueness` is computed in two tiers — the outward child's dominance is expected, helpers' coherence is measured separately.
+
 ### @kuralResidual
 
 No role in scoring. Audit suppression only.
