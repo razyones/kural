@@ -80,6 +80,7 @@ function formatDelta(delta: number): string {
 /**
  * Renders a hero score display with verdict and metadata.
  * @param options - Hero display configuration including score, kind, and optional delta
+ * @kuralBound outward
  * @kuralCauses writes hero display to stdout
  */
 function renderHero(options: HeroOptions): void {

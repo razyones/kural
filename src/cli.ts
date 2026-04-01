@@ -4,7 +4,7 @@
  * The entry point. Bootstraps the CLI router, loads environment variables,
  * and dispatches to subcommands. It is the only module that wires the
  * top-level command tree — no other module touches process argv.
- * @kuralResidual outliers [204b56f5]
+ * @kuralBound inward
  */
 
 import audit from "./commands/audit/command.ts";
