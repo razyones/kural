@@ -175,6 +175,7 @@ async function writeFunctions(
  * @param result - Parsed codebase with directory objects to persist
  * @returns Resolves when directory rows are persisted
  * @kuralCauses persists directory rows to the snapshot database
+ * @kuralPatterns writeCollection
  */
 async function writeDirectories(
   collections: SnapshotCollections,
