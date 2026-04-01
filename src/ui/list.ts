@@ -24,19 +24,6 @@ type ListSection = {
 };
 
 /**
- * Renders a single list item as a bullet heading with indented dim details.
- * @param item - The list item to render
- * @kuralCauses writes list item to stdout
- */
-function printListItem(item: ListItem): void {
-  logger.log(`  ${colors.bold(BULLET)} ${item.heading}`);
-  for (const detail of item.details) {
-    logger.log(colors.dim(`    ${detail}`));
-  }
-  logger.log("");
-}
-
-/**
  * Renders non-empty sections as titled groups of list items.
  * @param sections - Titled sections to display
  * @kuralCauses writes section groups to stdout
@@ -47,7 +34,11 @@ function printListSections(sections: ListSection[]): void {
     const count = section.total ?? section.items.length;
     logger.log(colors.yellow(`${section.title} (${count})\n`));
     for (const item of section.items) {
-      printListItem(item);
+      logger.log(`  ${colors.bold(BULLET)} ${item.heading}`);
+      for (const detail of item.details) {
+        logger.log(colors.dim(`    ${detail}`));
+      }
+      logger.log("");
     }
   }
 }
