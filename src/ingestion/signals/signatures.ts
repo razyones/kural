@@ -29,6 +29,7 @@ function identitySignature(name: string, description?: string): string {
  * @param type - The KuralType to extract structure from
  * @returns Field structure string, or empty string if no fields
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitSignature
  */
 function typeSignature(type: KuralType): string {
@@ -45,6 +46,7 @@ function typeSignature(type: KuralType): string {
  * @param type - The KuralType to build a signature for
  * @returns A plain-text leaf signature with structural context
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitLeafSignature
  */
 function typeLeafSignature(type: KuralType): string {
@@ -61,6 +63,7 @@ function typeLeafSignature(type: KuralType): string {
  * @param fn - The KuralFunction to extract structure from
  * @returns Params and return type string
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitSignature
  */
 function functionSignature(fn: KuralFunction): string {
@@ -80,6 +83,7 @@ function functionSignature(fn: KuralFunction): string {
  * @param fn - The KuralFunction to build a signature for
  * @returns A plain-text leaf signature with structural context
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitLeafSignature
  */
 function functionLeafSignature(fn: KuralFunction): string {
@@ -92,6 +96,7 @@ function functionLeafSignature(fn: KuralFunction): string {
  * @param file - The KuralFile to extract structure from
  * @returns Exports string, or empty string if no exports
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitSignature
  */
 function fileSignature(file: KuralFile): string {
@@ -117,6 +122,7 @@ function fileSignature(file: KuralFile): string {
  * @param file - The KuralFile to build a signature for
  * @returns A plain-text leaf signature with structural context
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitLeafSignature
  */
 function fileLeafSignature(file: KuralFile): string {
@@ -133,6 +139,7 @@ function fileLeafSignature(file: KuralFile): string {
  * @param dir - The KuralDirectory to extract structure from
  * @returns Children string, or empty string if no children
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitSignature
  */
 function directorySignature(dir: KuralDirectory): string {
@@ -148,6 +155,7 @@ function directorySignature(dir: KuralDirectory): string {
  * @param dir - The KuralDirectory to build a signature for
  * @returns A plain-text leaf signature with structural context
  * @kuralPure
+ * @kuralPatterns signatureBuilder
  * @kuralPatterns unitLeafSignature
  */
 function directoryLeafSignature(dir: KuralDirectory): string {
