@@ -78,7 +78,12 @@ function processTag(tag: ts.JSDocTag, info: JSDocInfo): void {
     info.causes = tag.comment;
   } else if (tagName === "kuralPatterns" && typeof tag.comment === "string") {
     info.patterns ??= [];
-    info.patterns.push(tag.comment.trim());
+    for (const part of tag.comment.split(",")) {
+      const trimmed = part.trim();
+      if (trimmed.length > NONE) {
+        info.patterns.push(trimmed);
+      }
+    }
   } else if (tagName === "kuralCompanion" && typeof tag.comment === "string") {
     info.companion = tag.comment.trim();
   } else if (tagName === "param" && hasTagComment(tag)) {

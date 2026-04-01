@@ -96,6 +96,16 @@ describe("getJSDoc kural tag extraction", () => {
     expect(info.patterns).toEqual(["outer", "inner"]);
   });
 
+  it("parses comma-separated @kuralPatterns", () => {
+    const info = jsdocFrom(`/** @kuralPatterns outer, inner */\nfunction foo() {}`);
+    expect(info.patterns).toEqual(["outer", "inner"]);
+  });
+
+  it("ignores empty segments in comma-separated @kuralPatterns", () => {
+    const info = jsdocFrom(`/** @kuralPatterns outer,, inner */\nfunction foo() {}`);
+    expect(info.patterns).toEqual(["outer", "inner"]);
+  });
+
   it("extracts @kuralCompanion tag", () => {
     const info = jsdocFrom(`/** @kuralCompanion tableShape */\nfunction foo() {}`);
     expect(info.companion).toBe("tableShape");

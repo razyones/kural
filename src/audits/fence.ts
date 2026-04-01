@@ -51,8 +51,7 @@ function stddev(values: number[], mu: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of standard deviations from the mean
  * @returns Upper fence threshold, or Infinity for fewer than 2 values
- * @kuralPatterns fenceComputation
- * @kuralPatterns zScoreFence
+ * @kuralPatterns fenceComputation, zScoreFence
  * @kuralPure
  */
 function upperFence(values: number[], sensitivity: number): number {
@@ -68,8 +67,7 @@ function upperFence(values: number[], sensitivity: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of standard deviations from the mean
  * @returns Lower fence threshold, or -Infinity for fewer than 2 values
- * @kuralPatterns fenceComputation
- * @kuralPatterns zScoreFence
+ * @kuralPatterns fenceComputation, zScoreFence
  * @kuralPure
  */
 function lowerFence(values: number[], sensitivity: number): number {
@@ -85,8 +83,7 @@ function lowerFence(values: number[], sensitivity: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of scaled MAD units from the median
  * @returns Robust lower fence, or -Infinity for fewer than 2 values
- * @kuralPatterns fenceComputation
- * @kuralPatterns robustFence
+ * @kuralPatterns fenceComputation, robustFence
  * @kuralPure
  */
 function robustLowerFence(values: number[], sensitivity: number): number {
@@ -104,8 +101,7 @@ function robustLowerFence(values: number[], sensitivity: number): number {
  * @param values - Distribution of values
  * @param sensitivity - Number of scaled MAD units from the median
  * @returns Robust upper fence, or Infinity for fewer than 2 values
- * @kuralPatterns fenceComputation
- * @kuralPatterns robustFence
+ * @kuralPatterns fenceComputation, robustFence
  * @kuralPure
  */
 function robustUpperFence(values: number[], sensitivity: number): number {
