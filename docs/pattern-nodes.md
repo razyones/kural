@@ -54,7 +54,7 @@ materializePatterns(nodes):
         kind:      "pattern"
         name:      patternId
         identity:  centroid(members.map(m => m.identity))
-        leaf:      [] (populated during embedding)
+        leaf:      centroid(members.map(m => m.leaf))
         childKeys: [member keys]
         parentKey: file key
       reparent members: set member.parentKey = pattern key
@@ -92,15 +92,15 @@ Directory leaf computation is unaffected — directories aggregate file/subdirec
 
 ### Scoring
 
-`deduplicateByGroup` in `metrics.ts` is no longer needed. A file's `getEligibleChildren` returns pattern nodes and ungrouped leaves. Pattern nodes participate in uniqueness computation like any container — their identity (the centroid) is the representative vector.
+`deduplicateByGroup` in `metrics.ts` is no longer needed. A file's `getEligibleChildren` returns pattern nodes and ungrouped leaves. Pattern nodes participate in uniqueness computation like any container — their identity (the centroid) is the representative vector. `getEligibleChildren` also implements the util sandbox: util parents include all children, domain parents exclude util children.
 
-Fit for pattern members measures `cosineSimilarity(patternNode.identity, member.leaf)` — "does this member match the pattern's centroid?" A mis-tagged member scores low, which is correct.
+Fit for pattern members measures `cosineSimilarity(patternNode.identity, member.leaf)` — "does this member match the pattern's centroid?" A mis-tagged member scores low, which is correct. Util containers now get fit and childrenFit when their parent is also util — within the util tree, these measurements are meaningful.
 
 ### Auditing
 
-Pattern members are no longer siblings of each other — they live under different parents (the pattern node vs other pattern nodes / the file). The guards `a.patterns !== null && b.patterns !== null` in sibling pair collection, duplicates, and util-duplicates become unnecessary. The tree topology enforces what the guards were manually filtering.
+Pattern members are no longer siblings of each other — they live under different parents (the pattern node vs other pattern nodes / the file). Sibling pair collection skips pattern nodes as parents since intra-pattern similarity is by design. Duplicate detection skips pairs sharing the same pattern ID, and also skips cross-pattern pairs within the same file (different pattern nodes sharing a file parent). Outliers and containments still audit pattern internals — a pattern group could have a mis-tagged member or be dominated by one child.
 
-`deduplicateByGroup` in `audits/groups.ts` is also unnecessary — bloated, outliers, and containments audits iterate `getEligibleChildren`, which returns pattern nodes directly.
+`deduplicateByGroup` in `audits/groups.ts` is no longer used by scoring — the tree handles it. Bloated, outliers, and containments audits iterate `getEligibleChildren`, which returns pattern nodes directly.
 
 ### Placement
 
@@ -116,12 +116,12 @@ Fix: `collectSubtree` skips `kind === "pattern"` nodes from contributing their o
 
 ## 5. What Pattern Nodes Do NOT Have
 
-| Property        | File/Directory           | Pattern Node            |
-| --------------- | ------------------------ | ----------------------- |
-| Description     | Human-written            | None                    |
-| Database record | Persisted                | In-memory only          |
-| Identity source | Embedded from facets     | Centroid of members     |
-| Leaf source     | Aggregated from children | Aggregated from members |
+| Property        | File/Directory           | Pattern Node                  |
+| --------------- | ------------------------ | ----------------------------- |
+| Description     | Human-written            | None                          |
+| Database record | Persisted                | In-memory only                |
+| Identity source | Embedded from facets     | Centroid of member identities |
+| Leaf source     | Aggregated from children | Centroid of member leaves     |
 
 The `patterns` field on function/type rows is the source of truth. `buildTree` materializes the hierarchy every run.
 
