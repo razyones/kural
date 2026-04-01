@@ -14,6 +14,7 @@ import { num } from "../../utils/record.ts";
 
 const NONE = 0;
 const NEXT = 1;
+const MIN_SUBSTANTIAL_CLUSTERS = 2;
 
 /**
  * Renders cluster composition details showing which children should split into separate containers.
@@ -76,7 +77,8 @@ function detectBloated(
     if (!result || !hasSignificantGap(result.merges, sensitivity)) {
       continue;
     }
-    if (result.clusters.length >= valid.length) {
+    const substantialClusters = result.clusters.filter((c) => c.length > NEXT);
+    if (substantialClusters.length < MIN_SUBSTANTIAL_CLUSTERS) {
       continue;
     }
     if (kind === "file" && isTypeOnlySplit(result.clusters, valid)) {
