@@ -166,9 +166,21 @@ async function rotateActive(root: string, branch: string): Promise<void> {
 function readPinName(dbPath: string): string | undefined {
   const db = new BetterSqlite3(dbPath);
   try {
-    const row: unknown = db.prepare("SELECT value FROM metadata WHERE key = ?").get(PIN_NAME_KEY);
+    const reg: unknown = db
+      .prepare("SELECT table_name FROM collection_registry WHERE collection_id = 'metadata'")
+      .get();
+    if (reg === undefined || reg === null || typeof reg !== "object" || !("table_name" in reg)) {
+      return undefined;
+    }
+    const table = String(reg.table_name);
+    const row: unknown = db
+      .prepare(`SELECT value FROM ${table} WHERE key = ?`)
+      .get(`s:${PIN_NAME_KEY}`);
     if (row !== null && row !== undefined && typeof row === "object" && "value" in row) {
-      return String(row.value);
+      const parsed: unknown = JSON.parse(String(row.value));
+      if (parsed !== null && typeof parsed === "object" && "value" in parsed) {
+        return String(parsed.value);
+      }
     }
     return undefined;
   } catch {
