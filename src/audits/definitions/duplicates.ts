@@ -16,6 +16,13 @@ import { isSuppressed } from "../context.ts";
 const NONE = 0;
 const NEXT = 1;
 
+/** True when both nodes live under different pattern groups in the same file. @kuralHelper */
+function isSameFileViaPatterns(a: CodeNode, b: CodeNode, nodes: Map<string, CodeNode>): boolean {
+  const fa = a.parentKey === null ? undefined : nodes.get(a.parentKey);
+  const fb = b.parentKey === null ? undefined : nodes.get(b.parentKey);
+  return fa?.kind === "pattern" && fb?.kind === "pattern" && fa.parentKey === fb.parentKey;
+}
+
 /**
  * Shared formatter for both duplicates and util-duplicates audits.
  * @param ctx - The formatting context with finding and display data
@@ -54,7 +61,13 @@ function scanLeafCrossFile(
       if (a.parentKey === b.parentKey) {
         continue;
       }
+      if (a.patterns !== null && a.patterns === b.patterns) {
+        continue;
+      }
       if (isCallerCallee(a, b)) {
+        continue;
+      }
+      if (isSameFileViaPatterns(a, b, nodes)) {
         continue;
       }
       const fa = a.parentKey === null ? undefined : nodes.get(a.parentKey);
@@ -83,6 +96,7 @@ function scanLeafCrossFile(
  * Finds structurally similar units that straddle the util-domain boundary, surfacing misclassified utilities.
  * @param nonUtil - Non-util leaf node entries
  * @param util - Util leaf node entries
+ * @param nodes - The code tree node map
  * @param fence - The similarity threshold above which a pair is flagged
  * @returns Findings for cross-population duplicates
  * @kuralPatterns crossScan
@@ -91,6 +105,7 @@ function scanLeafCrossFile(
 function scanCrossPopDuplicates(
   nonUtil: [string, CodeNode][],
   util: [string, CodeNode][],
+  nodes: Map<string, CodeNode>,
   fence: number,
 ): Finding[] {
   const findings: Finding[] = [];
@@ -101,7 +116,13 @@ function scanCrossPopDuplicates(
       if (a.parentKey === b.parentKey) {
         continue;
       }
+      if (a.patterns !== null && a.patterns === b.patterns) {
+        continue;
+      }
       if (isCallerCallee(a, b)) {
+        continue;
+      }
+      if (isSameFileViaPatterns(a, b, nodes)) {
         continue;
       }
       const sim = cosineSimilarity(a.leaf, b.leaf);
@@ -161,7 +182,7 @@ function scanFileCrossDir(entries: [string, CodeNode][], fence: number): Finding
   return findings;
 }
 
-export { formatDuplicate };
+export { formatDuplicate, isSameFileViaPatterns };
 
 export default defineAudit({
   name: "duplicates",
@@ -181,7 +202,7 @@ export default defineAudit({
 
     const findings = [
       ...scanLeafCrossFile(leafEntries, nodes, leafMergeFence),
-      ...scanCrossPopDuplicates(leafEntries, utilLeafEntries, leafMergeFence),
+      ...scanCrossPopDuplicates(leafEntries, utilLeafEntries, nodes, leafMergeFence),
       ...scanFileCrossDir(fileEntries, fileMergeFence),
     ];
 

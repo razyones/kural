@@ -5,9 +5,9 @@
  */
 
 import type { AuditContext, Finding } from "../types.ts";
+import { formatDuplicate, isSameFileViaPatterns } from "./duplicates.ts";
 import { cosineSimilarity } from "../../utils/vectors.ts";
 import { defineAudit } from "../types.ts";
-import { formatDuplicate } from "./duplicates.ts";
 import { isCallerCallee } from "../helpers.ts";
 import { isLeaf } from "../../sost/tree.ts";
 import { isSuppressed } from "../context.ts";
@@ -33,7 +33,13 @@ export default defineAudit({
         if (a.parentKey === b.parentKey) {
           continue;
         }
+        if (a.patterns !== null && a.patterns === b.patterns) {
+          continue;
+        }
         if (isCallerCallee(a, b)) {
+          continue;
+        }
+        if (isSameFileViaPatterns(a, b, nodes)) {
           continue;
         }
         const sim = cosineSimilarity(a.leaf, b.leaf);

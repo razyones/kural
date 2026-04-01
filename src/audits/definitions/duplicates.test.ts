@@ -216,6 +216,69 @@ describe("duplicates detect — exclusions", () => {
   });
 });
 
+describe("duplicates detect — same-file cross-pattern exclusion", () => {
+  test("excludes cross-pattern pairs in the same file", () => {
+    const fnA = makeFunction({
+      key: "func:/src/a.ts:fnA",
+      name: "fnA",
+      leaf: EMB_ALPHA,
+      parentKey: "pattern:file:/src/a.ts:grpA",
+      patterns: "grpA",
+    });
+    const fnB = makeFunction({
+      key: "func:/src/a.ts:fnB",
+      name: "fnB",
+      leaf: EMB_ALPHA_TWIN,
+      parentKey: "pattern:file:/src/a.ts:grpB",
+      patterns: "grpB",
+    });
+    const patA = {
+      key: "pattern:file:/src/a.ts:grpA",
+      kind: "pattern" as const,
+      name: "grpA",
+      identity: [],
+      leaf: [],
+      childKeys: [fnA.key],
+      parentKey: "file:/src/a.ts",
+      patterns: null,
+      companion: null,
+      util: false,
+      helper: false,
+      residuals: [],
+      hash: "pat1hash",
+      exported: false,
+      description: undefined,
+    };
+    const patB = {
+      key: "pattern:file:/src/a.ts:grpB",
+      kind: "pattern" as const,
+      name: "grpB",
+      identity: [],
+      leaf: [],
+      childKeys: [fnB.key],
+      parentKey: "file:/src/a.ts",
+      patterns: null,
+      companion: null,
+      util: false,
+      helper: false,
+      residuals: [],
+      hash: "pat2hash",
+      exported: false,
+      description: undefined,
+    };
+    const file = makeFile({
+      key: "file:/src/a.ts",
+      childKeys: [patA.key, patB.key],
+    });
+    const nodes = toNodeMap(file, patA, patB, fnA, fnB);
+    const ctx = createContext(nodes, CONFIG);
+    const findings = duplicates.detect(ctx);
+    const hasAB = findings.some((f) => f.key === fnA.key && f.pairKey === fnB.key);
+
+    expect(hasAB).toBe(false);
+  });
+});
+
 describe("duplicates detect — companion exclusion", () => {
   test("excludes companion pairs in same group", () => {
     const fnA = makeFunction({

@@ -45,7 +45,7 @@ function isTypeProducerPair(first: CodeNode, second: CodeNode): boolean {
 function collectSiblingPairs(nodes: Map<string, CodeNode>): SiblingPair[] {
   const pairs: SiblingPair[] = [];
   for (const [parentKey, parentNode] of nodes) {
-    if (isLeaf(parentNode) || parentNode.util) {
+    if (isLeaf(parentNode) || parentNode.util || parentNode.kind === "pattern") {
       continue;
     }
     const cwk = getChildrenWithKeys(parentNode, nodes).filter(({ node: c }) => !c.util);

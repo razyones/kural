@@ -188,6 +188,75 @@ describe("duplicate-utils detect — exclusions", () => {
     expect(findings.length).toBe(NONE);
   });
 
+  test("excludes cross-pattern pairs in the same file", () => {
+    const fnA = makeFunction({
+      key: "func:/src/a.ts:utilA",
+      name: "utilA",
+      leaf: EMB_UTIL_A,
+      parentKey: "pattern:file:/src/a.ts:grpA",
+      util: true,
+      patterns: "grpA",
+    });
+    const fnB = makeFunction({
+      key: "func:/src/a.ts:utilB",
+      name: "utilB",
+      leaf: EMB_UTIL_B,
+      parentKey: "pattern:file:/src/a.ts:grpB",
+      util: true,
+      patterns: "grpB",
+    });
+    const patA = {
+      key: "pattern:file:/src/a.ts:grpA",
+      kind: "pattern" as const,
+      name: "grpA",
+      identity: [],
+      leaf: [],
+      childKeys: [fnA.key],
+      parentKey: "file:/src/a.ts",
+      patterns: null,
+      companion: null,
+      util: true,
+      helper: false,
+      residuals: [],
+      hash: "pat1hash",
+      exported: false,
+      description: undefined,
+    };
+    const patB = {
+      key: "pattern:file:/src/a.ts:grpB",
+      kind: "pattern" as const,
+      name: "grpB",
+      identity: [],
+      leaf: [],
+      childKeys: [fnB.key],
+      parentKey: "file:/src/a.ts",
+      patterns: null,
+      companion: null,
+      util: true,
+      helper: false,
+      residuals: [],
+      hash: "pat2hash",
+      exported: false,
+      description: undefined,
+    };
+    const file = makeFile({
+      key: "file:/src/a.ts",
+      childKeys: [patA.key, patB.key],
+    });
+    const siblings = makeBaselineNodes();
+    const baseFile = makeBaselineFile(siblings);
+    const nodes = toNodeMap(file, patA, patB, fnA, fnB, baseFile, ...siblings);
+    const ctx = createContext(nodes, CONFIG);
+    const findings = duplicateUtils.detect(ctx);
+    const hasAB = findings.some(
+      (f) =>
+        (f.key === fnA.key && f.pairKey === fnB.key) ||
+        (f.key === fnB.key && f.pairKey === fnA.key),
+    );
+
+    expect(hasAB).toBe(false);
+  });
+
   test("excludes caller-callee pairs", () => {
     const fnA = makeFunction({
       key: "func:/src/a.ts:utilA",
