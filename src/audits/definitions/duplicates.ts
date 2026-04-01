@@ -16,12 +16,19 @@ import { isSuppressed } from "../context.ts";
 const NONE = 0;
 const NEXT = 1;
 
-/** True when both nodes share at least one pattern ID. @kuralHelper */
-function sharesPattern(a: CodeNode, b: CodeNode): boolean {
-  if (a.patterns === null || b.patterns === null) {
+/**
+ * True when both nodes share at least one pattern ID.
+ * @param source - The node whose patterns are iterated
+ * @param candidate - The node checked for a matching pattern
+ * @returns True if the two nodes have at least one overlapping pattern ID
+ * @kuralPure
+ * @kuralHelper
+ */
+function sharesPattern(source: CodeNode, candidate: CodeNode): boolean {
+  if (source.patterns === null || candidate.patterns === null) {
     return false;
   }
-  return a.patterns.some((p) => b.patterns?.includes(p) === true);
+  return source.patterns.some((p) => candidate.patterns?.includes(p) === true);
 }
 
 /**
