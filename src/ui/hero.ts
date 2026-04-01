@@ -1,7 +1,8 @@
 /**
- * The spotlight. Renders a prominent score display with an optional
- * delta indicator. It is the only module that owns the hero score
- * layout — no other module prints the big-number verdict pattern.
+ * The spotlight. Renders the hero score display and owns the shared
+ * vocabulary for score presentation — health-based coloring, delta
+ * formatting, and human-readable verdicts. No other module decides
+ * how scores look on screen.
  */
 
 import { colors, logger } from "./log.ts";
