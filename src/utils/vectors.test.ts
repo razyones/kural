@@ -193,6 +193,15 @@ describe("centroid", () => {
     const vectors = [[TEN], [TWENTY], [THIRTY]];
     expect(centroid(vectors)).toEqual([TWENTY]);
   });
+
+  it("ignores empty vectors in a mixed array", () => {
+    const vectors = [[TWO, FOUR], [], [SIX, TWO]];
+    expect(centroid(vectors)).toEqual([FOUR, THREE]);
+  });
+
+  it("returns empty when all vectors are empty", () => {
+    expect(centroid([[], []])).toEqual([]);
+  });
 });
 
 describe("pruneOutliers below minSize", () => {

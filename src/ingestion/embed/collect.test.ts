@@ -2,6 +2,7 @@ import type { KuralDirectory, KuralFile, KuralFunction, KuralType } from "../par
 import { collapseByPattern, collectContainers, collectLeaves } from "./collect.ts";
 import { describe, expect, it } from "vite-plus/test";
 import type { ParseResult } from "../parse/pipeline.ts";
+import { centroid } from "./blend.ts";
 
 const EMPTY: number[] = [];
 const ROOT_PATH = "/src";
@@ -416,20 +417,6 @@ describe("collectContainers", () => {
 });
 
 describe("collapseByPattern", () => {
-  const meanFn = (vecs: number[][]): number[] => {
-    if (vecs.length === NONE) {
-      return [];
-    }
-    const dim = vecs[NONE].length;
-    return Array.from({ length: dim }, (_, d) => {
-      let sum = NONE;
-      for (const v of vecs) {
-        sum += v[d];
-      }
-      return sum / vecs.length;
-    });
-  };
-
   it("passes ungrouped leaves through unchanged", () => {
     const solo = makeFunction({ name: "solo" });
     const leaves = collectLeaves(
@@ -439,7 +426,7 @@ describe("collapseByPattern", () => {
       DICTIONARY,
     );
     const embeddings = [[SINGLE, PAIR]];
-    const result = collapseByPattern([NONE], embeddings, leaves, meanFn);
+    const result = collapseByPattern([NONE], embeddings, leaves, centroid);
 
     expect(result).toEqual([[SINGLE, PAIR]]);
   });
@@ -457,7 +444,7 @@ describe("collapseByPattern", () => {
     const VEC_B = 4;
     const EXPECTED_MEAN = 3;
     const embeddings = [[VEC_A], [VEC_B]];
-    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves, meanFn);
+    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves, centroid);
 
     expect(result.length).toBe(SINGLE);
     expect(result[NONE]).toEqual([EXPECTED_MEAN]);
@@ -474,7 +461,7 @@ describe("collapseByPattern", () => {
       DICTIONARY,
     );
     const embeddings = [[SINGLE], [PAIR], [QUADRUPLE]];
-    const result = collapseByPattern([NONE, SINGLE, PAIR], embeddings, leaves, meanFn);
+    const result = collapseByPattern([NONE, SINGLE, PAIR], embeddings, leaves, centroid);
 
     expect(result.length).toBe(PAIR);
   });
@@ -490,7 +477,7 @@ describe("collapseByPattern", () => {
     );
     const VEC_A = 5;
     const embeddings: number[][] = [[VEC_A], []];
-    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves, meanFn);
+    const result = collapseByPattern([NONE, SINGLE], embeddings, leaves, centroid);
 
     expect(result.length).toBe(SINGLE);
     expect(result[NONE]).toEqual([VEC_A]);

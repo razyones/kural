@@ -6,6 +6,7 @@
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import type { CodeNode, NodeMap } from "../../sost/tree.ts";
 import { num, str } from "../../utils/record.ts";
+import type { ChildWithKey } from "../children.ts";
 import { cosineSimilarity } from "../../utils/vectors.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../utils/format.ts";
@@ -55,9 +56,6 @@ function computeChildSims(parent: CodeNode, nodes: NodeMap): ChildSim[] {
     }));
 }
 
-/** Outward node reference. */
-type OutwardRef = { key: string; node: CodeNode };
-
 /**
  * Groups outward-bound nodes by their parent key.
  * @param nodes - The full code tree
@@ -65,8 +63,8 @@ type OutwardRef = { key: string; node: CodeNode };
  * @kuralPure
  * @kuralHelper
  */
-function groupByParent(nodes: NodeMap): Map<string, OutwardRef[]> {
-  const byParent = new Map<string, OutwardRef[]>();
+function groupByParent(nodes: NodeMap): Map<string, ChildWithKey[]> {
+  const byParent = new Map<string, ChildWithKey[]>();
   for (const [key, node] of nodes) {
     if (node.bound !== "outward" || node.parentKey === null) {
       continue;
@@ -92,7 +90,7 @@ function groupByParent(nodes: NodeMap): Map<string, OutwardRef[]> {
  */
 function checkParentDrift(
   parentKey: string,
-  outwardNodes: OutwardRef[],
+  outwardNodes: ChildWithKey[],
   sims: ChildSim[],
   findings: Finding[],
 ): void {

@@ -3,11 +3,11 @@ import {
   applyParentSignal,
   applySignatureSignals,
   blend,
+  centroid,
   cosineSimilarity,
-  mean,
 } from "./blend.ts";
+import { blendDirectories, blendFiles, buildContainerIdentities } from "./containers.ts";
 import { describe, expect, it } from "vite-plus/test";
-import { blendFiles } from "./containers.ts";
 
 const HALF = 0.5;
 const TOLERANCE = 1e-6;
@@ -132,9 +132,9 @@ describe("cosineSimilarity edge cases", () => {
   });
 });
 
-describe("mean basic", () => {
+describe("centroid basic", () => {
   it("computes element-wise mean of vectors", () => {
-    const result = mean([
+    const result = centroid([
       [TWO, FOUR],
       [SIX, TWO],
     ]);
@@ -144,29 +144,29 @@ describe("mean basic", () => {
   });
 
   it("returns the vector itself for a single input", () => {
-    const result = mean([[THREE, FIVE]]);
+    const result = centroid([[THREE, FIVE]]);
 
     expect(result[ARRAY_FIRST]).toBeCloseTo(THREE, TOLERANCE);
     expect(result[ARRAY_SECOND]).toBeCloseTo(FIVE, TOLERANCE);
   });
 });
 
-describe("mean edge cases", () => {
+describe("centroid edge cases", () => {
   it("ignores empty vectors", () => {
-    const result = mean([[TWO, FOUR], [], [SIX, TWO]]);
+    const result = centroid([[TWO, FOUR], [], [SIX, TWO]]);
 
     expect(result[ARRAY_FIRST]).toBeCloseTo(FOUR, TOLERANCE);
     expect(result[ARRAY_SECOND]).toBeCloseTo(THREE, TOLERANCE);
   });
 
   it("returns empty when all vectors are empty", () => {
-    const result = mean([[], []]);
+    const result = centroid([[], []]);
 
     expect(result).toEqual([]);
   });
 
   it("returns empty for empty input array", () => {
-    const result = mean([]);
+    const result = centroid([]);
 
     expect(result).toEqual([]);
   });
@@ -403,5 +403,85 @@ describe("blendFiles — inward uses sibling leaves", () => {
     // leaf = blend([0,1], 0.5, [1,0], 0.5) = [0.5, 0.5]
     expect(result[ARRAY_FIRST]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
     expect(result[ARRAY_SECOND]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
+  });
+});
+
+describe("buildContainerIdentities — cached containers", () => {
+  it("restores cached identity embeddings", () => {
+    const cachedIdentity = [ONE, ZERO];
+    const containers: ContainerData = {
+      names: ["a.ts"],
+      descs: [""],
+      paths: ["/src/a.ts"],
+      units: [{ name: "a.ts", path: "/src/a.ts", identityEmbedding: [], leafEmbedding: [] }],
+      unitPaths: ["/src/a.ts"],
+      fileCount: ONE,
+      dirs: [],
+      fileBounds: [undefined],
+    };
+    const cr = {
+      cachedLeaves: new Set<number>(),
+      cachedContainerIds: new Map<number, number[]>([[ZERO, cachedIdentity]]),
+      uLeaf: [] as number[],
+      uCont: [] as number[],
+      cacheHits: ONE,
+    };
+    const result = buildContainerIdentities(containers, cr, [], [], []);
+    expect(result[ZERO]).toEqual(cachedIdentity);
+  });
+});
+
+describe("blendDirectories — depth-first blending", () => {
+  it("blends nested directories deepest-first with sort comparator", () => {
+    const fileLeaf = [ONE, ZERO];
+    const childDirId = [ZERO, ONE];
+    const parentDirId = [ONE, ONE];
+
+    const containers: ContainerData = {
+      names: ["a.ts", "child", "parent"],
+      descs: ["", "", ""],
+      paths: ["/src/child/a.ts", "/src/child", "/src"],
+      units: [
+        { name: "a.ts", path: "/src/child/a.ts", identityEmbedding: [], leafEmbedding: fileLeaf },
+        { name: "child", path: "/src/child", identityEmbedding: [], leafEmbedding: [] },
+        { name: "parent", path: "/src", identityEmbedding: [], leafEmbedding: [] },
+      ],
+      unitPaths: ["/src/child/a.ts", "/src/child", "/src"],
+      fileCount: ONE,
+      dirs: [
+        {
+          name: "parent",
+          path: "/src",
+          children: ["/src/child"],
+          identityEmbedding: [],
+          leafEmbedding: [],
+          residuals: [],
+          description: undefined,
+        },
+        {
+          name: "child",
+          path: "/src/child",
+          children: ["/src/child/a.ts"],
+          identityEmbedding: [],
+          leafEmbedding: [],
+          residuals: [],
+          description: undefined,
+        },
+      ],
+      fileBounds: [undefined],
+    };
+
+    const identities = [fileLeaf, childDirId, parentDirId];
+
+    blendDirectories(containers, identities);
+
+    // child dir: blend([0,1], 0.5, [1,0], 0.5) = [0.5, 0.5]
+    const childResult = containers.units[ONE].leafEmbedding;
+    expect(childResult[ARRAY_FIRST]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
+    expect(childResult[ARRAY_SECOND]).toBeCloseTo(ID_WEIGHT, TOLERANCE);
+
+    // parent dir: blend([1,1], 0.5, childLeaf, 0.5)
+    const parentResult = containers.units[TWO].leafEmbedding;
+    expect(parentResult.length).toBe(TWO);
   });
 });

@@ -4,8 +4,8 @@
  * vector addition on embeddings — no other module blends embedding dimensions.
  */
 
+import { centroid, cosineSimilarity } from "../../utils/vectors.ts";
 import type { LeafData } from "./collect.ts";
-import { cosineSimilarity } from "../../utils/vectors.ts";
 
 const NONE = 0;
 
@@ -34,30 +34,6 @@ function blend(a: number[], weightA: number, b: number[], weightB: number): numb
   const result: number[] = [];
   for (let i = NONE; i < a.length; i++) {
     result.push(a[i] * weightA + b[i] * weightB);
-  }
-  return result;
-}
-
-/**
- * Computes the element-wise mean of a list of embedding vectors.
- * Ignores empty vectors. Returns empty if all inputs are empty.
- * @param vectors - Array of embedding vectors to average
- * @returns Element-wise mean vector
- * @kuralPure
- */
-function mean(vectors: number[][]): number[] {
-  const nonEmpty = vectors.filter((v) => v.length > NONE);
-  if (nonEmpty.length === NONE) {
-    return [];
-  }
-  const dim = nonEmpty[NONE].length;
-  const result: number[] = [];
-  for (let d = NONE; d < dim; d++) {
-    let sum = NONE;
-    for (const v of nonEmpty) {
-      sum += v[d];
-    }
-    result.push(sum / nonEmpty.length);
   }
   return result;
 }
@@ -181,7 +157,7 @@ export {
   applySignatureSignals,
   blend,
   blendLeaves,
+  centroid,
   computeIdentity,
   cosineSimilarity,
-  mean,
 };

@@ -65,23 +65,25 @@ function avg(samples: number[]): number {
 
 /**
  * Computes the element-wise centroid (mean) of a set of vectors.
+ * Empty vectors are ignored. Returns empty if all inputs are empty.
  * @param vectors - Vectors to average
  * @returns Mean vector
  * @kuralPure
  */
 function centroid(vectors: number[][]): number[] {
-  if (vectors.length === NONE) {
+  const valid = vectors.filter((v) => v.length > NONE);
+  if (valid.length === NONE) {
     return [];
   }
-  const dim = vectors[NONE].length;
+  const dim = valid[NONE].length;
   const result = Array.from<number>({ length: dim }).fill(NONE);
-  for (const v of vectors) {
+  for (const v of valid) {
     for (let i = NONE; i < dim; i++) {
       result[i] += v[i];
     }
   }
   for (let i = NONE; i < dim; i++) {
-    result[i] /= vectors.length;
+    result[i] /= valid.length;
   }
   return result;
 }

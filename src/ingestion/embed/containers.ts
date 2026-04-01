@@ -5,7 +5,7 @@
  */
 
 import type { ContainerData, LeafData } from "./collect.ts";
-import { blend, computeIdentity, mean } from "./blend.ts";
+import { blend, centroid, computeIdentity } from "./blend.ts";
 import type { CacheResolution } from "./hash.ts";
 import type { KuralDirectory } from "../parse/types.ts";
 import { collapseByPattern } from "./collect.ts";
@@ -27,16 +27,13 @@ function computeFileSigFacet(
   leafEmbeddings: number[][],
   leaves: LeafData,
 ): number[] {
-  const reps = collapseByPattern(childIndices, leafEmbeddings, leaves, mean);
+  const reps = collapseByPattern(childIndices, leafEmbeddings, leaves, centroid);
   for (const idx of childIndices) {
-    if (leaves.boundIds[idx] === "outward") {
-      const vec = leafEmbeddings[idx];
-      if (vec !== undefined && vec.length > NONE) {
-        reps.push(vec);
-      }
+    if (leaves.boundIds[idx] === "outward" && leafEmbeddings[idx].length > NONE) {
+      reps.push(leafEmbeddings[idx]);
     }
   }
-  return mean(reps);
+  return centroid(reps);
 }
 
 /**
@@ -65,7 +62,7 @@ function resolveInwardSigFacet(
       .map((p) => pathToFileLeaf.get(p))
       .filter((e): e is number[] => e !== undefined && e.length > NONE);
     if (siblingLeafs.length > NONE) {
-      return mean(siblingLeafs);
+      return centroid(siblingLeafs);
     }
   }
   const childIndices = leaves.fileChildIndices.get(filePath) ?? [];
@@ -153,7 +150,7 @@ function blendDirectories(containers: ContainerData, identities: number[][]): vo
     const childLeafs = containers.dirs[di].children
       .map((p) => pathToLeaf.get(p))
       .filter((e): e is number[] => e !== undefined && e.length > NONE);
-    const leaf = blend(identities[vi], IDENTITY_WEIGHT, mean(childLeafs), IDENTITY_WEIGHT);
+    const leaf = blend(identities[vi], IDENTITY_WEIGHT, centroid(childLeafs), IDENTITY_WEIGHT);
     containers.units[vi].identityEmbedding = identities[vi];
     containers.units[vi].leafEmbedding = leaf;
     pathToLeaf.set(containers.dirs[di].path, leaf);
