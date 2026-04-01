@@ -16,7 +16,6 @@ import {
 import { buildTree, getEligibleChildren, isLeaf } from "./tree.ts";
 import { collectSubtree, descendantScores } from "./subtree.ts";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
-import type { SubtreeResult } from "./subtree.ts";
 import { harmonicMean } from "../utils/vectors.ts";
 
 const NONE = 0;
@@ -112,9 +111,6 @@ function computeChildrenScore(
   if (childrenFit === null || childrenUniqueness === null) {
     return null;
   }
-  if (childrenUniqueness === NO_SIBLINGS) {
-    return null;
-  }
   return harmonicMean(childrenFit, childrenUniqueness);
 }
 
@@ -164,18 +160,11 @@ function computeSubtreeScores(
   key: string,
   metrics: NodeMetrics,
   nodes: NodeMap,
-  subtreeCache: Map<string, SubtreeResult>,
 ): { subtreeFit: number | null; subtreeUniqueness: number | null; subtreeScore: number | null } {
   const cFit = metrics.childrenFitMap.get(key) ?? null;
   const cUniq = metrics.childrenUniqMap.get(key) ?? NO_SIBLINGS;
 
-  const sub = memoizedCollectSubtree(
-    key,
-    nodes,
-    metrics.childrenFitMap,
-    metrics.childrenUniqMap,
-    subtreeCache,
-  );
+  const sub = collectSubtree(key, nodes, metrics.childrenFitMap, metrics.childrenUniqMap);
   const { subtreeFit, subtreeUniqueness } = descendantScores(sub, cFit, cUniq);
 
   const subtreeScore =
@@ -192,7 +181,6 @@ function computeSubtreeScores(
  * @param node - The container node to build a card for
  * @param metrics - Pre-computed per-node metrics
  * @param nodes - The flat node map for traversal and uncle lookups
- * @param subtreeCache - Memoization cache for subtree results
  * @returns A complete ScoreCard for the container node
  * @kuralPatterns cardBuilder
  * @kuralPure
@@ -202,7 +190,6 @@ function buildContainerCard(
   node: CodeNode,
   metrics: NodeMetrics,
   nodes: NodeMap,
-  subtreeCache: Map<string, SubtreeResult>,
 ): ScoreCard {
   const fit = metrics.fitMap.get(key) ?? null;
   const uniqueness = metrics.uniqMap.get(key) ?? NO_SIBLINGS;
@@ -213,12 +200,7 @@ function buildContainerCard(
   const cUniqOrNull = cUniq === NO_SIBLINGS ? null : cUniq;
   const cScore = computeChildrenScore(cFit, cUniqOrNull);
 
-  const { subtreeFit, subtreeUniqueness, subtreeScore } = computeSubtreeScores(
-    key,
-    metrics,
-    nodes,
-    subtreeCache,
-  );
+  const { subtreeFit, subtreeUniqueness, subtreeScore } = computeSubtreeScores(key, metrics, nodes);
 
   const overallScore =
     selfScore === null || subtreeScore === null
@@ -253,44 +235,17 @@ function buildContainerCard(
 function score(result: ParseResult): ScoreCard[] {
   const nodes = buildTree(result);
   const metrics = computeMetrics(nodes);
-  const subtreeCache = new Map<string, SubtreeResult>();
   const cards: ScoreCard[] = [];
 
   for (const [key, node] of nodes) {
     if (isLeaf(node)) {
       cards.push(buildLeafCard(node, metrics, nodes));
     } else {
-      cards.push(buildContainerCard(key, node, metrics, nodes, subtreeCache));
+      cards.push(buildContainerCard(key, node, metrics, nodes));
     }
   }
 
   return cards;
-}
-
-/**
- * Memoized wrapper around collectSubtree.
- * @param key - The node key to collect subtree for
- * @param nodes - The flat node map for traversal
- * @param fitMap - Pre-computed children fit values
- * @param uniqMap - Pre-computed children uniqueness values
- * @param cache - Memoization cache for subtree results
- * @returns Aggregated subtree scores for the node
- * @kuralPure
- */
-function memoizedCollectSubtree(
-  key: string,
-  nodes: NodeMap,
-  fitMap: Map<string, number | null>,
-  uniqMap: Map<string, number>,
-  cache: Map<string, SubtreeResult>,
-): SubtreeResult {
-  const cached = cache.get(key);
-  if (cached !== undefined) {
-    return cached;
-  }
-  const result = collectSubtree(key, nodes, fitMap, uniqMap);
-  cache.set(key, result);
-  return result;
 }
 
 export { score };

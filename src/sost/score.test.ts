@@ -125,12 +125,19 @@ describe("score single file", () => {
 });
 
 describe("score null overallScore", () => {
-  it("overallScore is null when fit is null", () => {
+  it("util file under domain parent has null fit and null overallScore", () => {
     const cards = score(utilFileResult());
     const utilCard = cards.find((c) => c.name === "util.ts");
-    if (utilCard !== undefined) {
-      expect(utilCard.overallScore).toBeNull();
-    }
+    expect(utilCard).toBeDefined();
+    expect(utilCard?.fit).toBeNull();
+    expect(utilCard?.overallScore).toBeNull();
+  });
+
+  it("util file gets childrenFit since util containers are now scored", () => {
+    const cards = score(utilFileResult());
+    const utilCard = cards.find((c) => c.name === "util.ts");
+    expect(utilCard).toBeDefined();
+    expect(utilCard?.childrenFit).not.toBeNull();
   });
 
   it("overallScore is null when uniqueness is NO_SIBLINGS", () => {

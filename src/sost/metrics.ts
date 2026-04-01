@@ -16,22 +16,23 @@ const MIN_PAIR_COUNT = 2;
 
 /**
  * Computes fit as a child: how well this node's content matches its
- * parent's declared identity.
+ * parent's declared identity. Util containers only get fit when their
+ * parent is also util (scored within the util tree).
  * @param node - The node to compute fit for
  * @param nodes - The flat node map for parent lookup
- * @returns cosineSimilarity(parent.identity, N.leaf), or null if no parent or util container
+ * @returns cosineSimilarity(parent.identity, N.leaf), or null if no parent
  * @kuralPatterns fitMetric
  * @kuralPure
  */
 function computeFit(node: CodeNode, nodes: NodeMap): number | null {
-  if (node.util && (node.kind === "file" || node.kind === "directory")) {
-    return null;
-  }
   if (node.parentKey === null) {
     return null;
   }
   const parent = nodes.get(node.parentKey);
   if (parent === undefined) {
+    return null;
+  }
+  if (node.util && !parent.util && (node.kind === "file" || node.kind === "directory")) {
     return null;
   }
   if (parent.identity.length === NONE || node.leaf.length === NONE) {
@@ -42,17 +43,15 @@ function computeFit(node: CodeNode, nodes: NodeMap): number | null {
 
 /**
  * Computes childrenFit as a parent: how well this container's content
- * matches its own declared identity.
+ * matches its own declared identity. Applicable to all containers
+ * including util — every container tree has meaningful self-alignment.
  * @param node - The node to compute children fit for
- * @returns cosineSimilarity(N.identity, N.leaf), or null for leaves/util containers
+ * @returns cosineSimilarity(N.identity, N.leaf), or null for leaves
  * @kuralPatterns fitMetric
  * @kuralPure
  */
 function computeChildrenFit(node: CodeNode): number | null {
   if (node.kind === "type" || node.kind === "function") {
-    return null;
-  }
-  if (node.util) {
     return null;
   }
   if (node.identity.length === NONE || node.leaf.length === NONE) {

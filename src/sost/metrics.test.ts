@@ -590,4 +590,37 @@ describe("computeFit — edge cases", () => {
     const nodes = buildNodeMap([parent, child]);
     expect(computeFit(child, nodes)).toBe(NEXT);
   });
+
+  it("returns null for util file under domain parent", () => {
+    const parent = makeDirectoryNode({
+      key: "dir:src",
+      name: "src",
+      childKeys: ["file:utils"],
+    });
+    const utilFile = makeFileNode({
+      key: "file:utils",
+      name: "utils.ts",
+      parentKey: "dir:src",
+      util: true,
+    });
+    const nodes = buildNodeMap([parent, utilFile]);
+    expect(computeFit(utilFile, nodes)).toBeNull();
+  });
+
+  it("returns a score for util file under util parent", () => {
+    const utilDir = makeDirectoryNode({
+      key: "dir:utils",
+      name: "utils",
+      childKeys: ["file:vectors"],
+      util: true,
+    });
+    const utilFile = makeFileNode({
+      key: "file:vectors",
+      name: "vectors.ts",
+      parentKey: "dir:utils",
+      util: true,
+    });
+    const nodes = buildNodeMap([utilDir, utilFile]);
+    expect(computeFit(utilFile, nodes)).not.toBeNull();
+  });
 });
