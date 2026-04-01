@@ -58,19 +58,21 @@ type ContainerData = {
 };
 
 /**
- * Collects text facets and unit references for all leaf units (types
- * and functions) in a parse result. Builds signature text from prose
- * when Language Service info is available, falling back to structural
- * signature builders.
- * @param result - The parsed codebase to collect from
+ * Appends one leaf unit's facets to the shared accumulator arrays so
+ * a single function or type becomes a row in the batch-embedding input.
+ * @param data - The leaf data accumulator to push into
+ * @param unit - The unit object for write-back reference
+ * @param desc - The unit's description text
+ * @param fileDesc - The parent file's description for anchoring
  * @param rootPath - Absolute path to the generation root
- * @param keywords - Top domain keywords
- * @param dictionary - Domain term definitions for prose signatures
- * @returns Leaf facets, units, and file-to-child-index mapping
+ * @param keywords - Top domain keywords for path signal
+ * @param sig - Structural signature text
+ * @param causes - Causes description for impure functions
+ * @param calls - Call-graph text
+ * @param patternId - Pattern group ID from @kuralPatterns
  * @kuralPure
- * @kuralPatterns collectUnit
+ * @kuralHelper
  */
-/** Pushes a leaf unit's facets into the parallel arrays. @kuralHelper */
 function pushLeaf(
   data: LeafData,
   unit: KuralUnit,
@@ -94,7 +96,17 @@ function pushLeaf(
   data.patternIds.push(patternId);
 }
 
-/** Collects all leaves from a single file into the shared LeafData arrays. @kuralHelper */
+/**
+ * Walks one file's types and functions, building signature text and
+ * appending each leaf's facets to the shared accumulator.
+ * @param file - The parsed file to collect from
+ * @param data - The leaf data accumulator
+ * @param rootPath - Absolute path to the generation root
+ * @param keywords - Top domain keywords for path signals
+ * @param dictionary - Domain term definitions for prose signatures
+ * @kuralPure
+ * @kuralHelper
+ */
 function collectFileLeaves(
   file: KuralFile,
   data: LeafData,
@@ -140,6 +152,19 @@ function collectFileLeaves(
   data.fileChildIndices.set(file.path, childIndices);
 }
 
+/**
+ * Collects text facets and unit references for all leaf units (types
+ * and functions) in a parse result. Builds signature text from prose
+ * when Language Service info is available, falling back to structural
+ * signature builders.
+ * @param result - The parsed codebase to collect from
+ * @param rootPath - Absolute path to the generation root
+ * @param keywords - Top domain keywords
+ * @param dictionary - Domain term definitions for prose signatures
+ * @returns Leaf facets, units, and file-to-child-index mapping
+ * @kuralPure
+ * @kuralPatterns collectUnit
+ */
 function collectLeaves(
   result: ParseResult,
   rootPath: string,

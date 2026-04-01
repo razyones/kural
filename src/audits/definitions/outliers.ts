@@ -31,7 +31,14 @@ function formatOutlier({ finding, prefix, label, location }: FormatCtx): ListIte
   };
 }
 
-/** Computes mean pairwise similarity for each child against its siblings. @kuralHelper */
+/**
+ * Produces the per-child baseline that the outlier fence is computed
+ * against — each child's average similarity to all its siblings.
+ * @param leaves - Leaf embedding vectors for all children
+ * @returns Array of mean similarities, aligned with the input
+ * @kuralPure
+ * @kuralHelper
+ */
 function meanSiblingSimPerChild(leaves: number[][]): number[] {
   const n = leaves.length;
   const means: number[] = [];
