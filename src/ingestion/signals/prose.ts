@@ -264,7 +264,7 @@ function buildDefinitions(referenced: Set<string>, dictionary: Record<string, st
 }
 
 /**
- * Converts a symbol's display information into natural language prose.
+ * Dispatches to the correct per-kind prose builder based on the symbol's first keyword, then appends dictionary definitions.
  * @param info - Structured symbol information from the Language Service
  * @param dictionary - Domain term definitions for link-style references
  * @returns Prose signature with appended dictionary definitions

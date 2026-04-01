@@ -49,7 +49,7 @@ async function writeMetadata(
 }
 
 /**
- * Persists every parsed code unit so the snapshot captures the full structural graph of the codebase.
+ * Orchestrates the full write sequence — files, types, functions, and directories — in a single call so the pipeline has one entry point for persistence.
  * @param collections - Snapshot collections to write into
  * @param result - Parsed codebase with files and directories
  * @returns Resolves when all unit rows are persisted
