@@ -106,7 +106,8 @@ function formatReport(
       });
     }
 
-    return { title: definition.title, total, items };
+    const titleWithId = `${definition.title} ${colors.dim(`[${definition.name}]`)}`;
+    return { title: titleWithId, total, items };
   });
 }
 

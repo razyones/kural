@@ -56,7 +56,7 @@ function resolveConfig(
 function parseFilterTerms(filterInput: string): string[] {
   return filterInput
     .split(",")
-    .map((term) => term.trim().toLowerCase())
+    .map((term) => term.trim().toLowerCase().replaceAll("-", " "))
     .filter((term) => term.length > NONE);
 }
 
