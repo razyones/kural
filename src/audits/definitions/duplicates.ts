@@ -1,7 +1,8 @@
 /**
  * Detects semantically identical units separated by module boundaries —
- * cross-file leaves, cross-directory files, and cross-population
- * util-domain straddles that exceed the sibling merge fence.
+ * cross-file leaves, cross-directory files, cross-population
+ * util-domain straddles, and util-to-util duplicates that exceed the
+ * sibling merge fence.
  * @kuralResidual containments [98edd1c4]
  */
 
@@ -167,6 +168,58 @@ function scanCrossPopDuplicates(
 }
 
 /**
+ * Finds util-scoped units in separate files whose embeddings exceed the merge fence, covering the util-to-util gap.
+ * @param entries - Util leaf node entries to compare pairwise
+ * @param nodes - The code tree node map
+ * @param fence - The similarity threshold above which a pair is flagged
+ * @returns Findings for cross-file util duplicates
+ * @kuralPatterns crossScan
+ * @kuralPure
+ */
+function scanUtilCrossFile(
+  entries: [string, CodeNode][],
+  nodes: Map<string, CodeNode>,
+  fence: number,
+): Finding[] {
+  const findings: Finding[] = [];
+  for (let i = NONE; i < entries.length; i++) {
+    for (let j = i + NEXT; j < entries.length; j++) {
+      const [, a] = entries[i];
+      const [, b] = entries[j];
+      if (a.parentKey === b.parentKey) {
+        continue;
+      }
+      if (sharesPattern(a, b)) {
+        continue;
+      }
+      if (isCallerCallee(a, b)) {
+        continue;
+      }
+      if (isSameFileViaPatterns(a, b, nodes)) {
+        continue;
+      }
+      const sim = cosineSimilarity(a.leaf, b.leaf);
+      if (
+        sim > fence &&
+        !isSuppressed(a, "util-duplicates") &&
+        !isSuppressed(b, "util-duplicates")
+      ) {
+        findings.push({
+          audit: "util-duplicates",
+          key: a.key,
+          name: a.name,
+          hash: a.hash,
+          pairKey: b.key,
+          pairName: b.name,
+          value: sim,
+        });
+      }
+    }
+  }
+  return findings;
+}
+
+/**
  * Finds files in separate directories whose embeddings are statistically closer than any same-parent siblings.
  * @param entries - File node entries to compare pairwise
  * @param fence - The similarity threshold above which a pair is flagged
@@ -206,31 +259,42 @@ function scanFileCrossDir(entries: [string, CodeNode][], fence: number): Finding
   return findings;
 }
 
-export { formatDuplicate, isSameFileViaPatterns };
-
-export default defineAudit({
+const duplicates = defineAudit({
   name: "duplicates",
   title: "Duplicates",
   format: formatDuplicate,
   detect: (ctx: AuditContext): Finding[] => {
     const { nodes, leafMergeFence, fileMergeFence } = ctx;
-    const leafEntries = [...nodes.entries()].filter(
+    const all = [...nodes.entries()];
+    const leafEntries = all.filter(
       ([, n]) => isLeaf(n) && !n.util && !n.helper && n.leaf.length > NONE,
     );
-    const utilLeafEntries = [...nodes.entries()].filter(
+    const utilEntries = all.filter(
       ([, n]) => isLeaf(n) && n.util && !n.helper && n.leaf.length > NONE,
     );
-    const fileEntries = [...nodes.entries()].filter(
-      ([, n]) => n.kind === "file" && !n.util && n.leaf.length > NONE,
-    );
-
+    const fileEntries = all.filter(([, n]) => n.kind === "file" && !n.util && n.leaf.length > NONE);
     const findings = [
       ...scanLeafCrossFile(leafEntries, nodes, leafMergeFence),
-      ...scanCrossPopDuplicates(leafEntries, utilLeafEntries, nodes, leafMergeFence),
+      ...scanCrossPopDuplicates(leafEntries, utilEntries, nodes, leafMergeFence),
       ...scanFileCrossDir(fileEntries, fileMergeFence),
     ];
-
     findings.sort((a, b) => (b.value ?? NONE) - (a.value ?? NONE));
     return findings;
   },
 });
+
+const utilDuplicates = defineAudit({
+  name: "util-duplicates",
+  title: "Util Duplicates",
+  format: formatDuplicate,
+  detect: (ctx: AuditContext): Finding[] => {
+    const { nodes, leafMergeFence } = ctx;
+    const utilLeaves = [...nodes.entries()].filter(
+      ([, n]) => isLeaf(n) && n.util && n.leaf.length > NONE,
+    );
+    const findings = scanUtilCrossFile(utilLeaves, nodes, leafMergeFence);
+    findings.sort((a, b) => (b.value ?? NONE) - (a.value ?? NONE));
+    return findings;
+  },
+});
+export { duplicates as default, formatDuplicate, isSameFileViaPatterns, utilDuplicates };

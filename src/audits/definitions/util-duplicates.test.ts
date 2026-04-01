@@ -14,7 +14,7 @@ import {
 import { describe, expect, test } from "vite-plus/test";
 import { makeFile, makeFunction, suppress, toNodeMap } from "../../../tests/helpers/audits.ts";
 import { createContext } from "../context.ts";
-import duplicateUtils from "./util-duplicates.ts";
+import { utilDuplicates as duplicateUtils } from "./duplicates.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
   containmentFloor: CONTAINMENT_FLOOR,

@@ -4,13 +4,12 @@
  * which rules run and in what sequence they appear in output.
  */
 
-/* eslint-disable max-dependencies */
+/* eslint-disable max-dependencies, sort-imports */
 import { bloatedDirectories, bloatedFiles } from "./bloated.ts";
 import { incoherent, incoherentUtils } from "./incoherent.ts";
 import type { AuditDefinition } from "../types.ts";
 import containments from "./containments.ts";
-import duplicateUtils from "./util-duplicates.ts";
-import duplicates from "./duplicates.ts";
+import duplicates, { utilDuplicates as duplicateUtils } from "./duplicates.ts";
 import focalDrift from "./focal-drift.ts";
 import identityLanguage from "./identity-language.ts";
 import incompleteDocs from "./incomplete-docs.ts";
