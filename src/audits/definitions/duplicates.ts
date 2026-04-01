@@ -16,7 +16,15 @@ import { isSuppressed } from "../context.ts";
 const NONE = 0;
 const NEXT = 1;
 
-/** True when both nodes live under different pattern groups in the same file. @kuralHelper */
+/**
+ * True when both nodes live under different pattern groups in the same file.
+ * @param a - First node to check
+ * @param b - Second node to check
+ * @param nodes - The code tree node map for parent lookup
+ * @returns True if both parents are pattern nodes sharing the same file parent
+ * @kuralPure
+ * @kuralHelper
+ */
 function isSameFileViaPatterns(a: CodeNode, b: CodeNode, nodes: Map<string, CodeNode>): boolean {
   const fa = a.parentKey === null ? undefined : nodes.get(a.parentKey);
   const fb = b.parentKey === null ? undefined : nodes.get(b.parentKey);
