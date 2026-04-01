@@ -1,0 +1,1 @@
+The eraser. Wires the delete CLI arguments to the snapshot removal logic. It is the only command that permanently destroys snapshot database files — no other command besides automatic eviction deletes history entries.

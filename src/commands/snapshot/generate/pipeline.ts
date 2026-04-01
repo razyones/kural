@@ -5,7 +5,7 @@
  * lifecycle.
  */
 
-import type { EmbedOptions, Embedder } from "../../ingestion/embed/pipeline.ts";
+import type { EmbedOptions, Embedder } from "../../../ingestion/embed/pipeline.ts";
 import {
   buildSnapshotId,
   closeSnapshot,
@@ -13,12 +13,13 @@ import {
   currentBranch,
   currentCommitHash,
   rotateActive,
-} from "../../db/snapshot.ts";
+} from "../../../db/snapshot.ts";
 import { writeMetadata, writeScoreCards, writeUnits } from "./storage.ts";
-import { embed } from "../../ingestion/embed/pipeline.ts";
-import { loadEmbeddingCache } from "../../db/cache.ts";
-import { parse } from "../../ingestion/parse/pipeline.ts";
-import { score } from "../../sost/score.ts";
+import { embed } from "../../../ingestion/embed/pipeline.ts";
+import { loadEmbeddingCache } from "../../../db/cache.ts";
+import { parse } from "../../../ingestion/parse/pipeline.ts";
+import { pinSnapshot } from "../../../db/pin.ts";
+import { score } from "../../../sost/score.ts";
 
 /** Progress callbacks for each pipeline stage. */
 type GenerateCallbacks = {
@@ -46,6 +47,7 @@ type GenerateResult = {
  * @param embedOptions - Embedding configuration
  * @param modelId - Embedding model ID for cache validation
  * @param callbacks - Optional progress callbacks
+ * @param pinName - Optional pin name to assign to the new snapshot
  * @returns Counts and database path from the completed run
  * @kuralCauses orchestrates parsing, embedding, scoring, and database persistence
  */
@@ -56,6 +58,7 @@ async function generate(
   embedOptions: EmbedOptions,
   modelId: string,
   callbacks?: GenerateCallbacks,
+  pinName?: string,
 ): Promise<GenerateResult> {
   const result = await parse(targetPath);
   const fileCount = Object.keys(result.files).length;
@@ -83,6 +86,10 @@ async function generate(
   await writeScoreCards(snapshot.collections, cards);
   await closeSnapshot(snapshot);
   callbacks?.onStored?.(dbPath, snapshotId);
+
+  if (pinName !== undefined) {
+    await pinSnapshot(root, branch, snapshotId, pinName);
+  }
 
   return {
     fileCount,

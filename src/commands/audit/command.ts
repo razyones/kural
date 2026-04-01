@@ -134,7 +134,10 @@ function printAuditFooter(): void {
       { command: "kural audit -d <name>", description: "disable specific audits" },
       { command: "kural audit -k <n>", description: "adjust sensitivity threshold" },
       { command: "kural audit --json", description: "output result as JSON" },
-      { command: "kural generate", description: "regenerate snapshot after fixing issues" },
+      {
+        command: "kural snapshot generate",
+        description: "regenerate snapshot after fixing issues",
+      },
     ],
   );
 }

@@ -4,9 +4,9 @@
  * database rows — no other module decides how units are serialized to storage.
  */
 
-import type { ScoreCard } from "../../sost/score.ts";
-import type { SnapshotCollections } from "../../db/collections.ts";
-import { parse } from "../../ingestion/parse/pipeline.ts";
+import type { ScoreCard } from "../../../sost/score.ts";
+import type { SnapshotCollections } from "../../../db/collections.ts";
+import { parse } from "../../../ingestion/parse/pipeline.ts";
 
 const NONE = 0;
 

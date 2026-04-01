@@ -5,16 +5,16 @@
  * command's arguments or output.
  */
 
-import type { EmbedOptions, Embedder } from "../../ingestion/embed/pipeline.ts";
+import type { EmbedOptions, Embedder } from "../../../ingestion/embed/pipeline.ts";
 import type { GenerateCallbacks, GenerateResult } from "./pipeline.ts";
-import { createEmbeddingModel, embedSignatures } from "../../ingestion/embed/model.ts";
-import { logBanner, logger } from "../../ui/log.ts";
+import { createEmbeddingModel, embedSignatures } from "../../../ingestion/embed/model.ts";
+import { logBanner, logger } from "../../../ui/log.ts";
 import { relative, resolve } from "node:path";
-import { createStepTracker } from "../../ui/step-tracker.ts";
+import { createStepTracker } from "../../../ui/step-tracker.ts";
 import { define } from "gunshi";
 import { generate } from "./pipeline.ts";
-import { loadProjectConfig } from "../../config/loader.ts";
-import { renderFooter } from "../../ui/footer.ts";
+import { loadProjectConfig } from "../../../config/loader.ts";
+import { renderFooter } from "../../../ui/footer.ts";
 
 const NONE = 0;
 const JSON_INDENT = 2;
@@ -123,10 +123,21 @@ function printGenerateFooter(): void {
       { command: "kural score", description: "view the overall structural score" },
       { command: "kural score -p <path>", description: "score a specific node" },
       { command: "kural score -e", description: "detailed score breakdown table" },
-      { command: "kural generate --json", description: "output result as JSON" },
+      { command: "kural snapshot list", description: "list all snapshots" },
+      { command: "kural snapshot pin <id> <name>", description: "pin this snapshot" },
     ],
   );
 }
+
+/** Parsed CLI arguments for the generate command. */
+type GenerateArgs = {
+  path: string;
+  provider?: string;
+  model?: string;
+  apiKey?: string;
+  json?: boolean;
+  pin?: string;
+};
 
 /**
  * Orchestrates the full generate flow — resolves the embedding provider, runs the pipeline, and renders either human or JSON output.
@@ -134,13 +145,7 @@ function printGenerateFooter(): void {
  * @returns Resolves when generation and output have completed
  * @kuralCauses orchestrates the full parse-embed-score-store pipeline with I/O
  */
-async function handleGenerate(values: {
-  path: string;
-  provider?: string;
-  model?: string;
-  apiKey?: string;
-  json?: boolean;
-}): Promise<void> {
+async function handleGenerate(values: GenerateArgs): Promise<void> {
   const targetPath = resolve(values.path);
   const provider = values.provider ?? "vercel";
   const jsonMode = values.json === true;
@@ -152,7 +157,7 @@ async function handleGenerate(values: {
   });
 
   if (!jsonMode) {
-    logBanner("generate", {
+    logBanner("snapshot generate", {
       path: relative(process.cwd(), targetPath) || ".",
       provider,
       model: modelId,
@@ -175,6 +180,7 @@ async function handleGenerate(values: {
     embedOptions,
     modelId,
     callbacks,
+    values.pin,
   );
 
   if (jsonMode) {
@@ -212,6 +218,10 @@ export default define({
     json: {
       type: "boolean" as const,
       description: "Output result as JSON",
+    },
+    pin: {
+      type: "string" as const,
+      description: "Pin this snapshot with a name (prevents automatic eviction)",
     },
   },
   run: async (ctx) => {

@@ -8,8 +8,8 @@ import {
   activePath,
   closeSnapshot,
   currentBranch,
-  getHistorySnapshots,
   openSnapshot,
+  resolveSnapshot,
 } from "../../db/snapshot.ts";
 import type { ScoreRow } from "../../db/schemas.ts";
 
@@ -141,8 +141,7 @@ function resolveSnapshotPath(root: string, branch: string, snapshotId?: string):
   if (snapshotId === undefined) {
     return activePath(root, branch);
   }
-  const snapshots = getHistorySnapshots(root, branch);
-  const match = snapshots.find((s) => s.snapshotId === snapshotId);
+  const match = resolveSnapshot(root, branch, snapshotId);
   return match?.path ?? null;
 }
 

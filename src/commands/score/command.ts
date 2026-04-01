@@ -117,12 +117,12 @@ export default define({
     snapshot: {
       type: "string" as const,
       short: "s",
-      description: "Snapshot ID to read (defaults to active)",
+      description: "Snapshot ID or pin name to read (defaults to active)",
     },
     compare: {
       type: "string" as const,
       short: "c",
-      description: "Snapshot ID to compare against for deltas",
+      description: "Snapshot ID or pin name to compare against for deltas",
     },
     explain: {
       type: "boolean" as const,

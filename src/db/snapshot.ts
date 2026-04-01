@@ -5,12 +5,14 @@
  * part of the system touches the .kural-db directory structure.
  */
 
+import { buildSnapshotId, currentCommitHash } from "./git.ts";
 import { cleanupAll, createSnapshotCollections, preloadAll } from "./collections.ts";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, renameSync, rmSync } from "node:fs";
 import BetterSqlite3 from "better-sqlite3";
 import type { SnapshotCollections } from "./collections.ts";
-import { execSync } from "node:child_process";
 import { join } from "node:path";
+
+const PIN_NAME_KEY = "pin_name";
 
 const DB_DIR = ".kural-db";
 const HISTORY_DIR = "history";
@@ -20,13 +22,13 @@ const HISTORY_SUFFIX = ".db";
 const MAX_HISTORY = 10;
 const SNAPSHOT_ID_PATTERN = /^(\d+)-([a-f0-9]+)\.db$/;
 const MATCH_TIMESTAMP = 1;
-const HASH_LENGTH = 7;
 
 /** Metadata for a single snapshot database file. */
 type SnapshotInfo = {
   path: string;
   snapshotId: string;
   timestamp: number;
+  pinName?: string;
 };
 
 /** An open snapshot with its database handle and collections. */
@@ -34,49 +36,6 @@ type OpenSnapshot = {
   database: BetterSqlite3.Database;
   collections: SnapshotCollections;
 };
-
-/**
- * Detects the current git branch name.
- * Falls back to "main" if not in a git repo.
- * @returns The current git branch name, or "main" as fallback
- * @kuralPatterns gitInfo
- * @kuralCauses runs git rev-parse via execSync
- */
-function currentBranch(): string {
-  try {
-    return execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf-8" }).trim();
-  } catch {
-    return "main";
-  }
-}
-
-/**
- * Gets the short commit hash of HEAD.
- * Falls back to "0000000" if not in a git repo.
- * @returns The short commit hash of HEAD, or "0000000" as fallback
- * @kuralPatterns gitInfo
- * @kuralCauses runs git rev-parse via execSync
- */
-function currentCommitHash(): string {
-  try {
-    return execSync(`git rev-parse --short=${String(HASH_LENGTH)} HEAD`, {
-      encoding: "utf-8",
-    }).trim();
-  } catch {
-    return "0000000";
-  }
-}
-
-/**
- * Builds a snapshot ID from timestamp and commit hash.
- * @param timestamp - Unix timestamp in milliseconds
- * @param commitHash - Short git commit hash
- * @returns Snapshot ID in the format "<timestamp>-<commitHash>"
- * @kuralPure
- */
-function buildSnapshotId(timestamp: number, commitHash: string): string {
-  return `${String(timestamp)}-${commitHash}`;
-}
 
 /**
  * Resolves the branch directory path.
@@ -189,8 +148,9 @@ async function rotateActive(root: string, branch: string): Promise<void> {
   renameSync(active, historyPath);
 
   const snapshots = getHistorySnapshots(root, branch);
-  while (snapshots.length > MAX_HISTORY) {
-    const oldest = snapshots.shift();
+  const unpinned = snapshots.filter((s) => s.pinName === undefined);
+  while (unpinned.length > MAX_HISTORY) {
+    const oldest = unpinned.shift();
     if (oldest) {
       rmSync(oldest.path);
     }
@@ -198,11 +158,33 @@ async function rotateActive(root: string, branch: string): Promise<void> {
 }
 
 /**
+ * Reads the pin name from a snapshot database without full preload.
+ * @param dbPath - Absolute path to the SQLite database file
+ * @returns The pin name if set, undefined otherwise
+ * @kuralCauses opens and closes a SQLite database to read metadata
+ */
+function readPinName(dbPath: string): string | undefined {
+  const db = new BetterSqlite3(dbPath);
+  try {
+    const row: unknown = db.prepare("SELECT value FROM metadata WHERE key = ?").get(PIN_NAME_KEY);
+    if (row !== null && row !== undefined && typeof row === "object" && "value" in row) {
+      return String(row.value);
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  } finally {
+    db.close();
+  }
+}
+
+/**
  * Lists all history snapshots sorted by timestamp ascending.
+ * Reads pin metadata from each snapshot database.
  * @param root - The project root directory
  * @param branch - The git branch name
  * @returns Array of snapshot info objects sorted by timestamp ascending
- * @kuralCauses reads the history directory listing
+ * @kuralCauses reads the history directory and opens each snapshot to read pin metadata
  */
 function getHistorySnapshots(root: string, branch: string): SnapshotInfo[] {
   const dir = historyDir(root, branch);
@@ -217,10 +199,12 @@ function getHistorySnapshots(root: string, branch: string): SnapshotInfo[] {
     const match = SNAPSHOT_ID_PATTERN.exec(entry);
     if (match) {
       const snapshotId = entry.replace(HISTORY_SUFFIX, "");
+      const fullPath = join(dir, entry);
       snapshots.push({
-        path: join(dir, entry),
+        path: fullPath,
         snapshotId,
         timestamp: Number(match[MATCH_TIMESTAMP]),
+        pinName: readPinName(fullPath),
       });
     }
   }
@@ -260,17 +244,36 @@ function deleteAdvise(root: string, branch: string): void {
   }
 }
 
+/**
+ * Resolves a snapshot by ID or pin name.
+ * @param root - The project root directory
+ * @param branch - The git branch name
+ * @param idOrName - Optional snapshot ID or pin name
+ * @returns The resolved snapshot info, or null if not found
+ * @kuralCauses reads the history directory and snapshot metadata
+ */
+function resolveSnapshot(root: string, branch: string, idOrName?: string): SnapshotInfo | null {
+  if (idOrName === undefined) {
+    return null;
+  }
+  const snapshots = getHistorySnapshots(root, branch);
+  return (
+    snapshots.find((s) => s.snapshotId === idOrName) ??
+    snapshots.find((s) => s.pinName === idOrName) ??
+    null
+  );
+}
+
+export { buildSnapshotId, currentBranch, currentCommitHash } from "./git.ts";
 export {
   activePath,
-  buildSnapshotId,
   cloneActiveToAdvise,
   closeSnapshot,
   createActive,
-  currentBranch,
-  currentCommitHash,
   deleteAdvise,
   getHistorySnapshots,
   openSnapshot,
+  resolveSnapshot,
   rotateActive,
 };
 export type { OpenSnapshot, SnapshotInfo };

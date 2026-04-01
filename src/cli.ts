@@ -10,9 +10,9 @@
 import audit from "./commands/audit/command.ts";
 import { cli } from "gunshi";
 import { existsSync } from "node:fs";
-import generate from "./commands/generate/command.ts";
 import { loadEnvFile } from "node:process";
 import score from "./commands/score/command.ts";
+import snapshot from "./commands/snapshot/command.ts";
 
 const ARGV_START = 2;
 
@@ -20,7 +20,7 @@ if (existsSync(".env")) {
   loadEnvFile(".env");
 }
 
-await cli(process.argv.slice(ARGV_START), generate, {
+await cli(process.argv.slice(ARGV_START), snapshot, {
   name: "kural",
   version: "0.0.0",
   subCommands: { audit, score },
