@@ -1,4 +1,7 @@
-# Database Architecture
+---
+title: Database
+description: Local snapshot persistence — schema, lifecycle, and serialization
+---
 
 Local snapshot persistence for the Kural CLI. All data lives on disk as SQLite databases under `.kural-db/`.
 

@@ -36,7 +36,7 @@
       "better-sqlite3"
     ],
     "overrides": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+      "kural>vite": "npm:@voidzero-dev/vite-plus-core@latest",
       "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
     }
   }

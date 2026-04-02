@@ -1,4 +1,7 @@
-# Embedding Formulas — Faceted Blending Reference
+---
+title: Embedding Formulas
+description: Faceted blending reference for the embedding pipeline
+---
 
 The embedding pipeline produces two vectors per unit (identity and leaf) by embedding individual **facets** separately and blending them at fixed weights. **Signals** are weighted modifiers that nudge a facet toward the right semantic context before blending.
 

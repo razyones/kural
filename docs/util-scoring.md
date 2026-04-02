@@ -1,4 +1,7 @@
-# Util Scoring — Capability Trees
+---
+title: Util Scoring
+description: Capability trees — how @kuralUtil containers are scored
+---
 
 The codebase is organized by domain (ingestion, scoring, auditing), but at every level there's a need to group by capability — shared tools that multiple domain modules use. That's what `@kuralUtil` marks.
 

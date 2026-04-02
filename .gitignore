@@ -16,6 +16,11 @@ dist
 dist-ssr
 *.local
 
+# Docs site generated files
+docs-site/.source/
+docs-site/.output/
+docs-site/src/routeTree.gen.ts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

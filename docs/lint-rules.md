@@ -1,4 +1,7 @@
-# Lint Rules Reference
+---
+title: Lint Rules
+description: Reference for oxlint type-aware rules used by vp check
+---
 
 `vp check` runs oxlint with type-aware rules. The error messages are terse — this document explains what each rule actually means and how to fix it.
 

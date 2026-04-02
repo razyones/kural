@@ -1,4 +1,7 @@
-# Pattern Nodes — One Concept, One Vote
+---
+title: Pattern Nodes
+description: One concept, one vote — deduplication via invisible folders
+---
 
 Units tagged with the same `@kuralPatterns` ID are structural repetitions of a single concept. The scoring, auditing, embedding, and placement systems all need to treat them as one entity — but today each system reimplements this reduction independently via `deduplicateByGroup`. Pattern nodes unify this by materializing the group as a real node in the in-memory tree.
 
