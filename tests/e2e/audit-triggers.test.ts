@@ -503,10 +503,108 @@ describe("vocabulary-bleed trigger", () => {
   });
 });
 
-/*
- * Audits not tested here (statistical thresholds require precise
- * dendrogram gap / fence calibration better validated by unit tests):
- * - merge-candidates
- * - bloated-directories
- * - bloated-files
- */
+/* ------------------------------------------------------------------ */
+/*  merge-candidates                                                  */
+/* ------------------------------------------------------------------ */
+
+describe("merge-candidates trigger", () => {
+  it("flags near-identical sibling functions under the same file", async () => {
+    tmpRoot = createTmpRoot();
+    const p = `${tmpRoot}/src`;
+
+    // 4 orthogonal siblings to keep the fence low + 2 near-identical to breach it
+    const spreadLeafs: number[][] = [
+      [E0, E0, E1, E0, E0, E0],
+      [E0, E0, E0, E1, E0, E0],
+      [E0, E0, E0, E0, E1, E0],
+      [E0, E0, E0, E0, E0, E1],
+    ];
+    const spreadFns = spreadLeafs.map((leaf, i) => fn(`${p}/app.ts`, `spread${String(i)}`, leaf));
+
+    const data: SeedData = {
+      directories: [dir(p, "src", [`${p}/app.ts`], [E05, E05, E0, E0, E0, E0])],
+      files: [file(`${p}/app.ts`, "app.ts", [E05, E05, E0, E0, E0, E0])],
+      functions: [
+        ...spreadFns,
+        fn(`${p}/app.ts`, "nearA", [E095, E005, E0, E0, E0, E0]),
+        fn(`${p}/app.ts`, "nearB", [E094, E006, E0, E0, E0, E0]),
+      ],
+    };
+    await seedFullActiveSnapshot(tmpRoot, "main", data);
+    expectAudit(auditJson(tmpRoot), "merge-candidates");
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  bloated-directories                                               */
+/* ------------------------------------------------------------------ */
+
+describe("bloated-directories trigger", () => {
+  it("flags directory with two distinct clusters of children", async () => {
+    tmpRoot = createTmpRoot();
+    const p = `${tmpRoot}/src`;
+
+    // Cluster A (dim 0) and Cluster B (dim 5), 3 files each
+    const clusterA = ["a1.ts", "a2.ts", "a3.ts"].map((f, i) => {
+      const leafs = [
+        [E09, E01, E0, E0, E0, E0, E0, E0],
+        [E085, E015, E0, E0, E0, E0, E0, E0],
+        [E088, E012, E0, E0, E0, E0, E0, E0],
+      ];
+      return file(`${p}/${f}`, f, leafs[i]);
+    });
+    const clusterB = ["b1.ts", "b2.ts", "b3.ts"].map((f, i) => {
+      const leafs = [
+        [E0, E0, E0, E0, E0, E09, E01, E0],
+        [E0, E0, E0, E0, E0, E085, E015, E0],
+        [E0, E0, E0, E0, E0, E088, E012, E0],
+      ];
+      return file(`${p}/${f}`, f, leafs[i]);
+    });
+    const allFiles = [...clusterA, ...clusterB];
+
+    // Each file needs a child function so it's not a leaf
+    const fns = allFiles.map((f) => fn(f.path, `fn_${f.name.replace(".ts", "")}`, f.leafEmbedding));
+
+    const data: SeedData = {
+      directories: [
+        dir(
+          p,
+          "src",
+          allFiles.map((f) => f.path),
+          [E05, E0, E0, E0, E0, E05, E0, E0],
+        ),
+      ],
+      files: allFiles,
+      functions: fns,
+    };
+    await seedFullActiveSnapshot(tmpRoot, "main", data);
+    expectAudit(auditJson(tmpRoot), "bloated-directories");
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  bloated-files                                                     */
+/* ------------------------------------------------------------------ */
+
+describe("bloated-files trigger", () => {
+  it("flags file with two distinct clusters of function children", async () => {
+    tmpRoot = createTmpRoot();
+    const p = `${tmpRoot}/src`;
+
+    const data: SeedData = {
+      directories: [dir(p, "src", [`${p}/big.ts`], [E05, E0, E0, E0, E0, E05, E0, E0])],
+      files: [file(`${p}/big.ts`, "big.ts", [E05, E0, E0, E0, E0, E05, E0, E0])],
+      functions: [
+        fn(`${p}/big.ts`, "a1", [E09, E01, E0, E0, E0, E0, E0, E0]),
+        fn(`${p}/big.ts`, "a2", [E085, E015, E0, E0, E0, E0, E0, E0]),
+        fn(`${p}/big.ts`, "a3", [E088, E012, E0, E0, E0, E0, E0, E0]),
+        fn(`${p}/big.ts`, "b1", [E0, E0, E0, E0, E0, E09, E01, E0]),
+        fn(`${p}/big.ts`, "b2", [E0, E0, E0, E0, E0, E085, E015, E0]),
+        fn(`${p}/big.ts`, "b3", [E0, E0, E0, E0, E0, E088, E012, E0]),
+      ],
+    };
+    await seedFullActiveSnapshot(tmpRoot, "main", data);
+    expectAudit(auditJson(tmpRoot), "bloated-files");
+  });
+});
