@@ -2,6 +2,6 @@
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 
-#nd-page {
-  padding-bottom: 3rem;
+#nd-page > div:last-child {
+  margin-top: 10rem;
 }

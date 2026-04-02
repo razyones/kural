@@ -45,9 +45,9 @@ const getPageData = createServerFn({
 const mdxComponents = getMDXComponents();
 
 const clientLoader = browserCollections.docs.createClientLoader({
-  component({ frontmatter, default: MDX }) {
+  component({ frontmatter, default: MDX, toc }) {
     return (
-      <DocsPage>
+      <DocsPage toc={toc}>
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
         <DocsBody>

@@ -40,6 +40,3 @@ How well we embed, score, audit, and place is what gives meaning to Kural.
 - **[Architecture](/docs/infrastructure/architecture)** — System overview: the pipeline, tiers, data model, and sync design.
 - **[Database](/docs/infrastructure/db)** — SQLite snapshot persistence, schema, lifecycle, and caching.
 
-## Contributing
-
-- **[Lint Rules](/docs/contributing/lint-rules)** — oxlint type-aware rules used by `vp check` and how to fix violations.
