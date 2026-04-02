@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useMemo } from "react";
+import { useState, useCallback, useRef, useMemo, useEffect } from "react";
 import treeData from "@/data/embeddings.json";
 
 type TreeNode = {
@@ -8,6 +8,7 @@ type TreeNode = {
   path: string;
   description: string;
   score: number | null;
+  subtreeScore?: number | null;
   position?: [number, number, number];
   children?: TreeNode[];
 };
@@ -24,6 +25,47 @@ function isoProject(x: number, y: number, z: number): [number, number] {
   const px = (x - z) * Math.cos(Math.PI / 6) * ISO_SCALE + CX;
   const py = -(x + z) * Math.sin(Math.PI / 6) * ISO_SCALE - y * ISO_SCALE + CY;
   return [px, py];
+}
+
+// Find the rotation angle that best separates points in 2D projection
+// Uses a combined metric: weighted sum of minimum pairwise distance (avoid overlap)
+// and total spread (overall separation).
+function bestRotation(nodes: TreeNode[]): number {
+  const positioned = nodes.filter((c) => c.position);
+  if (positioned.length < 2) return 0;
+
+  const s = 0.85;
+  let bestAngle = 0;
+  let bestScore = -Infinity;
+
+  for (let deg = 0; deg < 360; deg += 2) {
+    const rad = (deg * Math.PI) / 180;
+    const pts = positioned.map((c) => {
+      const [x, y, z] = c.position!.map((v) => v * s) as [number, number, number];
+      const rx = x * Math.cos(rad) - z * Math.sin(rad);
+      const rz = x * Math.sin(rad) + z * Math.cos(rad);
+      return isoProject(rx, y, rz);
+    });
+
+    let minDist = Infinity;
+    let totalDist = 0;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        const dx = pts[i][0] - pts[j][0];
+        const dy = pts[i][1] - pts[j][1];
+        const d = dx * dx + dy * dy;
+        minDist = Math.min(minDist, d);
+        totalDist += Math.sqrt(d);
+      }
+    }
+    // Balance: avoid overlaps (min) + maximize spread (total)
+    const score = Math.sqrt(minDist) * 2 + totalDist;
+    if (score > bestScore) {
+      bestScore = score;
+      bestAngle = deg;
+    }
+  }
+  return bestAngle;
 }
 
 // Cube corners in 3D, projected to 2D
@@ -74,7 +116,7 @@ function faceGrid(
 
 const ACCENT = "hsl(187, 40%, 55%)";
 const POINT_R = 4;
-const ACTIVE_R = 6;
+const ACTIVE_R = 5;
 
 const KIND_LABELS: Record<string, string> = {
   file: "file",
@@ -83,11 +125,13 @@ const KIND_LABELS: Record<string, string> = {
   dir: "dir.",
 };
 
+const KIND_ORDER = ["dir", "file", "func", "type"] as const;
+
 const KIND_COLORS: Record<string, string> = {
   dir: "hsl(187, 40%, 55%)",   // cyan — matches accent
   file: "hsl(45, 60%, 60%)",   // warm amber
   func: "hsl(280, 40%, 65%)",  // soft purple
-  type: "hsl(145, 40%, 55%)",  // muted green
+  type: "hsl(20, 55%, 60%)",    // warm coral
 };
 
 function findNode(path: string[]): TreeNode {
@@ -106,12 +150,19 @@ export function EmbeddingSpace() {
   const [cardHidden, setCardHidden] = useState(false);
   const svgRef = useRef<SVGSVGElement>(null);
 
-  // Drag rotation state
-  const [rotation, setRotation] = useState(0);
   const dragRef = useRef<{ startX: number; startRot: number } | null>(null);
 
   const currentNode = useMemo(() => findNode(breadcrumbs), [breadcrumbs]);
   const children = currentNode.children || [];
+
+  // Compute optimal initial rotation for this level
+  const initialRotation = useMemo(() => bestRotation(children), [children]);
+  const [rotation, setRotation] = useState(0);
+
+  // Reset rotation to optimal when level changes
+  useEffect(() => {
+    setRotation(initialRotation);
+  }, [initialRotation]);
 
   const corners = useMemo(() => cubeCorners(), []);
 
@@ -195,6 +246,13 @@ export function EmbeddingSpace() {
         >
           src
         </button>
+        {breadcrumbs.length === 0 && currentNode.score !== null && (
+          <span
+            className="text-[10px] uppercase tracking-wider px-1.5 border border-fd-border text-fd-muted-foreground translate-y-px"
+          >
+            score {currentNode.score.toFixed(2)}
+          </span>
+        )}
         {breadcrumbs.map((crumb, i) => {
           const node = findNode(breadcrumbs.slice(0, i + 1));
           const isLast = i === breadcrumbs.length - 1;
@@ -208,6 +266,13 @@ export function EmbeddingSpace() {
               >
                 {node.name}
               </button>
+              {isLast && node.score !== null && (
+                <span
+                  className="text-[10px] uppercase tracking-wider px-1.5 border border-fd-border text-fd-muted-foreground translate-y-px"
+                >
+                  score {node.score.toFixed(2)}
+                </span>
+              )}
             </span>
           );
         })}
@@ -217,7 +282,7 @@ export function EmbeddingSpace() {
       <div className="flex-1 relative min-h-0 flex items-center justify-center">
         <svg
           ref={svgRef}
-          viewBox="-10 -30 420 470"
+          viewBox="-10 40 420 360"
           preserveAspectRatio="xMidYMid meet"
           className="w-full h-full"
           onPointerDown={onPointerDown}
@@ -251,7 +316,7 @@ export function EmbeddingSpace() {
           {/* Axis extensions from inner corner (bbr) */}
           {(() => {
             const c = 1.15;
-            const ext = 0.35; // how far past the cube edge
+            const ext = 0.6; // how far past the cube edge
             const origin = isoProject(c, -c, c); // bbr — the inner corner
             const xEnd = isoProject(c + ext, -c, c); // extend along +X (not meaningful — axes go toward bbl, tbr, bfr)
             // Actually: from bbr, the 3 edges go to bbl (-X), tbr (+Y), bfr (-Z)
@@ -331,7 +396,7 @@ export function EmbeddingSpace() {
                 <circle
                   cx={pt.px}
                   cy={pt.py}
-                  r={(isHovered ? ACTIVE_R : POINT_R) + 3}
+                  r={(isHovered ? ACTIVE_R : POINT_R) + 1.5}
                   fill="var(--color-fd-background)"
                   opacity={isHovered ? 0.9 : 0.8}
                 />
@@ -340,7 +405,7 @@ export function EmbeddingSpace() {
                   <circle
                     cx={pt.px}
                     cy={pt.py}
-                    r={ACTIVE_R + 3}
+                    r={ACTIVE_R + 2}
                     fill={kindColor}
                     opacity={0.2}
                   />
@@ -361,7 +426,7 @@ export function EmbeddingSpace() {
 
           {/* Legend */}
           {(() => {
-            const entries = Object.entries(KIND_LABELS);
+            const entries = KIND_ORDER.map((k) => [k, KIND_LABELS[k]] as const);
             const gap = 55;
             const totalWidth = (entries.length - 1) * gap;
             const startX = CX - totalWidth / 2;
@@ -386,12 +451,29 @@ export function EmbeddingSpace() {
         </svg>
 
         {/* Tooltip anchored to node */}
-        {hoveredPoint && !cardHidden && (
+        {hoveredPoint && !cardHidden && (() => {
+          const svg = svgRef.current;
+          const container = svg?.parentElement;
+          let left = `${((hoveredPoint.px + 10) / 420) * 100}%`;
+          let top = `${((hoveredPoint.py + 30) / 470) * 100}%`;
+          if (svg && container) {
+            const pt = svg.createSVGPoint();
+            pt.x = hoveredPoint.px;
+            pt.y = hoveredPoint.py;
+            const ctm = svg.getScreenCTM();
+            if (ctm) {
+              const screenPt = pt.matrixTransform(ctm);
+              const rect = container.getBoundingClientRect();
+              left = `${screenPt.x - rect.left}px`;
+              top = `${screenPt.y - rect.top}px`;
+            }
+          }
+          return (
           <div
             className="absolute z-10"
             style={{
-              left: `${((hoveredPoint.px + 10) / 420) * 100}%`,
-              top: `${((hoveredPoint.py + 30) / 470) * 100}%`,
+              left,
+              top,
               transform: "translate(12px, -50%)",
             }}
           >
@@ -453,7 +535,8 @@ export function EmbeddingSpace() {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
 
       </div>
 

@@ -61,6 +61,18 @@ code, pre, kbd, samp {
   --color-fd-primary-foreground: hsl(0, 0%, 98%);
 }
 
+/* ── Sidebar footer: top line only, no box ── */
+.flex.flex-col.p-4.pt-2 > .border.bg-fd-secondary\/50.rounded-lg {
+  border: none;
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
+
+.flex.flex-col.p-4.pt-2 {
+  border-top: 1px solid var(--color-fd-border);
+}
+
 /* ── Spacing fix ── */
 #nd-page > div:last-child {
   margin-top: 10rem;

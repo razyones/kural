@@ -14,6 +14,7 @@ import type { SharedProps } from "fumadocs-ui/contexts/search";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import { useDocsSearch } from "fumadocs-core/search/client";
 import { searchDocs } from "@/lib/search";
+import { AnimatedBg } from "@/components/animated-bg";
 import appCss from "@/styles/app.css?url";
 import config from "../../docs.config";
 
@@ -82,6 +83,7 @@ function RootComponent() {
         <HeadContent />
       </head>
       <body className="flex min-h-screen flex-col">
+        <AnimatedBg intensity={0.55} />
         <RootProvider search={{ SearchDialog: KuralSearchDialog }}>
           <Outlet />
         </RootProvider>

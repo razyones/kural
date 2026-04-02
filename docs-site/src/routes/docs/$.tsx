@@ -62,7 +62,7 @@ function Page() {
   const { pageTree, path } = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsLayout tree={pageTree} nav={{ title: config.name }} links={config.nav.links}>
+    <DocsLayout tree={pageTree} nav={{ title: config.name }} githubUrl="https://github.com/user/kural">
       <Suspense>{clientLoader.useContent(path)}</Suspense>
     </DocsLayout>
   );

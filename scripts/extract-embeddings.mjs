@@ -52,6 +52,7 @@ for (const [, { table, kind }] of Object.entries(COLLECTIONS)) {
       description: (data.description || "").substring(0, 120),
       embedding,
       score: score?.overallScore ?? null,
+      subtreeScore: score?.subtreeScore ?? null,
     });
   }
 }
@@ -78,6 +79,7 @@ function buildTree(units) {
     path: "",
     description: rootUnit?.description || "Root source directory",
     score: rootUnit?.score ?? null,
+    subtreeScore: rootUnit?.subtreeScore ?? null,
     embedding: rootUnit?.embedding,
     children: [],
   };
@@ -95,6 +97,7 @@ function buildTree(units) {
       path: u.path,
       description: u.description,
       score: u.score,
+      subtreeScore: u.subtreeScore,
       embedding: u.embedding,
       children: [],
     };

@@ -5,6 +5,7 @@
   "path": "",
   "description": "The system. The only directory whose children span the full lifecycle from source code to scored output. It binds readin",
   "score": 0.9175696479551014,
+  "subtreeScore": 0.9175696479551014,
   "children": [
     {
       "id": "audits",
@@ -13,6 +14,7 @@
       "path": "audits",
       "description": "The stethoscope. Applies statistical fences and deterministic rules to surface localized anomalies that aggregate scores",
       "score": 0.7357844157291247,
+      "subtreeScore": 0.9319542678464334,
       "children": [
         {
           "id": "audits/definitions",
@@ -21,6 +23,7 @@
           "path": "audits/definitions",
           "description": "The rulebook. Houses every individual audit detection and formatting function. It is the only directory that defines wha",
           "score": 0.8176472244506103,
+          "subtreeScore": 0.9266890409069171,
           "children": [
             {
               "id": "audits/definitions/bloated.ts",
@@ -39,9 +42,9 @@
                   "score": 0.609136905033596,
                   "children": [],
                   "position": [
-                    -1,
                     1,
-                    -1
+                    -1,
+                    1
                   ]
                 },
                 {
@@ -53,9 +56,9 @@
                   "score": 0.6337825310365904,
                   "children": [],
                   "position": [
-                    1,
-                    0.015,
-                    -0.475
+                    -1,
+                    -0.015,
+                    0.733
                   ]
                 },
                 {
@@ -67,16 +70,16 @@
                   "score": 0.6280718408614853,
                   "children": [],
                   "position": [
-                    -0.98,
-                    -1,
-                    1
+                    0.98,
+                    1,
+                    -1
                   ]
                 }
               ],
               "position": [
                 -0.29,
-                -0.1,
-                -1
+                0.1,
+                1
               ]
             },
             {
@@ -112,7 +115,7 @@
                   "position": [
                     1,
                     -0.507,
-                    -0.763
+                    1
                   ]
                 },
                 {
@@ -126,14 +129,14 @@
                   "position": [
                     -1,
                     -1,
-                    1
+                    -0.93
                   ]
                 }
               ],
               "position": [
                 -0.808,
-                0.047,
-                -0.036
+                -0.047,
+                0.036
               ]
             },
             {
@@ -153,9 +156,9 @@
                   "score": 0.6322345849176105,
                   "children": [],
                   "position": [
-                    -1,
+                    1,
                     -0.875,
-                    -1
+                    1
                   ]
                 },
                 {
@@ -167,9 +170,9 @@
                   "score": 0.6402079468207634,
                   "children": [],
                   "position": [
-                    -0.658,
+                    0.658,
                     -1,
-                    1
+                    -1
                   ]
                 },
                 {
@@ -181,9 +184,9 @@
                   "score": 0.7780764771702657,
                   "children": [],
                   "position": [
-                    -0.111,
+                    0.111,
                     1,
-                    0.176
+                    -0.176
                   ]
                 },
                 {
@@ -195,9 +198,9 @@
                   "score": 1.083297715958085,
                   "children": [],
                   "position": [
-                    0.824,
+                    -0.824,
                     -0.89,
-                    -0.075
+                    0.075
                   ]
                 },
                 {
@@ -209,9 +212,9 @@
                   "score": 1.1229354344243068,
                   "children": [],
                   "position": [
-                    0.756,
+                    -0.756,
                     -0.301,
-                    -0.647
+                    0.647
                   ]
                 },
                 {
@@ -223,9 +226,9 @@
                   "score": 1.1136574352561868,
                   "children": [],
                   "position": [
-                    1,
+                    -1,
                     -0.537,
-                    0.034
+                    -0.034
                   ]
                 },
                 {
@@ -237,16 +240,16 @@
                   "score": 1.0860664731293876,
                   "children": [],
                   "position": [
-                    0.884,
+                    -0.884,
                     -0.864,
-                    0.109
+                    -0.109
                   ]
                 }
               ],
               "position": [
                 -0.305,
-                1,
-                0.459
+                -1,
+                -0.459
               ]
             },
             {
@@ -330,8 +333,8 @@
               ],
               "position": [
                 -0.505,
-                -0.898,
-                -0.701
+                0.898,
+                0.701
               ]
             },
             {
@@ -359,8 +362,8 @@
               ],
               "position": [
                 0.172,
-                -1,
-                0.577
+                1,
+                -0.577
               ]
             },
             {
@@ -381,8 +384,8 @@
                   "children": [],
                   "position": [
                     1,
-                    1,
-                    1
+                    -1,
+                    0.828
                   ]
                 },
                 {
@@ -395,8 +398,8 @@
                   "children": [],
                   "position": [
                     -1,
-                    0.409,
-                    0.386
+                    -0.409,
+                    -1
                   ]
                 },
                 {
@@ -409,15 +412,15 @@
                   "children": [],
                   "position": [
                     0.52,
-                    -1,
-                    -1
+                    1,
+                    1
                   ]
                 }
               ],
               "position": [
                 -0.49,
-                -0.99,
-                0.267
+                0.99,
+                -0.267
               ]
             },
             {
@@ -445,8 +448,8 @@
               ],
               "position": [
                 0.849,
-                -0.396,
-                1
+                0.396,
+                -1
               ]
             },
             {
@@ -459,8 +462,8 @@
               "children": [],
               "position": [
                 1,
-                0.387,
-                -0.693
+                -0.387,
+                0.693
               ]
             },
             {
@@ -488,8 +491,8 @@
               ],
               "position": [
                 -0.851,
-                0.993,
-                0.545
+                -0.993,
+                -0.545
               ]
             },
             {
@@ -510,7 +513,7 @@
                   "children": [],
                   "position": [
                     1,
-                    0.382,
+                    -0.382,
                     1
                   ]
                 },
@@ -524,8 +527,8 @@
                   "children": [],
                   "position": [
                     -0.548,
-                    -1,
-                    0.266
+                    1,
+                    0.241
                   ]
                 },
                 {
@@ -538,15 +541,15 @@
                   "children": [],
                   "position": [
                     -1,
-                    1,
+                    -1,
                     -1
                   ]
                 }
               ],
               "position": [
                 -0.684,
-                -0.128,
-                -0.18
+                0.128,
+                0.18
               ]
             },
             {
@@ -588,8 +591,8 @@
               ],
               "position": [
                 -1,
-                -0.586,
-                0.464
+                0.586,
+                -0.464
               ]
             },
             {
@@ -610,8 +613,8 @@
                   "children": [],
                   "position": [
                     1,
-                    0.684,
-                    -1
+                    -0.684,
+                    1
                   ]
                 },
                 {
@@ -624,8 +627,8 @@
                   "children": [],
                   "position": [
                     -0.812,
-                    -0.579,
-                    -0.149
+                    0.579,
+                    0.149
                   ]
                 },
                 {
@@ -638,8 +641,8 @@
                   "children": [],
                   "position": [
                     -1,
-                    0.764,
-                    0.097
+                    -0.764,
+                    -0.097
                   ]
                 },
                 {
@@ -652,8 +655,8 @@
                   "children": [],
                   "position": [
                     0.912,
-                    -1,
-                    0.414
+                    1,
+                    -0.414
                   ]
                 },
                 {
@@ -666,21 +669,21 @@
                   "children": [],
                   "position": [
                     0.653,
-                    1,
-                    1
+                    -1,
+                    -1
                   ]
                 }
               ],
               "position": [
                 -0.505,
-                -0.651,
-                0.24
+                0.651,
+                -0.24
               ]
             }
           ],
           "position": [
             1,
-            -0.362,
+            0.362,
             -1
           ]
         },
@@ -723,7 +726,7 @@
           ],
           "position": [
             -0.509,
-            1,
+            -1,
             -0.15
           ]
         },
@@ -744,8 +747,8 @@
               "score": 0.6712503816254918,
               "children": [],
               "position": [
-                -0.644,
-                0.293,
+                0.644,
+                -0.293,
                 -1
               ]
             },
@@ -758,8 +761,8 @@
               "score": 0.6615203443934018,
               "children": [],
               "position": [
-                1,
-                0.218,
+                -1,
+                -0.218,
                 -0.194
               ]
             },
@@ -772,8 +775,8 @@
               "score": 0.639842731947897,
               "children": [],
               "position": [
-                0.871,
-                0.391,
+                -0.871,
+                -0.391,
                 0.28
               ]
             },
@@ -786,8 +789,8 @@
               "score": 0.6955492149081417,
               "children": [],
               "position": [
-                -0.456,
-                -1,
+                0.456,
+                1,
                 0.781
               ]
             },
@@ -800,8 +803,8 @@
               "score": 0.7060718821411172,
               "children": [],
               "position": [
-                -1,
                 1,
+                -1,
                 1
               ]
             },
@@ -814,15 +817,15 @@
               "score": 0.7263956356436883,
               "children": [],
               "position": [
-                -0.824,
-                -0.024,
+                0.824,
+                0.024,
                 -0.787
               ]
             }
           ],
           "position": [
             -0.839,
-            -0.604,
+            0.604,
             -0.263
           ]
         },
@@ -843,8 +846,8 @@
               "score": 0.6122006612657098,
               "children": [],
               "position": [
-                0.991,
-                -0.906,
+                -0.991,
+                0.906,
                 -0.128
               ]
             },
@@ -857,8 +860,8 @@
               "score": 0.5960907802742496,
               "children": [],
               "position": [
-                1,
-                -0.83,
+                -1,
+                0.83,
                 -0.161
               ]
             },
@@ -871,8 +874,8 @@
               "score": 0.6981578618967937,
               "children": [],
               "position": [
-                -1,
-                -1,
+                1,
+                1,
                 -1
               ]
             },
@@ -885,8 +888,8 @@
               "score": 0.7531339023339962,
               "children": [],
               "position": [
-                -0.737,
-                -0.787,
+                0.737,
+                0.787,
                 1
               ]
             },
@@ -899,15 +902,15 @@
               "score": 0.6565360561458873,
               "children": [],
               "position": [
-                0.013,
-                1,
+                -0.013,
+                -1,
                 -0.21
               ]
             }
           ],
           "position": [
             0.358,
-            -0.197,
+            0.197,
             1
           ]
         },
@@ -950,7 +953,7 @@
           ],
           "position": [
             0.386,
-            -0.343,
+            0.343,
             0.671
           ]
         },
@@ -1049,7 +1052,7 @@
           ],
           "position": [
             -0.426,
-            -1,
+            1,
             -0.55
           ]
         },
@@ -1092,7 +1095,7 @@
           ],
           "position": [
             -0.531,
-            0.062,
+            -0.062,
             -0.707
           ]
         },
@@ -1113,9 +1116,9 @@
               "score": 0.5486494652369892,
               "children": [],
               "position": [
-                1,
-                0.192,
-                -0.896
+                -1,
+                -0.192,
+                0.896
               ]
             },
             {
@@ -1127,9 +1130,9 @@
               "score": 0.5006527352203457,
               "children": [],
               "position": [
-                -1,
                 1,
-                -1
+                -1,
+                1
               ]
             },
             {
@@ -1141,15 +1144,15 @@
               "score": 0.477099541848766,
               "children": [],
               "position": [
-                -0.76,
-                -1,
-                1
+                0.76,
+                1,
+                -1
               ]
             }
           ],
           "position": [
             0.691,
-            0.621,
+            -0.621,
             -0.475
           ]
         },
@@ -1192,7 +1195,7 @@
           ],
           "position": [
             -1,
-            0.256,
+            -0.256,
             -0.153
           ]
         },
@@ -1213,9 +1216,9 @@
               "score": 0.6245994760556305,
               "children": [],
               "position": [
-                0.037,
-                -0.436,
-                0.672
+                -0.037,
+                0.436,
+                -0.672
               ]
             },
             {
@@ -1227,9 +1230,9 @@
               "score": 0.6354251446861424,
               "children": [],
               "position": [
-                -0.839,
-                -0.099,
-                -0.211
+                0.839,
+                0.099,
+                0.211
               ]
             },
             {
@@ -1241,9 +1244,9 @@
               "score": 0.6871204363352854,
               "children": [],
               "position": [
-                0.903,
-                1,
-                0.594
+                -0.903,
+                -1,
+                -0.594
               ]
             },
             {
@@ -1255,9 +1258,9 @@
               "score": 0.6734851590357032,
               "children": [],
               "position": [
-                -0.095,
-                -0.154,
-                -1
+                0.095,
+                0.154,
+                1
               ]
             },
             {
@@ -1269,9 +1272,9 @@
               "score": 0.6251544057434303,
               "children": [],
               "position": [
-                -1,
-                -0.053,
-                0.862
+                1,
+                0.053,
+                -0.862
               ]
             },
             {
@@ -1283,9 +1286,9 @@
               "score": 0.6375024172177615,
               "children": [],
               "position": [
-                -0.98,
-                -0.079,
-                1
+                0.98,
+                0.079,
+                -1
               ]
             },
             {
@@ -1297,15 +1300,15 @@
               "score": 0.6787243240275702,
               "children": [],
               "position": [
-                1,
                 -1,
-                0.652
+                1,
+                -0.652
               ]
             }
           ],
           "position": [
             0.873,
-            0.002,
+            -0.002,
             -0.401
           ]
         }
@@ -1313,7 +1316,7 @@
       "position": [
         -0.777,
         0.832,
-        -0.569
+        0.569
       ]
     },
     {
@@ -1323,6 +1326,7 @@
       "path": "commands",
       "description": "The dispatch. Binds CLI argument schemas to their execution pipelines. It is the only directory whose children define us",
       "score": 0.7499827791821919,
+      "subtreeScore": 0.9074489469251551,
       "children": [
         {
           "id": "commands/audit",
@@ -1331,6 +1335,7 @@
           "path": "commands/audit",
           "description": "The inspector's office. Wires the diagnostic CLI arguments to the issue display pipeline. It is the only command that re",
           "score": 0.7291621313306491,
+          "subtreeScore": 0.8852477346369849,
           "children": [
             {
               "id": "commands/audit/command.ts",
@@ -1349,8 +1354,8 @@
                   "score": 0.6225798432211442,
                   "children": [],
                   "position": [
-                    -0.215,
-                    -0.529,
+                    0.215,
+                    0.529,
                     1
                   ]
                 },
@@ -1363,8 +1368,8 @@
                   "score": 0.623238581195605,
                   "children": [],
                   "position": [
-                    -1,
-                    -0.388,
+                    1,
+                    0.388,
                     -1
                   ]
                 },
@@ -1377,8 +1382,8 @@
                   "score": 0.6055684542718083,
                   "children": [],
                   "position": [
-                    0.741,
-                    -1,
+                    -0.741,
+                    1,
                     -0.493
                   ]
                 },
@@ -1391,8 +1396,8 @@
                   "score": 0.5634846925082625,
                   "children": [],
                   "position": [
-                    1,
-                    -0.288,
+                    -1,
+                    0.288,
                     -0.765
                   ]
                 },
@@ -1405,8 +1410,8 @@
                   "score": 0.5954472758281015,
                   "children": [],
                   "position": [
-                    0.421,
-                    1,
+                    -0.421,
+                    -1,
                     -0.156
                   ]
                 },
@@ -1419,16 +1424,16 @@
                   "score": 0.5985187975569073,
                   "children": [],
                   "position": [
-                    0.712,
-                    -0.521,
+                    -0.712,
+                    0.521,
                     0.045
                   ]
                 }
               ],
               "position": [
-                1,
+                -1,
                 -0.149,
-                0.669
+                -1
               ]
             },
             {
@@ -1450,7 +1455,7 @@
                   "position": [
                     1,
                     -0.604,
-                    0.658
+                    -0.658
                   ]
                 },
                 {
@@ -1464,7 +1469,7 @@
                   "position": [
                     0.22,
                     1,
-                    -1
+                    1
                   ]
                 },
                 {
@@ -1478,7 +1483,7 @@
                   "position": [
                     0.715,
                     -1,
-                    -0.451
+                    0.451
                   ]
                 },
                 {
@@ -1492,7 +1497,7 @@
                   "position": [
                     -1,
                     -0.604,
-                    -0.024
+                    0.024
                   ]
                 },
                 {
@@ -1506,7 +1511,7 @@
                   "position": [
                     -0.971,
                     -0.594,
-                    0.075
+                    -0.075
                   ]
                 },
                 {
@@ -1520,14 +1525,14 @@
                   "position": [
                     -0.071,
                     0.939,
-                    1
+                    -1
                   ]
                 }
               ],
               "position": [
+                1,
                 -1,
-                -1,
-                1
+                0.309
               ]
             },
             {
@@ -1548,7 +1553,7 @@
                   "children": [],
                   "position": [
                     -1,
-                    -1,
+                    1,
                     -1
                   ]
                 },
@@ -1562,8 +1567,8 @@
                   "children": [],
                   "position": [
                     -0.911,
-                    1,
-                    0.624
+                    -1,
+                    0.742
                   ]
                 },
                 {
@@ -1576,22 +1581,22 @@
                   "children": [],
                   "position": [
                     1,
-                    -0.068,
+                    0.068,
                     1
                   ]
                 }
               ],
               "position": [
-                -0.811,
+                0.811,
                 1,
-                -1
+                1
               ]
             }
           ],
           "position": [
             -0.338,
             1,
-            -1
+            0.271
           ]
         },
         {
@@ -1601,6 +1606,7 @@
           "path": "commands/score",
           "description": "The dashboard. Wires the score CLI arguments to the score display pipeline. It is the only command that reads and render",
           "score": 0.733781325407176,
+          "subtreeScore": 0.89909713265172,
           "children": [
             {
               "id": "commands/score/command.ts",
@@ -1619,9 +1625,9 @@
                   "score": 0.6828111076224397,
                   "children": [],
                   "position": [
-                    -0.879,
+                    0.879,
                     -1,
-                    -1
+                    1
                   ]
                 },
                 {
@@ -1633,9 +1639,9 @@
                   "score": 0.7590096866961122,
                   "children": [],
                   "position": [
-                    1,
+                    -1,
                     0.093,
-                    0.978
+                    -0.978
                   ]
                 },
                 {
@@ -1647,16 +1653,16 @@
                   "score": 0.6964428652106665,
                   "children": [],
                   "position": [
-                    -1,
                     1,
-                    1
+                    1,
+                    -1
                   ]
                 }
               ],
               "position": [
                 -0.02,
-                -1,
-                -1
+                1,
+                1
               ]
             },
             {
@@ -1677,8 +1683,8 @@
                   "children": [],
                   "position": [
                     -1,
-                    -0.142,
-                    0.342
+                    0.142,
+                    -0.342
                   ]
                 },
                 {
@@ -1691,8 +1697,8 @@
                   "children": [],
                   "position": [
                     1,
-                    0.562,
-                    1
+                    -0.562,
+                    -1
                   ]
                 },
                 {
@@ -1705,8 +1711,8 @@
                   "children": [],
                   "position": [
                     0.285,
-                    1,
-                    -1
+                    -1,
+                    1
                   ]
                 },
                 {
@@ -1719,15 +1725,15 @@
                   "children": [],
                   "position": [
                     0.868,
-                    -1,
-                    -0.473
+                    1,
+                    0.473
                   ]
                 }
               ],
               "position": [
                 -1,
-                1,
-                1
+                -1,
+                -1
               ]
             },
             {
@@ -1748,8 +1754,8 @@
                   "children": [],
                   "position": [
                     1,
-                    0.747,
-                    0.125
+                    -0.747,
+                    -0.125
                   ]
                 },
                 {
@@ -1762,8 +1768,8 @@
                   "children": [],
                   "position": [
                     0.778,
-                    0.588,
-                    0.214
+                    -0.588,
+                    -0.214
                   ]
                 },
                 {
@@ -1776,8 +1782,8 @@
                   "children": [],
                   "position": [
                     0.397,
-                    -0.685,
-                    0.621
+                    0.685,
+                    -0.621
                   ]
                 },
                 {
@@ -1790,8 +1796,8 @@
                   "children": [],
                   "position": [
                     -0.631,
-                    1,
-                    -0.218
+                    -1,
+                    0.218
                   ]
                 },
                 {
@@ -1804,8 +1810,8 @@
                   "children": [],
                   "position": [
                     -0.102,
-                    0.502,
-                    -1
+                    -0.502,
+                    1
                   ]
                 },
                 {
@@ -1818,8 +1824,8 @@
                   "children": [],
                   "position": [
                     0.787,
-                    0.77,
-                    -0.009
+                    -0.77,
+                    0.009
                   ]
                 },
                 {
@@ -1832,8 +1838,8 @@
                   "children": [],
                   "position": [
                     -1,
-                    0.859,
-                    1
+                    -0.859,
+                    -1
                   ]
                 },
                 {
@@ -1846,8 +1852,8 @@
                   "children": [],
                   "position": [
                     0.449,
-                    0.608,
-                    0.34
+                    -0.608,
+                    -0.34
                   ]
                 },
                 {
@@ -1860,8 +1866,8 @@
                   "children": [],
                   "position": [
                     -0.071,
-                    -1,
-                    0.389
+                    1,
+                    -0.389
                   ]
                 },
                 {
@@ -1874,15 +1880,15 @@
                   "children": [],
                   "position": [
                     -0.187,
-                    -0.43,
-                    -0.951
+                    0.43,
+                    0.951
                   ]
                 }
               ],
               "position": [
                 1,
-                0.973,
-                -0.414
+                -0.973,
+                0.414
               ]
             }
           ],
@@ -1899,6 +1905,7 @@
           "path": "commands/snapshot",
           "description": "The archive. Owns the full lifecycle of snapshot databases — creation, listing, pinning, and deletion. It is the only co",
           "score": 0.7567201378596727,
+          "subtreeScore": 0.8998783641122003,
           "children": [
             {
               "id": "commands/snapshot/delete",
@@ -1907,6 +1914,7 @@
               "path": "commands/snapshot/delete",
               "description": "The eraser. Wires the delete CLI arguments to the snapshot removal logic. It is the only command that permanently destro",
               "score": 0.6807395714003232,
+              "subtreeScore": null,
               "children": [
                 {
                   "id": "commands/snapshot/delete/command.ts",
@@ -1941,7 +1949,7 @@
               "position": [
                 -0.076,
                 1,
-                -0.639
+                0.639
               ]
             },
             {
@@ -1951,6 +1959,7 @@
               "path": "commands/snapshot/generate",
               "description": "The factory. Wires the generate CLI arguments to the full analysis pipeline. It is the only command that creates snapsho",
               "score": 0.7930924274271818,
+              "subtreeScore": 0.8854472277847273,
               "children": [
                 {
                   "id": "commands/snapshot/generate/command.ts",
@@ -1970,7 +1979,7 @@
                       "children": [],
                       "position": [
                         1,
-                        1,
+                        -1,
                         -0.435
                       ]
                     },
@@ -1984,7 +1993,7 @@
                       "children": [],
                       "position": [
                         -0.46,
-                        -0.631,
+                        0.631,
                         -1
                       ]
                     },
@@ -1998,7 +2007,7 @@
                       "children": [],
                       "position": [
                         0.619,
-                        -1,
+                        1,
                         0.251
                       ]
                     },
@@ -2012,7 +2021,7 @@
                       "children": [],
                       "position": [
                         -1,
-                        0.479,
+                        -0.479,
                         0.824
                       ]
                     },
@@ -2026,7 +2035,7 @@
                       "children": [],
                       "position": [
                         0.64,
-                        -0.856,
+                        0.856,
                         1
                       ]
                     },
@@ -2040,15 +2049,15 @@
                       "children": [],
                       "position": [
                         0.412,
-                        0.725,
+                        -0.725,
                         0.629
                       ]
                     }
                   ],
                   "position": [
-                    -1,
                     1,
-                    -1
+                    -1,
+                    1
                   ]
                 },
                 {
@@ -2069,7 +2078,7 @@
                       "children": [],
                       "position": [
                         1,
-                        0.204,
+                        -0.204,
                         1
                       ]
                     },
@@ -2083,7 +2092,7 @@
                       "children": [],
                       "position": [
                         -0.745,
-                        -1,
+                        1,
                         -1
                       ]
                     },
@@ -2097,15 +2106,15 @@
                       "children": [],
                       "position": [
                         -1,
-                        1,
+                        -1,
                         -0.46
                       ]
                     }
                   ],
                   "position": [
-                    -0.291,
-                    -1,
-                    -0.095
+                    0.291,
+                    1,
+                    -0.547
                   ]
                 },
                 {
@@ -2126,8 +2135,8 @@
                       "children": [],
                       "position": [
                         1,
-                        1,
-                        -0.294
+                        -1,
+                        0.294
                       ]
                     },
                     {
@@ -2140,8 +2149,8 @@
                       "children": [],
                       "position": [
                         -0.312,
-                        -1,
-                        -0.511
+                        1,
+                        0.511
                       ]
                     },
                     {
@@ -2154,8 +2163,8 @@
                       "children": [],
                       "position": [
                         -1,
-                        0.351,
-                        0.05
+                        -0.351,
+                        -0.05
                       ]
                     },
                     {
@@ -2168,8 +2177,8 @@
                       "children": [],
                       "position": [
                         -0.768,
-                        0.301,
-                        0.059
+                        -0.301,
+                        -0.059
                       ]
                     },
                     {
@@ -2182,8 +2191,8 @@
                       "children": [],
                       "position": [
                         -0.94,
-                        0.31,
-                        -1
+                        -0.31,
+                        1
                       ]
                     },
                     {
@@ -2196,8 +2205,8 @@
                       "children": [],
                       "position": [
                         -0.75,
-                        0.189,
-                        -0.541
+                        -0.189,
+                        0.541
                       ]
                     },
                     {
@@ -2210,8 +2219,8 @@
                       "children": [],
                       "position": [
                         -0.959,
-                        0.792,
-                        1
+                        -0.792,
+                        -1
                       ]
                     },
                     {
@@ -2224,22 +2233,22 @@
                       "children": [],
                       "position": [
                         0.048,
-                        -0.849,
-                        0.812
+                        0.849,
+                        -0.812
                       ]
                     }
                   ],
                   "position": [
-                    1,
-                    0.646,
-                    1
+                    -1,
+                    -0.646,
+                    -1
                   ]
                 }
               ],
               "position": [
                 1,
                 -0.852,
-                -1
+                1
               ]
             },
             {
@@ -2249,6 +2258,7 @@
               "path": "commands/snapshot/list",
               "description": "The inventory. Wires the list CLI arguments to the snapshot enumeration logic. It is the only command that reads and ren",
               "score": 0.6748331118800214,
+              "subtreeScore": null,
               "children": [
                 {
                   "id": "commands/snapshot/list/command.ts",
@@ -2283,7 +2293,7 @@
               "position": [
                 -0.021,
                 -0.323,
-                1
+                -1
               ]
             },
             {
@@ -2293,6 +2303,7 @@
               "path": "commands/snapshot/pin",
               "description": "The tack. Wires the pin CLI arguments to the snapshot pinning logic. It is the only command that assigns human-readable ",
               "score": 0.6791185767591412,
+              "subtreeScore": null,
               "children": [
                 {
                   "id": "commands/snapshot/pin/command.ts",
@@ -2327,7 +2338,7 @@
               "position": [
                 -0.921,
                 -1,
-                -0.221
+                0.221
               ]
             },
             {
@@ -2337,6 +2348,7 @@
               "path": "commands/snapshot/unpin",
               "description": "The remover. Wires the unpin CLI arguments to the snapshot unpinning logic. It is the only command that strips pin names",
               "score": 0.6334446513914688,
+              "subtreeScore": null,
               "children": [
                 {
                   "id": "commands/snapshot/unpin/command.ts",
@@ -2371,7 +2383,7 @@
               "position": [
                 -1,
                 -0.217,
-                -0.541
+                0.541
               ]
             },
             {
@@ -2385,7 +2397,7 @@
               "position": [
                 0.295,
                 -0.121,
-                0.955
+                -0.955
               ]
             }
           ],
@@ -2399,7 +2411,7 @@
       "position": [
         0.562,
         0.569,
-        -0.474
+        0.474
       ]
     },
     {
@@ -2409,6 +2421,7 @@
       "path": "config",
       "description": "The blueprint. Houses every knob, shape, and constant the system reads before it runs. It is the only module that owns d",
       "score": 0.6165749785349736,
+      "subtreeScore": null,
       "children": [
         {
           "id": "config/audits.ts",
@@ -2588,7 +2601,7 @@
       "position": [
         -0.344,
         0.145,
-        -0.262
+        0.262
       ]
     },
     {
@@ -2598,6 +2611,7 @@
       "path": "db",
       "description": "The memory. Persists and retrieves all application state in branch-scoped SQLite snapshot databases. It is the only part",
       "score": 0.7390524973027575,
+      "subtreeScore": 0.9365081793798182,
       "children": [
         {
           "id": "db/cache.ts",
@@ -2637,9 +2651,9 @@
             }
           ],
           "position": [
-            -0.037,
+            0.037,
             0.772,
-            1
+            -1
           ]
         },
         {
@@ -2659,9 +2673,9 @@
               "score": 0.6168792301606812,
               "children": [],
               "position": [
-                0.027,
+                -0.027,
                 1,
-                0.039
+                -0.039
               ]
             },
             {
@@ -2673,9 +2687,9 @@
               "score": 0.721972073730218,
               "children": [],
               "position": [
+                1,
                 -1,
-                -1,
-                0.117
+                -0.117
               ]
             },
             {
@@ -2687,9 +2701,9 @@
               "score": 0.5817166644496045,
               "children": [],
               "position": [
-                -0.018,
+                0.018,
                 0.823,
-                -0.049
+                0.049
               ]
             },
             {
@@ -2701,9 +2715,9 @@
               "score": null,
               "children": [],
               "position": [
-                0.866,
+                -0.866,
                 -0.633,
-                -1
+                1
               ]
             },
             {
@@ -2715,16 +2729,16 @@
               "score": null,
               "children": [],
               "position": [
-                1,
+                -1,
                 -0.522,
-                1
+                -1
               ]
             }
           ],
           "position": [
-            -0.916,
+            0.916,
             -0.255,
-            -0.375
+            0.375
           ]
         },
         {
@@ -2744,9 +2758,9 @@
               "score": 0.9700565773881622,
               "children": [],
               "position": [
+                1,
                 -1,
-                -1,
-                -1
+                1
               ]
             },
             {
@@ -2758,9 +2772,9 @@
               "score": 0.9668434635124022,
               "children": [],
               "position": [
-                -0.394,
+                0.394,
                 1,
-                -0.671
+                -0.162
               ]
             },
             {
@@ -2772,16 +2786,16 @@
               "score": 0.6695376937769485,
               "children": [],
               "position": [
-                1,
+                -1,
                 -0.536,
-                1
+                -1
               ]
             }
           ],
           "position": [
-            0.532,
+            -0.532,
             1,
-            -1
+            1
           ]
         },
         {
@@ -2803,7 +2817,7 @@
               "position": [
                 -1,
                 1,
-                0.704
+                -1
               ]
             },
             {
@@ -2817,7 +2831,7 @@
               "position": [
                 -0.349,
                 -1,
-                1
+                0.075
               ]
             },
             {
@@ -2831,14 +2845,14 @@
               "position": [
                 1,
                 0.584,
-                -1
+                1
               ]
             }
           ],
           "position": [
-            1,
             -1,
-            -0.004
+            -1,
+            0.004
           ]
         },
         {
@@ -2850,9 +2864,9 @@
           "score": 0.5934886716756765,
           "children": [],
           "position": [
-            -1,
+            1,
             -0.187,
-            -0.22
+            0.22
           ]
         },
         {
@@ -2872,9 +2886,9 @@
               "score": 0.7746340621418984,
               "children": [],
               "position": [
-                0.709,
-                0.14,
-                -0.192
+                -0.709,
+                -0.14,
+                0.192
               ]
             },
             {
@@ -2886,9 +2900,9 @@
               "score": 0.7412265079329848,
               "children": [],
               "position": [
-                1,
-                0.556,
-                0.155
+                -1,
+                -0.556,
+                -0.155
               ]
             },
             {
@@ -2900,9 +2914,9 @@
               "score": 0.6955215008085961,
               "children": [],
               "position": [
-                -0.471,
-                -1,
-                0.3
+                0.471,
+                1,
+                -0.3
               ]
             },
             {
@@ -2914,9 +2928,9 @@
               "score": 0.6827503947672143,
               "children": [],
               "position": [
-                -0.405,
-                -0.843,
-                0.342
+                0.405,
+                0.843,
+                -0.342
               ]
             },
             {
@@ -2928,9 +2942,9 @@
               "score": 0.6454337923282119,
               "children": [],
               "position": [
-                -0.69,
-                0.071,
-                0.645
+                0.69,
+                -0.071,
+                -0.645
               ]
             },
             {
@@ -2942,9 +2956,9 @@
               "score": 0.6550048108955749,
               "children": [],
               "position": [
-                -1,
-                0.034,
-                -0.556
+                1,
+                -0.034,
+                0.556
               ]
             },
             {
@@ -2956,9 +2970,9 @@
               "score": 0.7062063973312014,
               "children": [],
               "position": [
-                0.911,
-                0.522,
-                0.094
+                -0.911,
+                -0.522,
+                -0.094
               ]
             },
             {
@@ -2970,9 +2984,9 @@
               "score": 0.7020619728893226,
               "children": [],
               "position": [
-                -0.419,
-                0.908,
-                1
+                0.419,
+                -0.908,
+                -1
               ]
             },
             {
@@ -2984,9 +2998,9 @@
               "score": 0.7391466490456219,
               "children": [],
               "position": [
-                0.767,
-                0.767,
-                -0.14
+                -0.767,
+                -0.767,
+                0.14
               ]
             },
             {
@@ -2998,9 +3012,9 @@
               "score": 0.7273321116725653,
               "children": [],
               "position": [
-                -0.311,
-                0.597,
-                0.761
+                0.311,
+                -0.597,
+                -0.761
               ]
             },
             {
@@ -3012,9 +3026,9 @@
               "score": 0.695424539899087,
               "children": [],
               "position": [
-                0.159,
-                -0.326,
-                -0.708
+                -0.159,
+                0.326,
+                0.708
               ]
             },
             {
@@ -3026,9 +3040,9 @@
               "score": 0.7175711256048873,
               "children": [],
               "position": [
-                0.565,
-                -0.116,
-                -0.074
+                -0.565,
+                0.116,
+                0.074
               ]
             },
             {
@@ -3040,9 +3054,9 @@
               "score": 0.6903847389518806,
               "children": [],
               "position": [
-                -0.93,
-                1,
-                -0.171
+                0.93,
+                -1,
+                0.171
               ]
             },
             {
@@ -3054,9 +3068,9 @@
               "score": 0.6890930553805088,
               "children": [],
               "position": [
-                -0.971,
-                0.861,
-                -1
+                0.971,
+                -0.861,
+                1
               ]
             },
             {
@@ -3068,23 +3082,23 @@
               "score": 0.7313125070240487,
               "children": [],
               "position": [
-                0.638,
-                -0.142,
-                -0.242
+                -0.638,
+                0.142,
+                0.242
               ]
             }
           ],
           "position": [
-            0.186,
+            -0.186,
             0.281,
-            0.15
+            -0.15
           ]
         }
       ],
       "position": [
         -0.395,
         -1,
-        -1
+        1
       ]
     },
     {
@@ -3094,6 +3108,7 @@
       "path": "ingestion",
       "description": "The reader and translator. Everything between raw source code on disk and the numerical representations that downstream ",
       "score": 0.7400558766224344,
+      "subtreeScore": 0.9067029189275232,
       "children": [
         {
           "id": "ingestion/embed",
@@ -3102,6 +3117,7 @@
           "path": "ingestion/embed",
           "description": "The encoder. Turns descriptive inputs into numerical vectors through weighted blending and batched API calls. It is the ",
           "score": 0.820854279920553,
+          "subtreeScore": 0.8765186332551915,
           "children": [
             {
               "id": "ingestion/embed/axes.ts",
@@ -3120,9 +3136,9 @@
                   "score": 0.6207180907235451,
                   "children": [],
                   "position": [
-                    0.793,
-                    1,
-                    -1
+                    -0.793,
+                    -1,
+                    1
                   ]
                 },
                 {
@@ -3134,9 +3150,9 @@
                   "score": 0.6805543574632233,
                   "children": [],
                   "position": [
-                    -1,
-                    0.111,
-                    -0.03
+                    1,
+                    -0.111,
+                    0.03
                   ]
                 },
                 {
@@ -3148,9 +3164,9 @@
                   "score": 0.6493951922225648,
                   "children": [],
                   "position": [
-                    0.781,
-                    0.934,
-                    1
+                    -0.781,
+                    -0.934,
+                    -1
                   ]
                 },
                 {
@@ -3162,16 +3178,16 @@
                   "score": 0.6510392444188982,
                   "children": [],
                   "position": [
-                    1,
                     -1,
-                    -0.049
+                    1,
+                    0.049
                   ]
                 }
               ],
               "position": [
-                1,
-                -0.784,
-                -0.971
+                -1,
+                -0.785,
+                0.971
               ]
             },
             {
@@ -3191,9 +3207,9 @@
                   "score": 0.8371123995024781,
                   "children": [],
                   "position": [
+                    -1,
                     1,
-                    1,
-                    -0.049
+                    0.049
                   ]
                 },
                 {
@@ -3205,9 +3221,9 @@
                   "score": 0.6788771285282769,
                   "children": [],
                   "position": [
-                    -1,
+                    1,
                     0.44,
-                    -1
+                    1
                   ]
                 },
                 {
@@ -3219,9 +3235,9 @@
                   "score": 0.6598570298881152,
                   "children": [],
                   "position": [
-                    -0.93,
+                    0.93,
                     0.441,
-                    1
+                    -1
                   ]
                 },
                 {
@@ -3233,16 +3249,16 @@
                   "score": 0.7397752560465546,
                   "children": [],
                   "position": [
-                    0.29,
+                    -0.29,
                     -1,
-                    -0.03
+                    0.03
                   ]
                 }
               ],
               "position": [
-                -0.043,
+                0.041,
                 1,
-                -0.889
+                0.889
               ]
             },
             {
@@ -3353,9 +3369,9 @@
                 }
               ],
               "position": [
-                -0.411,
+                0.411,
                 -0.486,
-                1
+                -1
               ]
             },
             {
@@ -3375,9 +3391,9 @@
                   "score": 0.6646276176375345,
                   "children": [],
                   "position": [
-                    -0.259,
+                    0.259,
                     -0.799,
-                    -1
+                    1
                   ]
                 },
                 {
@@ -3389,9 +3405,9 @@
                   "score": 1.1556712888783471,
                   "children": [],
                   "position": [
-                    0.923,
+                    -0.923,
                     -0.289,
-                    0.3
+                    -0.3
                   ]
                 },
                 {
@@ -3403,9 +3419,9 @@
                   "score": 0.6043561838098425,
                   "children": [],
                   "position": [
-                    -0.648,
+                    0.648,
                     -0.88,
-                    0.052
+                    -0.052
                   ]
                 },
                 {
@@ -3417,9 +3433,9 @@
                   "score": 0.6446633016439236,
                   "children": [],
                   "position": [
+                    1,
                     -1,
-                    -1,
-                    1
+                    -1
                   ]
                 },
                 {
@@ -3431,9 +3447,9 @@
                   "score": 1.1367273349985798,
                   "children": [],
                   "position": [
-                    0.754,
+                    -0.754,
                     -0.829,
-                    0.404
+                    -0.404
                   ]
                 },
                 {
@@ -3445,9 +3461,9 @@
                   "score": 1.1471505692812096,
                   "children": [],
                   "position": [
-                    1,
+                    -1,
                     -0.872,
-                    0.362
+                    -0.362
                   ]
                 },
                 {
@@ -3459,16 +3475,16 @@
                   "score": 0.7817931014046886,
                   "children": [],
                   "position": [
-                    -0.274,
+                    0.274,
                     1,
-                    0.261
+                    -0.261
                   ]
                 }
               ],
               "position": [
-                -0.124,
-                -0.091,
-                0.667
+                0.123,
+                -0.092,
+                -0.667
               ]
             },
             {
@@ -3488,9 +3504,9 @@
                   "score": 0.6511260510044408,
                   "children": [],
                   "position": [
-                    1,
                     -1,
-                    -0.034
+                    1,
+                    0.034
                   ]
                 },
                 {
@@ -3502,9 +3518,9 @@
                   "score": 0.8040600075221845,
                   "children": [],
                   "position": [
-                    -1,
-                    -0.578,
-                    1
+                    1,
+                    0.578,
+                    -1
                   ]
                 },
                 {
@@ -3516,9 +3532,9 @@
                   "score": null,
                   "children": [],
                   "position": [
-                    -0.68,
-                    -0.01,
-                    -0.883
+                    0.68,
+                    0.01,
+                    0.883
                   ]
                 },
                 {
@@ -3530,9 +3546,9 @@
                   "score": null,
                   "children": [],
                   "position": [
-                    -0.438,
-                    0.203,
-                    -1
+                    0.438,
+                    -0.203,
+                    1
                   ]
                 },
                 {
@@ -3544,9 +3560,9 @@
                   "score": null,
                   "children": [],
                   "position": [
-                    0.499,
-                    0.836,
-                    0.31
+                    -0.499,
+                    -0.836,
+                    -0.31
                   ]
                 },
                 {
@@ -3558,9 +3574,9 @@
                   "score": null,
                   "children": [],
                   "position": [
-                    0.702,
-                    1,
-                    0.112
+                    -0.702,
+                    -1,
+                    -0.112
                   ]
                 },
                 {
@@ -3572,16 +3588,16 @@
                   "score": 0.6684547120627353,
                   "children": [],
                   "position": [
-                    0.738,
-                    -0.904,
-                    -0.476
+                    -0.738,
+                    0.904,
+                    0.476
                   ]
                 }
               ],
               "position": [
-                -0.955,
-                -0.332,
-                0.763
+                0.955,
+                -0.331,
+                -0.763
               ]
             },
             {
@@ -3608,9 +3624,9 @@
                 }
               ],
               "position": [
-                0.871,
+                -0.871,
                 -0.609,
-                0.756
+                -0.756
               ]
             },
             {
@@ -3630,7 +3646,7 @@
                   "score": 0.6567750992389048,
                   "children": [],
                   "position": [
-                    -1,
+                    1,
                     0.03,
                     0.686
                   ]
@@ -3644,7 +3660,7 @@
                   "score": 0.602254236068813,
                   "children": [],
                   "position": [
-                    -0.098,
+                    0.098,
                     -1,
                     0.28
                   ]
@@ -3658,7 +3674,7 @@
                   "score": 0.6148617122412904,
                   "children": [],
                   "position": [
-                    0.943,
+                    -0.943,
                     0.242,
                     1
                   ]
@@ -3672,7 +3688,7 @@
                   "score": 0.7531710135552669,
                   "children": [],
                   "position": [
-                    -0.734,
+                    0.734,
                     1,
                     0.282
                   ]
@@ -3686,7 +3702,7 @@
                   "score": 0.5785441971602543,
                   "children": [],
                   "position": [
-                    -0.206,
+                    0.206,
                     -0.748,
                     0.204
                   ]
@@ -3700,7 +3716,7 @@
                   "score": 0.5905556102932809,
                   "children": [],
                   "position": [
-                    1,
+                    -1,
                     0.256,
                     0.721
                   ]
@@ -3714,7 +3730,7 @@
                   "score": 0.6384745537396139,
                   "children": [],
                   "position": [
-                    0.553,
+                    -0.553,
                     0.279,
                     -1
                   ]
@@ -3728,16 +3744,16 @@
                   "score": 0.6240331564159014,
                   "children": [],
                   "position": [
-                    -0.633,
+                    0.633,
                     0.21,
                     0.319
                   ]
                 }
               ],
               "position": [
-                -0.465,
+                0.465,
                 -1,
-                -1
+                1
               ]
             },
             {
@@ -3757,9 +3773,9 @@
                   "score": 0.5540259680984198,
                   "children": [],
                   "position": [
-                    -0.733,
+                    0.733,
                     1,
-                    -1
+                    1
                   ]
                 },
                 {
@@ -3771,9 +3787,9 @@
                   "score": 0.5577697402172092,
                   "children": [],
                   "position": [
-                    -1,
+                    1,
                     0.258,
-                    1
+                    -1
                   ]
                 },
                 {
@@ -3785,9 +3801,9 @@
                   "score": 1.163955235663193,
                   "children": [],
                   "position": [
-                    -0.014,
+                    0.014,
                     -1,
-                    -0.683
+                    0.683
                   ]
                 },
                 {
@@ -3799,9 +3815,9 @@
                   "score": 0.5768761701572861,
                   "children": [],
                   "position": [
-                    1,
+                    -1,
                     0.693,
-                    0.174
+                    -0.174
                   ]
                 },
                 {
@@ -3813,9 +3829,9 @@
                   "score": 1.1669000281752653,
                   "children": [],
                   "position": [
-                    0.488,
+                    -0.488,
                     0.281,
-                    0.493
+                    -0.493
                   ]
                 },
                 {
@@ -3827,16 +3843,16 @@
                   "score": 1.1544574267644012,
                   "children": [],
                   "position": [
-                    -0.328,
+                    0.328,
                     -0.116,
-                    0.671
+                    -0.671
                   ]
                 }
               ],
               "position": [
-                0.07,
+                -0.07,
                 -0.721,
-                0.649
+                -0.649
               ]
             },
             {
@@ -3848,16 +3864,16 @@
               "score": 0.6203830408529986,
               "children": [],
               "position": [
-                -1,
+                1,
                 -0.872,
-                -0.988
+                0.988
               ]
             }
           ],
           "position": [
-            1,
-            0.334,
-            -1
+            -1,
+            -0.334,
+            1
           ]
         },
         {
@@ -3867,6 +3883,7 @@
           "path": "ingestion/parse",
           "description": "The reader. Turns a folder of source files into structured code units. It is the only module that touches the filesystem",
           "score": 0.8323182432733136,
+          "subtreeScore": 0.9072378540760551,
           "children": [
             {
               "id": "ingestion/parse/extract.ts",
@@ -3887,7 +3904,7 @@
                   "position": [
                     -0.926,
                     -1,
-                    -0.925
+                    0.925
                   ]
                 },
                 {
@@ -3901,7 +3918,7 @@
                   "position": [
                     -0.395,
                     0.091,
-                    0.004
+                    -0.004
                   ]
                 },
                 {
@@ -3915,7 +3932,7 @@
                   "position": [
                     0.141,
                     1,
-                    -1
+                    1
                   ]
                 },
                 {
@@ -3929,7 +3946,7 @@
                   "position": [
                     -0.474,
                     0.267,
-                    0.147
+                    -0.147
                   ]
                 },
                 {
@@ -3943,7 +3960,7 @@
                   "position": [
                     -1,
                     -0.158,
-                    0.339
+                    -0.339
                   ]
                 },
                 {
@@ -3957,7 +3974,7 @@
                   "position": [
                     1,
                     -0.95,
-                    0.296
+                    -0.296
                   ]
                 },
                 {
@@ -3971,7 +3988,7 @@
                   "position": [
                     -0.564,
                     0.36,
-                    0.39
+                    -0.39
                   ]
                 },
                 {
@@ -3985,7 +4002,7 @@
                   "position": [
                     -0.713,
                     0.005,
-                    1
+                    -1
                   ]
                 },
                 {
@@ -3999,14 +4016,14 @@
                   "position": [
                     -0.911,
                     -0.534,
-                    -0.462
+                    0.462
                   ]
                 }
               ],
               "position": [
                 0.576,
-                -0.364,
-                0.882
+                0.364,
+                -0.882
               ]
             },
             {
@@ -4027,8 +4044,8 @@
                   "children": [],
                   "position": [
                     0.453,
-                    1,
-                    -0.969
+                    -1,
+                    0.969
                   ]
                 },
                 {
@@ -4041,8 +4058,8 @@
                   "children": [],
                   "position": [
                     0.762,
-                    -1,
-                    -0.249
+                    1,
+                    0.249
                   ]
                 },
                 {
@@ -4055,8 +4072,8 @@
                   "children": [],
                   "position": [
                     0.514,
-                    0.344,
-                    1
+                    -0.344,
+                    -1
                   ]
                 },
                 {
@@ -4069,8 +4086,8 @@
                   "children": [],
                   "position": [
                     1,
-                    -0.449,
-                    0.207
+                    0.449,
+                    -0.207
                   ]
                 },
                 {
@@ -4083,8 +4100,8 @@
                   "children": [],
                   "position": [
                     0.483,
-                    0.921,
-                    -1
+                    -0.921,
+                    1
                   ]
                 },
                 {
@@ -4097,8 +4114,8 @@
                   "children": [],
                   "position": [
                     -0.964,
-                    0.672,
-                    0.737
+                    -0.672,
+                    -0.737
                   ]
                 },
                 {
@@ -4111,15 +4128,15 @@
                   "children": [],
                   "position": [
                     -1,
-                    -0.891,
-                    -0.892
+                    0.891,
+                    0.892
                   ]
                 }
               ],
               "position": [
                 0.354,
-                -0.034,
-                1
+                0.034,
+                -1
               ]
             },
             {
@@ -4189,8 +4206,8 @@
               ],
               "position": [
                 0.46,
-                1,
-                -0.885
+                -1,
+                0.885
               ]
             },
             {
@@ -4210,8 +4227,8 @@
                   "score": 0.5668815872897419,
                   "children": [],
                   "position": [
-                    0.95,
-                    -1,
+                    -0.95,
+                    1,
                     -1
                   ]
                 },
@@ -4224,8 +4241,8 @@
                   "score": 0.4951251329981938,
                   "children": [],
                   "position": [
-                    0.421,
-                    1,
+                    -0.421,
+                    -1,
                     -0.458
                   ]
                 },
@@ -4238,8 +4255,8 @@
                   "score": 0.6387555365342085,
                   "children": [],
                   "position": [
-                    -1,
-                    -0.6,
+                    1,
+                    0.6,
                     0.011
                   ]
                 },
@@ -4252,16 +4269,16 @@
                   "score": 0.5823113778911042,
                   "children": [],
                   "position": [
-                    1,
-                    -0.421,
+                    -1,
+                    0.421,
                     1
                   ]
                 }
               ],
               "position": [
                 1,
-                -0.88,
-                -0.289
+                0.88,
+                0.289
               ]
             },
             {
@@ -4281,9 +4298,9 @@
                   "score": 0.6520514005444742,
                   "children": [],
                   "position": [
-                    0.409,
-                    0.407,
-                    -0.053
+                    -0.409,
+                    -0.407,
+                    0.053
                   ]
                 },
                 {
@@ -4295,9 +4312,9 @@
                   "score": 0.6761870915978593,
                   "children": [],
                   "position": [
-                    0.743,
-                    -1,
-                    -0.713
+                    -0.743,
+                    1,
+                    0.713
                   ]
                 },
                 {
@@ -4309,9 +4326,9 @@
                   "score": null,
                   "children": [],
                   "position": [
-                    1,
-                    1,
-                    -0.283
+                    -1,
+                    -1,
+                    0.283
                   ]
                 },
                 {
@@ -4323,9 +4340,9 @@
                   "score": 0.6184066885702567,
                   "children": [],
                   "position": [
-                    -0.446,
-                    -0.168,
-                    1
+                    0.446,
+                    0.168,
+                    -1
                   ]
                 },
                 {
@@ -4337,9 +4354,9 @@
                   "score": 0.6172299121895453,
                   "children": [],
                   "position": [
-                    -1,
-                    0.346,
-                    -1
+                    1,
+                    -0.346,
+                    1
                   ]
                 },
                 {
@@ -4351,16 +4368,16 @@
                   "score": 0.5899811314620034,
                   "children": [],
                   "position": [
-                    -0.649,
-                    0.222,
-                    -0.41
+                    0.649,
+                    -0.222,
+                    0.41
                   ]
                 }
               ],
               "position": [
                 -1,
-                -0.62,
-                -0.26
+                0.62,
+                0.26
               ]
             },
             {
@@ -4402,15 +4419,15 @@
               ],
               "position": [
                 0.611,
-                -1,
-                -1
+                1,
+                1
               ]
             }
           ],
           "position": [
-            -1,
             1,
-            1
+            -1,
+            0.576
           ]
         },
         {
@@ -4420,6 +4437,7 @@
           "path": "ingestion/signals",
           "description": "The voice. Translates code structures into semantic text strings — prose descriptions, structural signatures, path ancho",
           "score": 0.802512942683512,
+          "subtreeScore": 0.941899435435414,
           "children": [
             {
               "id": "ingestion/signals/causes.ts",
@@ -4447,7 +4465,7 @@
               "position": [
                 -1,
                 0.312,
-                0.452
+                -0.452
               ]
             },
             {
@@ -4476,7 +4494,7 @@
               "position": [
                 1,
                 1,
-                1
+                -1
               ]
             },
             {
@@ -4497,7 +4515,7 @@
                   "children": [],
                   "position": [
                     -0.056,
-                    -1,
+                    1,
                     1
                   ]
                 },
@@ -4511,7 +4529,7 @@
                   "children": [],
                   "position": [
                     0.937,
-                    -0.431,
+                    0.431,
                     -0.704
                   ]
                 },
@@ -4525,7 +4543,7 @@
                   "children": [],
                   "position": [
                     1,
-                    -0.499,
+                    0.499,
                     -0.551
                   ]
                 },
@@ -4539,7 +4557,7 @@
                   "children": [],
                   "position": [
                     -0.823,
-                    -0.918,
+                    0.918,
                     -1
                   ]
                 },
@@ -4553,7 +4571,7 @@
                   "children": [],
                   "position": [
                     0.909,
-                    -0.476,
+                    0.476,
                     -0.065
                   ]
                 },
@@ -4567,7 +4585,7 @@
                   "children": [],
                   "position": [
                     -1,
-                    -0.962,
+                    0.962,
                     -0.173
                   ]
                 },
@@ -4581,7 +4599,7 @@
                   "children": [],
                   "position": [
                     -0.424,
-                    1,
+                    -1,
                     0.051
                   ]
                 },
@@ -4595,7 +4613,7 @@
                   "children": [],
                   "position": [
                     -0.959,
-                    -0.173,
+                    0.173,
                     -0.471
                   ]
                 }
@@ -4603,7 +4621,7 @@
               "position": [
                 0.705,
                 -1,
-                0.521
+                -0.521
               ]
             },
             {
@@ -4624,7 +4642,7 @@
                   "children": [],
                   "position": [
                     0.009,
-                    -0.023,
+                    0.023,
                     -1
                   ]
                 },
@@ -4638,7 +4656,7 @@
                   "children": [],
                   "position": [
                     0.788,
-                    -0.114,
+                    0.114,
                     0.677
                   ]
                 },
@@ -4652,7 +4670,7 @@
                   "children": [],
                   "position": [
                     -0.429,
-                    -0.835,
+                    0.835,
                     0.737
                   ]
                 },
@@ -4666,7 +4684,7 @@
                   "children": [],
                   "position": [
                     1,
-                    -0.344,
+                    0.344,
                     0.964
                   ]
                 },
@@ -4680,7 +4698,7 @@
                   "children": [],
                   "position": [
                     -0.209,
-                    -1,
+                    1,
                     1
                   ]
                 },
@@ -4694,7 +4712,7 @@
                   "children": [],
                   "position": [
                     0.342,
-                    0.696,
+                    -0.696,
                     0.989
                   ]
                 },
@@ -4708,7 +4726,7 @@
                   "children": [],
                   "position": [
                     -0.796,
-                    0.07,
+                    -0.07,
                     0.961
                   ]
                 },
@@ -4722,7 +4740,7 @@
                   "children": [],
                   "position": [
                     -0.036,
-                    1,
+                    -1,
                     0.867
                   ]
                 },
@@ -4736,7 +4754,7 @@
                   "children": [],
                   "position": [
                     -1,
-                    0.268,
+                    -0.268,
                     0.723
                   ]
                 }
@@ -4744,21 +4762,21 @@
               "position": [
                 0.598,
                 0.437,
-                -1
+                1
               ]
             }
           ],
           "position": [
-            -0.599,
-            -1,
-            -0.542
+            0.599,
+            1,
+            -1
           ]
         }
       ],
       "position": [
         -0.541,
         1,
-        -0.881
+        0.881
       ]
     },
     {
@@ -4768,6 +4786,7 @@
       "path": "sost",
       "description": "The brain. Computes structural health metrics from embedding vectors — label-fit, uniqueness, subtree aggregation, and o",
       "score": 0.7479358439781965,
+      "subtreeScore": 0.9053459661928266,
       "children": [
         {
           "id": "sost/builders.ts",
@@ -4787,8 +4806,8 @@
               "children": [],
               "position": [
                 0.251,
-                -1,
-                0.239
+                1,
+                -0.239
               ]
             },
             {
@@ -4801,8 +4820,8 @@
               "children": [],
               "position": [
                 -0.975,
-                0.567,
-                0.44
+                -0.567,
+                -0.44
               ]
             },
             {
@@ -4815,8 +4834,8 @@
               "children": [],
               "position": [
                 -0.939,
-                0.735,
-                0.378
+                -0.735,
+                -0.378
               ]
             },
             {
@@ -4829,8 +4848,8 @@
               "children": [],
               "position": [
                 -1,
-                0.462,
-                0.319
+                -0.462,
+                -0.319
               ]
             },
             {
@@ -4843,8 +4862,8 @@
               "children": [],
               "position": [
                 -0.95,
-                0.601,
-                -0.704
+                -0.601,
+                0.704
               ]
             },
             {
@@ -4857,8 +4876,8 @@
               "children": [],
               "position": [
                 0.369,
-                1,
-                0.89
+                -1,
+                -0.89
               ]
             },
             {
@@ -4871,8 +4890,8 @@
               "children": [],
               "position": [
                 1,
-                0.864,
-                -1
+                -0.864,
+                1
               ]
             },
             {
@@ -4885,8 +4904,8 @@
               "children": [],
               "position": [
                 0.755,
-                0.736,
-                1
+                -0.736,
+                -1
               ]
             }
           ],
@@ -4915,7 +4934,7 @@
               "position": [
                 0.873,
                 1,
-                -0.976
+                0.976
               ]
             },
             {
@@ -4929,7 +4948,7 @@
               "position": [
                 1,
                 0.963,
-                0.592
+                -0.592
               ]
             },
             {
@@ -4943,7 +4962,7 @@
               "position": [
                 0.279,
                 -1,
-                -1
+                1
               ]
             },
             {
@@ -4957,7 +4976,7 @@
               "position": [
                 0.525,
                 -0.728,
-                1
+                -1
               ]
             },
             {
@@ -4971,7 +4990,7 @@
               "position": [
                 -1,
                 0.82,
-                0.086
+                -0.086
               ]
             }
           ],
@@ -4999,7 +5018,7 @@
               "children": [],
               "position": [
                 -0.59,
-                0.117,
+                -0.117,
                 0.949
               ]
             },
@@ -5013,7 +5032,7 @@
               "children": [],
               "position": [
                 -1,
-                1,
+                -1,
                 -0.317
               ]
             },
@@ -5027,7 +5046,7 @@
               "children": [],
               "position": [
                 -0.242,
-                0.847,
+                -0.847,
                 -0.88
               ]
             },
@@ -5041,7 +5060,7 @@
               "children": [],
               "position": [
                 0.798,
-                0.108,
+                -0.108,
                 0.147
               ]
             },
@@ -5055,7 +5074,7 @@
               "children": [],
               "position": [
                 1,
-                -0.266,
+                0.266,
                 -0.454
               ]
             },
@@ -5069,7 +5088,7 @@
               "children": [],
               "position": [
                 -0.865,
-                -0.974,
+                0.974,
                 -0.324
               ]
             },
@@ -5083,7 +5102,7 @@
               "children": [],
               "position": [
                 0.533,
-                -0.262,
+                0.262,
                 -1
               ]
             },
@@ -5097,7 +5116,7 @@
               "children": [],
               "position": [
                 -0.896,
-                -1,
+                1,
                 -0.635
               ]
             },
@@ -5111,7 +5130,7 @@
               "children": [],
               "position": [
                 0.226,
-                -0.279,
+                0.279,
                 1
               ]
             }
@@ -5139,7 +5158,7 @@
               "score": 0.7098361806042676,
               "children": [],
               "position": [
-                -0.763,
+                0.763,
                 0.702,
                 1
               ]
@@ -5153,7 +5172,7 @@
               "score": 0.7290419839512523,
               "children": [],
               "position": [
-                0.063,
+                -0.063,
                 1,
                 -1
               ]
@@ -5167,7 +5186,7 @@
               "score": 0.7478602599494573,
               "children": [],
               "position": [
-                1,
+                -1,
                 -0.553,
                 0.358
               ]
@@ -5181,7 +5200,7 @@
               "score": 0.7062808436160695,
               "children": [],
               "position": [
-                -1,
+                1,
                 -1,
                 -0.491
               ]
@@ -5212,7 +5231,7 @@
               "position": [
                 0.691,
                 -0.55,
-                0.823
+                -0.823
               ]
             },
             {
@@ -5226,7 +5245,7 @@
               "position": [
                 -0.219,
                 1,
-                0.677
+                -0.677
               ]
             },
             {
@@ -5240,7 +5259,7 @@
               "position": [
                 -0.368,
                 0.759,
-                0.457
+                -0.457
               ]
             },
             {
@@ -5254,7 +5273,7 @@
               "position": [
                 -0.898,
                 -0.284,
-                0.045
+                -0.045
               ]
             },
             {
@@ -5268,7 +5287,7 @@
               "position": [
                 0.195,
                 -0.293,
-                -1
+                1
               ]
             },
             {
@@ -5282,7 +5301,7 @@
               "position": [
                 -0.542,
                 -1,
-                0.658
+                -0.658
               ]
             },
             {
@@ -5296,7 +5315,7 @@
               "position": [
                 -1,
                 -0.487,
-                1
+                -1
               ]
             },
             {
@@ -5310,7 +5329,7 @@
               "position": [
                 1,
                 -0.198,
-                0.84
+                -0.84
               ]
             }
           ],
@@ -5324,7 +5343,7 @@
       "position": [
         -1,
         0.616,
-        -0.616
+        0.616
       ]
     },
     {
@@ -5334,6 +5353,7 @@
       "path": "ui",
       "description": "The face. Renders all terminal output — banners, spinners, tables, heroes, footers, and bullet lists. It is the only par",
       "score": 0.7244380818223393,
+      "subtreeScore": 0.9089055974115022,
       "children": [
         {
           "id": "ui/footer.ts",
@@ -5353,8 +5373,8 @@
               "children": [],
               "position": [
                 1,
-                -0.055,
-                1
+                0.055,
+                -1
               ]
             },
             {
@@ -5367,8 +5387,8 @@
               "children": [],
               "position": [
                 -1,
-                -1,
-                -1
+                1,
+                1
               ]
             },
             {
@@ -5381,15 +5401,15 @@
               "children": [],
               "position": [
                 -0.928,
-                1,
-                0.698
+                -1,
+                0.179
               ]
             }
           ],
           "position": [
             0.363,
             -0.807,
-            -1
+            1
           ]
         },
         {
@@ -5474,7 +5494,7 @@
           "position": [
             0.885,
             1,
-            -0.373
+            0.373
           ]
         },
         {
@@ -5495,8 +5515,8 @@
               "children": [],
               "position": [
                 -1,
-                -1,
-                -0.944
+                1,
+                0.944
               ]
             },
             {
@@ -5509,8 +5529,8 @@
               "children": [],
               "position": [
                 -0.606,
-                0.023,
-                1
+                -0.023,
+                -1
               ]
             },
             {
@@ -5523,8 +5543,8 @@
               "children": [],
               "position": [
                 -0.366,
-                1,
-                -1
+                -1,
+                1
               ]
             },
             {
@@ -5537,15 +5557,15 @@
               "children": [],
               "position": [
                 1,
-                -0.503,
-                -0.382
+                0.503,
+                0.382
               ]
             }
           ],
           "position": [
             0.682,
             -0.324,
-            0.204
+            -0.204
           ]
         },
         {
@@ -5574,7 +5594,7 @@
           "position": [
             0.235,
             -1,
-            0.811
+            -0.811
           ]
         },
         {
@@ -5603,7 +5623,7 @@
           "position": [
             -1,
             0.509,
-            0.297
+            -0.297
           ]
         },
         {
@@ -5624,8 +5644,8 @@
               "children": [],
               "position": [
                 1,
-                -1,
-                1
+                1,
+                -1
               ]
             },
             {
@@ -5638,8 +5658,8 @@
               "children": [],
               "position": [
                 -1,
-                -0.322,
-                0.183
+                0.322,
+                -0.183
               ]
             },
             {
@@ -5652,8 +5672,8 @@
               "children": [],
               "position": [
                 0.781,
-                1,
-                0.432
+                -1,
+                -0.432
               ]
             },
             {
@@ -5666,22 +5686,22 @@
               "children": [],
               "position": [
                 0.897,
-                -0.5,
-                -1
+                0.5,
+                1
               ]
             }
           ],
           "position": [
             1,
             0.23,
-            1
+            -1
           ]
         }
       ],
       "position": [
         0.204,
         -0.129,
-        -0.102
+        0.102
       ]
     },
     {
@@ -5691,6 +5711,7 @@
       "path": "utils",
       "description": "The toolbox. Provides pure mathematical and path functions that multiple other modules depend on but that carry no appli",
       "score": null,
+      "subtreeScore": null,
       "children": [
         {
           "id": "utils/format.ts",
@@ -5731,7 +5752,7 @@
           ],
           "position": [
             -0.851,
-            0.173,
+            -0.173,
             1
           ]
         },
@@ -5774,7 +5795,7 @@
           ],
           "position": [
             -1,
-            0.847,
+            -0.847,
             -1
           ]
         },
@@ -5817,7 +5838,7 @@
           ],
           "position": [
             0.178,
-            -1,
+            1,
             -0.521
           ]
         },
@@ -5838,7 +5859,7 @@
               "score": 0.7336831886685675,
               "children": [],
               "position": [
-                -0.328,
+                0.328,
                 -1,
                 -0.483
               ]
@@ -5852,7 +5873,7 @@
               "score": 0.6943912262030731,
               "children": [],
               "position": [
-                -1,
+                1,
                 1,
                 -0.439
               ]
@@ -5866,7 +5887,7 @@
               "score": 0.6244978042395483,
               "children": [],
               "position": [
-                1,
+                -1,
                 0.317,
                 0.316
               ]
@@ -5880,7 +5901,7 @@
               "score": 0.6580417694598291,
               "children": [],
               "position": [
-                0.149,
+                -0.149,
                 0.022,
                 1
               ]
@@ -5894,7 +5915,7 @@
               "score": 0.6623361517084612,
               "children": [],
               "position": [
-                -0.712,
+                0.712,
                 -0.7,
                 0.481
               ]
@@ -5908,7 +5929,7 @@
               "score": 0.627294297384326,
               "children": [],
               "position": [
-                0.717,
+                -0.717,
                 -0.183,
                 -1
               ]
@@ -5916,7 +5937,7 @@
           ],
           "position": [
             1,
-            1,
+            -1,
             0.027
           ]
         }
@@ -5924,7 +5945,7 @@
       "position": [
         -0.526,
         0.254,
-        1
+        -1
       ]
     },
     {
@@ -5938,7 +5959,7 @@
       "position": [
         1,
         0.696,
-        -0.517
+        0.517
       ]
     }
   ]
