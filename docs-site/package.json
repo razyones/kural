@@ -13,6 +13,7 @@
     "fumadocs-core": "latest",
     "fumadocs-mdx": "latest",
     "fumadocs-ui": "latest",
+    "katex": "^0.16.44",
     "react": "^19",
     "react-dom": "^19",
     "vite": "^8"

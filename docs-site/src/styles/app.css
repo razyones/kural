@@ -3,6 +3,65 @@
 @import "fumadocs-ui/css/preset.css";
 @import "katex/dist/katex.min.css";
 
+/* ── Tailwind theme: sharp edges ── */
+@theme {
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 3px;
+  --radius-xl: 3px;
+  --radius-2xl: 3px;
+  --radius-full: 3px;
+}
+
+/* ── Font stack ── */
+:root {
+  --font-display: "Archivo", sans-serif;
+  --font-body: "Archivo", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+/* ── Typography ── */
+body {
+  font-family: var(--font-body);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+/* ── Color overrides (dark mode — Kural is dark-first) ── */
+.dark {
+  --color-fd-primary: hsl(187, 40%, 55%);
+  --color-fd-primary-foreground: hsl(0, 0%, 5%);
+  --color-fd-background: hsl(0, 0%, 5%);
+  --color-fd-foreground: hsl(0, 0%, 85%);
+  --color-fd-muted: hsl(0, 0%, 12%);
+  --color-fd-muted-foreground: hsl(0, 0%, 55%);
+  --color-fd-border: hsla(0, 0%, 30%, 25%);
+  --color-fd-card: hsl(0, 0%, 7%);
+  --color-fd-accent: hsla(0, 0%, 30%, 20%);
+  --color-fd-accent-foreground: hsl(0, 0%, 88%);
+  --color-fd-secondary: hsl(0, 0%, 12%);
+  --color-fd-secondary-foreground: hsl(0, 0%, 85%);
+}
+
+/* ── Light mode ── */
+@theme {
+  --color-fd-background: hsl(0, 0%, 98%);
+  --color-fd-foreground: hsl(0, 0%, 10%);
+  --color-fd-primary: hsl(187, 70%, 35%);
+  --color-fd-primary-foreground: hsl(0, 0%, 98%);
+}
+
+/* ── Spacing fix ── */
 #nd-page > div:last-child {
   margin-top: 10rem;
 }
