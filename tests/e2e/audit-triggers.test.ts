@@ -29,7 +29,10 @@ const E012 = 0.12;
 const E013 = 0.13;
 const E015 = 0.15;
 const E02 = 0.2;
+const E03 = 0.3;
 const E04 = 0.4;
+const E045 = 0.45;
+const E055 = 0.55;
 const E05 = 0.5;
 const E06 = 0.6;
 const E08 = 0.8;
@@ -41,6 +44,7 @@ const E094 = 0.94;
 const E095 = 0.95;
 const E099 = 0.99;
 const E1 = 1.0;
+const SLIGHT_COUNT = 8;
 
 /* ------------------------------------------------------------------ */
 /*  Shared helpers                                                    */
@@ -423,12 +427,86 @@ describe("util-duplicates trigger", () => {
   });
 });
 
+/* ------------------------------------------------------------------ */
+/*  misplaced                                                         */
+/* ------------------------------------------------------------------ */
+
+describe("misplaced trigger", () => {
+  it("flags file that fits an uncle directory better than its parent", async () => {
+    tmpRoot = createTmpRoot();
+    const p = `${tmpRoot}/src`;
+    const auth = `${p}/auth`;
+    const api = `${p}/api`;
+    const db = `${p}/db`;
+
+    // 1 misfit file under auth whose leaf points at api
+    // 8 slight files under auth with small deltas to establish the baseline
+    // Slightly toward api
+    const slightLeaf = [E045, E055, E0];
+    const slightFiles: FileRow[] = [];
+    const slightFns: FunctionRow[] = [];
+    for (let i = NONE; i < SLIGHT_COUNT; i++) {
+      const name = `s${String(i)}.ts`;
+      const fpath = `${auth}/${name}`;
+      slightFiles.push(file(fpath, name, slightLeaf));
+      slightFns.push(fn(fpath, `fn_s${String(i)}`, slightLeaf));
+    }
+
+    const misfitPath = `${auth}/misfit.ts`;
+    // Strongly fits api [0,1,0]
+    const misfitLeaf = [E0, E095, E005];
+
+    const data: SeedData = {
+      directories: [
+        dir(p, "src", [auth, api, db], [E05, E05, E0]),
+        dir(auth, "auth", [...slightFiles.map((f) => f.path), misfitPath], [E1, E0, E0]),
+        dir(api, "api", [], [E0, E1, E0]),
+        dir(db, "db", [], [E0, E0, E1]),
+      ],
+      files: [...slightFiles, file(misfitPath, "misfit.ts", misfitLeaf)],
+      functions: [...slightFns, fn(misfitPath, "fn_misfit", misfitLeaf)],
+    };
+    await seedFullActiveSnapshot(tmpRoot, "main", data);
+    expectAudit(auditJson(tmpRoot), "misplaced");
+  });
+});
+
+/* ------------------------------------------------------------------ */
+/*  vocabulary-bleed                                                  */
+/* ------------------------------------------------------------------ */
+
+describe("vocabulary-bleed trigger", () => {
+  it("flags directory whose identity is closer to a non-sibling than its weakest sibling", async () => {
+    tmpRoot = createTmpRoot();
+    const p = `${tmpRoot}/src`;
+    const auth = `${p}/auth`;
+    const api = `${p}/api`;
+    const db = `${p}/db`;
+    const other = `${tmpRoot}/other`;
+
+    // auth identity = [0, 0.95, 0.05] ≈ api [0,1,0], far from db [0,0,1]
+    // minSiblingSim(auth) = min(sim(auth,api), sim(auth,db)) ≈ sim(auth,db) ≈ 0.05
+    // crossPull to "other" [0.3, 0.3, 0.4]: sim(auth,other) ≈ 0.38
+    // delta = 0.38 - 0.05 = 0.33, should exceed fence of well-behaved dirs
+
+    const data: SeedData = {
+      directories: [
+        dir(p, "src", [auth, api, db], [E05, E05, E0]),
+        dir(auth, "auth", [], [E0, E095, E005]),
+        dir(api, "api", [], [E0, E1, E0]),
+        dir(db, "db", [], [E0, E0, E1]),
+        dir(other, "other", [], [E03, E03, E04]),
+      ],
+    };
+    await seedFullActiveSnapshot(tmpRoot, "main", data);
+    expectAudit(auditJson(tmpRoot), "vocabulary-bleed");
+  });
+});
+
 /*
  * Audits not tested here (statistical thresholds require precise
  * dendrogram gap / fence calibration better validated by unit tests):
  * - merge-candidates
  * - bloated-directories
  * - bloated-files
- * - misplaced (needs multi-level directory tree)
- * - vocabulary-bleed (needs cross-directory identity overlap)
  */
