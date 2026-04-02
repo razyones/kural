@@ -1,23 +1,18 @@
-import {
-  createRootRoute,
-  HeadContent,
-  Outlet,
-  Scripts,
-} from '@tanstack/react-router';
-import { RootProvider } from 'fumadocs-ui/provider/tanstack';
-import appCss from '@/styles/app.css?url';
-import config from '../../docs.config';
+import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
+import { RootProvider } from "fumadocs-ui/provider/tanstack";
+import appCss from "@/styles/app.css?url";
+import config from "../../docs.config";
 
 export const Route = createRootRoute({
   component: RootComponent,
   head: () => ({
     meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+      { charSet: "utf-8" },
+      { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: config.name },
-      { name: 'description', content: config.description },
+      { name: "description", content: config.description },
     ],
-    links: [{ rel: 'stylesheet', href: appCss }],
+    links: [{ rel: "stylesheet", href: appCss }],
   }),
 });
 
