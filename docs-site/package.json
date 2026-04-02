@@ -24,6 +24,8 @@
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6",
     "nitro": "^3",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
     "tailwindcss": "^4",
     "typescript": "~5.9.3"
   }

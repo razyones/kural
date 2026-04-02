@@ -11,9 +11,13 @@ Structural scoring system for TypeScript codebases — answers "where should thi
 
 Kural is a five-stage pipeline that transforms source code into structural health scores:
 
-```
-Parse -> Embed -> Score -> Store -> Query
-```
+<Steps>
+  <Step>**Parse** — Walk the filesystem, extract functions, types, and descriptions from the AST</Step>
+  <Step>**Embed** — Produce identity and leaf vectors via 7-facet embedding</Step>
+  <Step>**Score** — Compute fit, uniqueness, and subtree health for every node</Step>
+  <Step>**Store** — Persist units, scores, and metadata to a snapshot database</Step>
+  <Step>**Query** — Read snapshots for scoring, auditing, and comparison</Step>
+</Steps>
 
 The system is split into three tiers:
 

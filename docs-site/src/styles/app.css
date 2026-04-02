@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
+@import "katex/dist/katex.min.css";
 
 #nd-page > div:last-child {
   margin-top: 10rem;
