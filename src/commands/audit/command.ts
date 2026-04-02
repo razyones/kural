@@ -47,17 +47,30 @@ function resolveConfig(
 }
 
 /**
- * Splits the CLI filter flag into normalized category names so the report renderer can selectively show matching sections.
+ * Splits a comma-separated string into trimmed, lowercased, non-empty terms.
+ * @param input - Comma-separated string to split
+ * @returns Array of trimmed, lowercased, non-empty terms
+ * @kuralPure
+ * @kuralHelper
+ */
+function splitTerms(input: string): string[] {
+  return input
+    .split(",")
+    .map((term) => term.trim().toLowerCase())
+    .filter((term) => term.length > NONE);
+}
+
+/**
+ * Splits the CLI filter flag into normalized category names so the report
+ * renderer can selectively show matching sections. Replaces hyphens with
+ * spaces so `--filter outliers` matches the title "Outliers".
  * @param filterInput - Comma-separated string of filter terms
- * @returns Array of trimmed, lowercased, non-empty filter terms
+ * @returns Array of normalized filter terms
  * @kuralPure
  * @kuralHelper
  */
 function parseFilterTerms(filterInput: string): string[] {
-  return filterInput
-    .split(",")
-    .map((term) => term.trim().toLowerCase().replaceAll("-", " "))
-    .filter((term) => term.length > NONE);
+  return splitTerms(filterInput).map((term) => term.replaceAll("-", " "));
 }
 
 const SHOW_ALL = 0;
@@ -194,7 +207,7 @@ async function runAuditCommand(values: {
   const projectConfig = loadProjectConfig();
   const config = resolveConfig(values, projectConfig.audits ?? {});
 
-  const cliDisabled = parseFilterTerms(values.disable ?? "");
+  const cliDisabled = splitTerms(values.disable ?? "");
   const configDisabled = config.disable ?? [];
   const disabledAudits = new Set([...cliDisabled, ...configDisabled]);
   const jsonMode = values.json === true;

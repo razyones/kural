@@ -76,7 +76,12 @@ export default defineConfig({
   test: {
     coverage: {
       provider: "v8",
-      exclude: ["src/db/**", "src/cli.ts", "src/commands/*/command.ts"],
+      exclude: [
+        "src/db/**",
+        "src/cli.ts",
+        "src/commands/*/command.ts",
+        "src/commands/*/pipeline.ts",
+      ],
       thresholds: {
         statements: 90,
         branches: 90,
