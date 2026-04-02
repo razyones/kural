@@ -39,9 +39,14 @@ function createTmpRoot(): string {
     `kural-e2e-${String(Date.now())}-${String(Math.random()).slice(TWO)}`,
   );
   mkdirSync(root, { recursive: true });
+  // Strip git env vars leaked by pre-commit hooks (GIT_DIR, GIT_INDEX_FILE, etc.)
+  const cleanEnv = Object.fromEntries(
+    Object.entries(process.env).filter(([k]) => !k.startsWith("GIT_")),
+  );
   execSync("git init -b main && git commit --allow-empty -m init", {
     cwd: root,
     stdio: "ignore",
+    env: cleanEnv,
   });
   return root;
 }
