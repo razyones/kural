@@ -9,8 +9,9 @@
   "scripts": {
     "build": "vp pack",
     "prepare": "vp config",
-    "docs:dev": "vp run --filter kural-docs dev",
-    "docs:build": "vp run --filter kural-docs build"
+    "docs:extract": "node scripts/extract-embeddings.mjs",
+    "docs:dev": "node scripts/extract-embeddings.mjs && vp run --filter kural-docs dev",
+    "docs:build": "node scripts/extract-embeddings.mjs && vp run --filter kural-docs build"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.41",
