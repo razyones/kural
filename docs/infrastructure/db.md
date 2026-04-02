@@ -13,7 +13,7 @@ Local snapshot persistence for the Kural CLI. All data lives on disk as SQLite d
     active.db                           # current snapshot
     advise.db                           # ephemeral clone for simulation
     history/
-      kural-history-<snapshot-id>.db    # rotated snapshots (max 10)
+      <snapshot-id>.db                  # rotated snapshots (max 10)
 ```
 
 Snapshot ID format: `<timestamp>-<short-commit-hash>` (e.g., `1711700400-a3f8b2c`).
@@ -37,6 +37,7 @@ Source files with embeddings and import tracking.
 | `imports_internal`   | TEXT NOT NULL | JSON string array                               |
 | `imports_external`   | TEXT NOT NULL | JSON string array                               |
 | `companion`          | TEXT          | @kuralCompanion group ID                        |
+| `bound`              | TEXT          | `"inward"` or `"outward"` — @kuralBound         |
 | `residuals`          | TEXT NOT NULL | JSON ResidualEntry array                        |
 
 ### types
@@ -58,6 +59,7 @@ Type declarations (interfaces, classes, type aliases).
 | `leaf_embedding`     | BLOB NOT NULL    | Float32                                    |
 | `facet_hash`         | TEXT             |                                            |
 | `patterns`           | TEXT             | @kuralPatterns group ID                    |
+| `bound`              | TEXT             | `"inward"` or `"outward"` — @kuralBound    |
 
 ### functions
 
@@ -84,6 +86,7 @@ Function declarations with call graph and purity info.
 | `patterns`           | TEXT             | @kuralPatterns group ID                 |
 | `documented_params`  | INTEGER NOT NULL | Count of @param tags (default 0)        |
 | `has_return_doc`     | INTEGER NOT NULL | Boolean — has @returns tag (default 0)  |
+| `bound`              | TEXT             | `"inward"` or `"outward"` — @kuralBound |
 
 ### directories
 
@@ -137,6 +140,7 @@ Known keys:
 | Key                | Value                      | Purpose                                  |
 | ------------------ | -------------------------- | ---------------------------------------- |
 | `created_at`       | Unix timestamp (ms)        | When the snapshot was generated          |
+| `commit_hash`      | Short git commit hash      | Snapshot identity and provenance         |
 | `model_id`         | Embedding model identifier | Cache invalidation across model changes  |
 | `schema_version`   | Integer                    | Schema version for forward compatibility |
 | `axis:<id>`        | JSON number array          | Computed semantic axis vector            |

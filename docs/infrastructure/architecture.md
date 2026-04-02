@@ -58,15 +58,16 @@ Every parsed unit carries:
 
 ### Scores
 
-Each non-leaf node (file or directory) gets a `ScoreCard`:
+Every node (types, functions, files, directories) gets a `ScoreCard`:
 
-- `labelFit` — how well the declared name matches actual structure
-- `labelUniqueness` — how distinct children are from each other
-- `subtreeFit` / `subtreeUniqueness` — mean fit/uniqueness across subtree
-- `subtreeMinFit` / `subtreeMinUniqueness` — floor values (worst in subtree)
-- `overallScore` — harmonic mean of fit and uniqueness (nullable if no siblings)
-- `worstPair` — the least unique sibling pair
-- `bestUncleName` / `bestUncleScore` — the uncle node where this unit would fit better
+- `fit` — how well the node's content matches its parent's identity
+- `uniqueness` — mean distance to siblings (2.0 = N/A)
+- `score` — harmonic mean of fit and uniqueness
+- `childrenFit` / `childrenUniqueness` / `childrenScore` — direct children quality (containers only)
+- `subtreeFit` / `subtreeUniqueness` / `subtreeScore` — aggregate descendant health (containers only)
+- `overallScore` — leaf: score. Container: harmonic mean of score and subtreeScore
+- `worstPair` — the most similar child pair
+- `bestUncle` — the uncle node where this unit would fit better (name + score)
 
 ## Snapshot System
 
@@ -92,8 +93,9 @@ Format: `<timestamp>-<short-commit-hash>`
 .kural-db/
   <branch>/
     active.db       # current snapshot, clone-able
-    history.db      # consolidated history, all snapshots as rows
     advise.db       # ephemeral clone for AI simulation (paid)
+    history/        # rotated snapshots (max 10)
+      <snapshot-id>.db
 ```
 
 ### Server Storage Layout (Paid Tier)
@@ -108,8 +110,8 @@ Turso (<customer-id>.kural.io):
 ### Snapshot Lifecycle
 
 1. CLI generates a snapshot for the current branch
-2. Active snapshot is replaced; outgoing snapshot rows are appended to `history.db`
-3. History is keyed by `branch` + `snapshot_id`
+2. Active snapshot is rotated to `history/<snapshot-id>.db`; a fresh `active.db` is created
+3. Oldest unpinned history snapshots are evicted when count exceeds 10
 4. On the server, only CI writes (via API); developers keep snapshots locally
 
 ## Schema Design
