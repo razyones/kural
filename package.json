@@ -8,7 +8,9 @@
   "type": "module",
   "scripts": {
     "build": "vp pack",
-    "prepare": "vp config"
+    "prepare": "vp config",
+    "docs:dev": "vp run --filter kural-docs dev",
+    "docs:build": "vp run --filter kural-docs build"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.41",
