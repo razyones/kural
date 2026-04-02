@@ -167,6 +167,7 @@ type SeedData = {
   types?: TypeRow[];
   directories?: DirectoryRow[];
   scores?: ScoreRow[];
+  extraMetadata?: Array<{ key: string; value: string }>;
 };
 
 /**
@@ -208,6 +209,10 @@ async function seedFullActiveSnapshot(
   }
   if (data.scores && data.scores.length > NONE) {
     const tx = snapshot.collections.scores.insert(data.scores);
+    await tx.isPersisted.promise;
+  }
+  if (data.extraMetadata && data.extraMetadata.length > NONE) {
+    const tx = snapshot.collections.metadata.insert(data.extraMetadata);
     await tx.isPersisted.promise;
   }
 
