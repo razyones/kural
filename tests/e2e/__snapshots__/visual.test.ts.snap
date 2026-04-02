@@ -1,0 +1,205 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`visual: audit > renders clean audit (no findings) 1`] = `
+"kural (kural v0.0.0)
+
+kural · audit
+on snapshot: .kural-db/main/active.db
+taken on: <DATE>
+identified issues: 0
+────────────────────────────────────────
+
+[ success ] No structural issues detected
+
+Glossary:
+
+Similarity — cosine similarity between embedding vectors (0–100%)
+Dominant / next — highest and second-highest child-to-parent similarity
+Identity-content — alignment between a container's name and its actual contents
+Axis score — is-does linguistic measurement for descriptions
+clusters — groups of semantically similar children suggesting a split
+fence — statistical threshold computed from group distribution
+group — the peer set used as baseline for comparison
+
+Next steps:
+
+kural audit -f <category> — filter by audit category
+kural audit -e — show all findings per audit (no truncation)
+kural audit -d <name> — disable specific audits
+kural audit -k <n> — adjust sensitivity threshold
+kural audit --json — output result as JSON
+kural snapshot generate — regenerate snapshot after fixing issues
+
+"
+`;
+
+exports[`visual: audit > renders the audit report with findings 1`] = `
+"kural (kural v0.0.0)
+
+kural · audit
+on snapshot: .kural-db/main/active.db
+taken on: <DATE>
+identified issues: 1
+────────────────────────────────────────
+
+Incomplete Documentation [#incomplete-docs] (1)
+
+  ▸ Function "run" [<HASH>] in app.ts
+    Missing: description, 1/1 @param, @returns, @kuralPure or @kuralCauses
+
+
+Glossary:
+
+Similarity — cosine similarity between embedding vectors (0–100%)
+Dominant / next — highest and second-highest child-to-parent similarity
+Identity-content — alignment between a container's name and its actual contents
+Axis score — is-does linguistic measurement for descriptions
+clusters — groups of semantically similar children suggesting a split
+fence — statistical threshold computed from group distribution
+group — the peer set used as baseline for comparison
+
+Next steps:
+
+kural audit -f <category> — filter by audit category
+kural audit -e — show all findings per audit (no truncation)
+kural audit -d <name> — disable specific audits
+kural audit -k <n> — adjust sensitivity threshold
+kural audit --json — output result as JSON
+kural snapshot generate — regenerate snapshot after fixing issues
+
+"
+`;
+
+exports[`visual: score > renders empty state warning 1`] = `
+"kural (kural v0.0.0)
+
+[ warn ] No scores found. Run generate first.
+"
+`;
+
+exports[`visual: score > renders the hero score display 1`] = `
+"kural (kural v0.0.0)
+
+kural · score
+path: all
+branch: main
+snapshot: active
+────────────────────────────────────────
+
+Score:
+
+◆ 0.74
+
+Strong structural fit.
+directory · 1 children
+
+Glossary:
+
+Self — how well this node fits under its parent (-1…1)
+Children — how coherent this node's direct children are (-1…1)
+Subtree — recursive health of the entire subtree below (-1…1)
+Overall — harmonic mean of Self and Subtree (-1…1)
+(—) — not applicable (leaves have no Children or Subtree)
+
+Next steps:
+
+kural score -e — detailed score breakdown table
+kural score -p <path> — score a specific node or subtree
+kural score -e -l 0 — show all rows in breakdown
+kural score -c <id> — compare against a previous snapshot
+kural score --json — output as JSON
+
+"
+`;
+
+exports[`visual: score > renders the score breakdown table with -e 1`] = `
+"kural (kural v0.0.0)
+
+kural · score
+path: all
+branch: main
+snapshot: active
+────────────────────────────────────────
+
+Score:
+
+◆ 0.74
+
+Strong structural fit.
+directory · 1 children
+
+Explanation:
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────┬───────────────┬───────────────────┬──────────────────┬──────────────────┐
+│  Path (3 of 3)                                                                                                             │  Kind       │  Self (-1…1)  │  Children (-1…1)  │  Subtree (-1…1)  │  Overall (-1…1)  │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────┼───────────────┼───────────────────┼──────────────────┼──────────────────┤
+│  ../../../../../../..<ROOT>/src         │  directory  │         0.77  │             0.68  │            0.71  │            0.74  │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────┼───────────────┼───────────────────┼──────────────────┼──────────────────┤
+│  ../../../../../../..<ROOT>/src/app.ts  │  file       │         0.87  │             0.77  │            0.80  │            0.83  │
+├────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┼─────────────┼───────────────┼───────────────────┼──────────────────┼──────────────────┤
+│    :main                                                                                                                   │  function   │         0.93  │                —  │               —  │            0.93  │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────┴───────────────┴───────────────────┴──────────────────┴──────────────────┘
+
+Glossary:
+
+Self — how well this node fits under its parent (-1…1)
+Children — how coherent this node's direct children are (-1…1)
+Subtree — recursive health of the entire subtree below (-1…1)
+Overall — harmonic mean of Self and Subtree (-1…1)
+(—) — not applicable (leaves have no Children or Subtree)
+
+Next steps:
+
+kural score -e — detailed score breakdown table
+kural score -p <path> — score a specific node or subtree
+kural score -e -l 0 — show all rows in breakdown
+kural score -c <id> — compare against a previous snapshot
+kural score --json — output as JSON
+
+"
+`;
+
+exports[`visual: snapshot list > renders empty state warning 1`] = `
+"kural (kural v0.0.0)
+
+kural · snapshot list
+branch: main
+────────────────────────────────────────
+
+[ warn ] No snapshots found. Run snapshot generate first.
+"
+`;
+
+exports[`visual: snapshot list > renders the list banner and snapshot rows 1`] = `
+"kural (kural v0.0.0)
+
+kural · snapshot list
+branch: main
+────────────────────────────────────────
+
+<DATE>  1700000000000-abc0001 [baseline]
+<DATE>  1700000001000-def0002
+
+"
+`;
+
+exports[`visual: snapshot pin/unpin/delete > renders delete success message 1`] = `
+"kural (kural v0.0.0)
+
+[ success ] Deleted snapshot 1700000000000-abc0001
+"
+`;
+
+exports[`visual: snapshot pin/unpin/delete > renders pin success message 1`] = `
+"kural (kural v0.0.0)
+
+[ success ] Pinned 1700000000000-abc0001 as "release"
+"
+`;
+
+exports[`visual: snapshot pin/unpin/delete > renders unpin success message 1`] = `
+"kural (kural v0.0.0)
+
+[ success ] Unpinned 1700000000000-abc0001
+"
+`;

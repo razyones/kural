@@ -17,6 +17,8 @@ import { tmpdir } from "node:os";
 
 const NONE = 0;
 const TWO = 2;
+const MAX_RETRIES = 3;
+const RETRY_OFFSET = 1;
 const DEFAULT_EXIT = 1;
 const TIMEOUT_MS = 30_000;
 const CLI_PATH = join(import.meta.dirname, "../../dist/cli.mjs");
@@ -43,11 +45,18 @@ function createTmpRoot(): string {
   const cleanEnv = Object.fromEntries(
     Object.entries(process.env).filter(([k]) => !k.startsWith("GIT_")),
   );
-  execSync("git init -b main && git commit --allow-empty -m init", {
-    cwd: root,
-    stdio: "ignore",
-    env: cleanEnv,
-  });
+  const gitOpts = { cwd: root, stdio: "ignore" as const, env: cleanEnv };
+  // Retry git init under parallel load (resource contention in CI/parallel tests)
+  for (let attempt = NONE; attempt < MAX_RETRIES; attempt++) {
+    try {
+      execSync("git init -b main && git commit --allow-empty -m init", gitOpts);
+      return root;
+    } catch {
+      if (attempt === MAX_RETRIES - RETRY_OFFSET) {
+        throw new Error(`git init failed after ${String(MAX_RETRIES)} attempts in ${root}`);
+      }
+    }
+  }
   return root;
 }
 
