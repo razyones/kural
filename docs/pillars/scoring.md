@@ -225,35 +225,9 @@ Neither measures absolute separation. A folder where all children are uniformly 
 
 ---
 
-## 5. Kural Annotations in Scoring
+## 5. Kural Params in Scoring
 
-### @kuralUtil
-
-Capability containers (files/directories marked `@kuralUtil` or in `utils/`/`helpers/` paths). Their identity has no semantic direction, so:
-
-- `fit` = null (no meaningful parent alignment)
-- `childrenFit` = null (no meaningful self-alignment)
-- Util nodes excluded from parent's uniqueness computation via `getEligibleChildren`
-- Util subtrees sandboxed — their scores don't propagate into domain parent subtrees
-
-### @kuralHelper
-
-Helpers (unexported functions called by 2+ siblings). They participate in scoring but are excluded from audits.
-
-### @kuralPatterns / @kuralCompanion
-
-Groups are deduplicated to their identity centroid for uniqueness computation. Prevents structurally similar by-design groups from distorting the distribution.
-
-### @kuralBound inward / outward
-
-Units whose identity is inseparable from their hierarchical context. See `docs/bound-nodes.md` for full specification.
-
-- **Inward** (barrel exports, entry points): fit is replaced with representativeness against the centroid of aggregated targets. Excluded from parent's `childrenUniqueness`.
-- **Outward** (dominant primary exports): fit is normal. Parent's `childrenUniqueness` is computed in two tiers — the outward child's dominance is expected, helpers' coherence is measured separately.
-
-### @kuralResidual
-
-No role in scoring. Audit suppression only.
+`@kuralUtil`, `@kuralHelper`, `@kuralPatterns`, `@kuralCompanion`, `@kuralBound`, and `@kuralResidual` all adjust how scoring behaves for units that don't fit the default domain hierarchy. See [Kural Params](/docs/codebase-realities/kural-params) for the full specification and impact matrix across all four pillars.
 
 ---
 

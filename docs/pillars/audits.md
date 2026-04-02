@@ -1,0 +1,149 @@
+---
+title: Audits
+description: 14 statistical checks that surface specific structural issues
+---
+
+Audits surface specific, actionable issues in the codebase's structural organization. Where scoring produces aggregate health numbers, audits produce named findings — "this function is an outlier", "these two types are near-duplicates", "this directory's vocabulary bleeds into its sibling's domain."
+
+Score and Audit are two lenses on the same vector space, intentionally different to cross-validate each other. Fixing audit findings should improve scores. If a fix drops the score, it introduced a new issue — the chain isn't complete.
+
+---
+
+## 1. How Audits Work
+
+Every audit applies statistical fencing to detect values that deviate from the expected distribution. Two fencing strategies handle different data characteristics.
+
+### Standard fencing (Z-score)
+
+```
+upperFence = mean + sensitivity × σ
+lowerFence = mean - sensitivity × σ
+```
+
+Used when the sample size is large enough for parametric assumptions. Detects merge candidates, containments, misplaced nodes, and incoherent containers.
+
+### Robust fencing (MAD-based)
+
+```
+robustUpperFence = median + sensitivity × 1.4826 × MAD
+robustLowerFence = median - sensitivity × 1.4826 × MAD
+```
+
+MAD (Median Absolute Deviation) resists outliers better than standard deviation. The constant 1.4826 makes MAD consistent with σ for normal data. A minimum MAD of 0.015 prevents collapse on uniform distributions. Used for outlier detection, vocabulary bleed, and identity language.
+
+### Dendrogram gap
+
+```
+hasSignificantGap = maxGap > medianGap × (1 + sensitivity)
+```
+
+Hierarchical clustering detects natural split points in a container's children. Used by bloated-directories and bloated-files to identify where a container should be divided.
+
+The `sensitivity` parameter (default 2.0) controls how many deviations from center constitute an anomaly. Higher values produce stricter thresholds and fewer findings.
+
+---
+
+## 2. The 14 Audits
+
+### Bloating & Size
+
+**bloated-directories** — Detects directories whose children cluster into distinct groups via dendrogram gap analysis. Suggests a natural split point for reorganization. In the Kural codebase, `src/` carries `@kuralResidual bloated-directories [070d22b3]` because its breadth — spanning ingestion, scoring, audits, storage, commands, and UI — is the intended architecture.
+
+**bloated-files** — Same dendrogram logic applied to functions and types within files. Distinguishes type-vs-function splits (natural) from semantic clusters (actionable).
+
+### Outliers & Cohesion
+
+**outliers** — Detects children whose mean similarity to siblings falls below a robust lower fence. Uses cosine similarity between each child and all its siblings, then flags children whose mean is statistically low. Excludes util, helper, and `@kuralBound inward` nodes. Populates a shared `outlierKeys` set that downstream audits use for adjusted thresholds.
+
+**merge-candidates** — Detects sibling pairs whose similarity exceeds the upper fence — near-duplicates within the same parent. Separate fences for file-level pairs (computed from file sibling similarities) and leaf-level pairs (computed from leaf sibling similarities). Filters out caller-callee pairs and `@kuralBound inward` nodes.
+
+### Containment & Hierarchy
+
+**containments** — Detects parents where one child's dominance gap is an upper outlier. The parent is essentially a wrapper around a single child. In `src/ui/hero.ts`, `renderHero` dominates its parent — but this is declared `@kuralBound outward`, so the containment finding on the parent is suppressed.
+
+**misplaced** — Detects nodes that fit better under a different parent. Uses the `bestUncle` metric: if a node's similarity to an uncle exceeds its similarity to its own parent by a statistically significant delta, the node may belong elsewhere. Applies a more lenient fence for nodes already identified as outliers. In the Kural codebase, `src/commands/audit/` carries `@kuralResidual misplaced [ab944cdf]` — audit command logic must live near commands, even though it's semantically close to `src/audits/`.
+
+### Cross-Module Duplicates
+
+**duplicates** — Detects semantically identical units separated by module boundaries. Covers cross-file leaves (functions/types in different files), cross-directory files, and cross-population pairs (util vs domain). Filters out pairs sharing the same `@kuralPatterns` group, caller-callee pairs, and companion groups.
+
+**util-duplicates** — Detects util-scoped units in separate files whose embeddings exceed the merge fence. Covers the util-to-util gap that the main duplicates audit doesn't reach.
+
+### Vocabulary & Identity
+
+**focal-drift** — Applies only to `@kuralBound outward` units. Detects when the declared focal node is no longer the most similar child to its parent — the file's purpose has shifted. Either the tag is stale or a new function has grown to overtake the declared focal. Reports the overtaking child's name and both similarity values.
+
+**vocabulary-bleed** — Detects directories whose identity embedding drifts closer to a non-sibling module than to their weakest sibling. In embedding space, this means the directory's description borrows vocabulary from outside its domain. Reports the top 3 closest non-siblings pulling the identity away. Requires at least 2 other candidates for the statistical test.
+
+### Documentation & Coherence
+
+**incoherent** — Detects non-util containers whose identity-to-content similarity is a lower outlier. The name and description say one thing; the actual content says another. Capped at 0.9 to avoid flagging near-perfect alignment as an issue.
+
+**incoherent-utils** — Same logic for util containers, scored within their own population.
+
+**identity-language** — Detects directories whose KURAL.md description leans toward "is" (static identity) instead of "does" (dynamic purpose). Measured against the is-does axis — 60 multilingual anchor sentences from `src/config/axis-anchors.ts`. Flags directories whose axis score falls below a robust lower fence.
+
+**incomplete-docs** — Detects units missing required documentation. Functions need description, `@param`, `@returns`, and `@kuralPure` or `@kuralCauses`. Types need description. Files need file-level JSDoc. Directories need KURAL.md with a description.
+
+---
+
+## 3. The Feedback Loop
+
+Audits and scores cross-validate:
+
+1. **Score reveals regions** — a low `childrenUniqueness` tells you siblings are clumped
+2. **Audit reveals specifics** — `merge-candidates` names the exact pair
+3. **Fix the finding** — move, rename, merge, or split as the audit suggests
+4. **Re-run** — if the score improves, the fix helped
+5. **Chain fixes** — if the score drops, check what new audit finding appeared. The chain continues until no new findings are introduced and scores improve
+
+A single fix that drops the score isn't a failure — it's a signal that the fix introduced another issue. A proper chained fix sequence resolves cleanly.
+
+---
+
+## 4. Suppression
+
+### @kuralResidual
+
+When an audit finding is architecturally intentional, `@kuralResidual` suppresses it:
+
+```
+@kuralResidual <audit-name> [<hash>]
+```
+
+The hash ties the suppression to the current code structure. If the code changes, the hash becomes stale and the suppression breaks — forcing re-evaluation.
+
+Examples from the Kural codebase:
+
+| Location                       | Suppressed audit                 | Reason                                            |
+| :----------------------------- | :------------------------------- | :------------------------------------------------ |
+| `src/KURAL.md`                 | `bloated-directories [070d22b3]` | Root intentionally spans the full lifecycle       |
+| `src/config/KURAL.md`          | `containments [576a50e8]`        | Config intentionally contains all settings        |
+| `src/ingestion/parse/jsdoc.ts` | `containments [a1e18864]`        | JSDoc parser intentionally dominates its file     |
+| `src/ingestion/embed/axes.ts`  | `duplicates [1618cc7f]`          | Axis types share structure by design              |
+| `src/commands/audit/KURAL.md`  | `misplaced [ab944cdf]`           | Audit command must live near commands, not audits |
+
+### Implicit suppression
+
+`@kuralBound` and `@kuralHelper` suppress specific audits automatically — see [Kural Params](/docs/codebase-realities/kural-params) for the full suppression matrix.
+
+---
+
+## 5. Audit Execution Order
+
+Audits run in a defined sequence. The `outliers` audit runs early and populates a shared `outlierKeys` set in the audit context. Downstream audits use this set — `misplaced` applies a more lenient fence for nodes already identified as outliers, since an outlier that also appears misplaced deserves a lower threshold for the suggestion.
+
+---
+
+## 6. Configuration
+
+```typescript
+{
+  sensitivity: 2.0,       // Standard deviations from center (higher = stricter)
+  containmentFloor: 0.9,  // Minimum dominance gap for containment findings
+  minGroup: 4,            // Minimum group size for statistical tests
+  disable: []             // Audit names to skip entirely
+}
+```
+
+Sensitivity is the primary knob. At 2.0, findings are moderate — most real issues surface without excessive noise. At 3.0, only strong outliers are flagged. Below 1.5, expect many findings.

@@ -1,0 +1,206 @@
+---
+title: Architecture
+description: System overview — the pipeline, tiers, data model, and sync design
+---
+
+# Kural Architecture
+
+Structural scoring system for TypeScript codebases — answers "where should this code live?"
+
+## System Overview
+
+Kural is a five-stage pipeline that transforms source code into structural health scores:
+
+```
+Parse -> Embed -> Score -> Store -> Query
+```
+
+The system is split into three tiers:
+
+- **CLI (free, open source)** — scan, score, local snapshots
+- **Paid plugin (`kural-pro`)** — advise (AI suggestions), CI sync, cloud dashboard
+- **Dashboard (web UI)** — reactive views over snapshot data, served from customer infra
+
+## Tech Stack
+
+| Layer | Tool | Role |
+|---|---|---|
+| CLI framework | Gunshi | Command routing, plugin system |
+| AI | Vercel AI SDK via AI Gateway | Embeddings, advise |
+| Local persistence | TanStack DB + node-sqlite-persistence | Snapshot storage |
+| Cloud backend | Turso (database-per-project) | `active.db` + `history.db` per project |
+| Dashboard | TanStack DB (React) | Reactive UI over collections |
+
+## Repository Structure
+
+- **`kural`** (public) — CLI core, open source
+- **`kural-pro`** (private) — Gunshi plugin that registers `suggest` and `dashboard` commands, gated by auth
+
+The paid plugin hooks into the CLI via Gunshi's first-class plugin system. Users without the plugin never see paid commands.
+
+## Data Model
+
+### KuralUnit (base for all)
+
+Every parsed unit carries:
+
+- `name`, `path`, `description`
+- `identityEmbedding` — name + description vector
+- `leafEmbedding` — name + description + structural signature vector
+- `facetHash` — SHA256 for cache invalidation
+
+### Unit Types
+
+- **KuralFile** — source files with functions, types, imports
+- **KuralType** — interfaces, classes, type aliases with fields and references
+- **KuralFunction** — functions with params, return types, purity, call graph
+- **KuralDirectory** — directory hierarchy with children, descriptions from KURAL.md
+
+### Scores
+
+Each non-leaf node (file or directory) gets a `ScoreCard`:
+
+- `labelFit` — how well the declared name matches actual structure
+- `labelUniqueness` — how distinct children are from each other
+- `subtreeFit` / `subtreeUniqueness` — mean fit/uniqueness across subtree
+- `subtreeMinFit` / `subtreeMinUniqueness` — floor values (worst in subtree)
+- `overallScore` — harmonic mean of fit and uniqueness (nullable if no siblings)
+- `worstPair` — the least unique sibling pair
+- `bestUncleName` / `bestUncleScore` — the uncle node where this unit would fit better
+
+## Snapshot System
+
+### Snapshot = Isolated SQLite Database
+
+Each snapshot is a self-contained SQLite database file. This enables clone-and-mutate workflows — copy a snapshot, run analysis/simulation on the clone, discard when done. The original stays untouched.
+
+### Snapshot ID
+
+Format: `<timestamp>-<short-commit-hash>`
+
+```
+1711700400-a3f8b2c
+```
+
+- Sortable by time for history ordering
+- Tied to code state via commit hash
+- Deduplicable — same commit produces same hash suffix
+
+### Local Storage Layout
+
+```
+.kural-db/
+  <branch>/
+    active.db       # current snapshot, clone-able
+    history.db      # consolidated history, all snapshots as rows
+    advise.db       # ephemeral clone for AI simulation (paid)
+```
+
+### Server Storage Layout (Paid Tier)
+
+```
+Turso (<customer-id>.kural.io):
+  <project>/
+    <branch>/active.db    # live, clone-able snapshot
+    history.db            # consolidated, all branches + timestamps
+```
+
+### Snapshot Lifecycle
+
+1. CLI generates a snapshot for the current branch
+2. Active snapshot is replaced; outgoing snapshot rows are appended to `history.db`
+3. History is keyed by `branch` + `snapshot_id`
+4. On the server, only CI writes (via API); developers keep snapshots locally
+
+## Schema Design
+
+### Database Tables
+
+| Table | Purpose |
+|---|---|
+| `files` | Source files with embeddings, imports, descriptions |
+| `types` | Type/interface/class declarations with fields, refs |
+| `functions` | Functions with params, return types, purity, call graph |
+| `directories` | Directory hierarchy with children, descriptions |
+| `scores` | Structural health metrics per file/directory |
+| `metadata` | Key-value store (created_at, model_id, schema_version, axes) |
+
+### Schema Versioning
+
+- `schema_version` is stored in every snapshot's metadata from day one
+- **Additive-only evolution** is the default — new nullable columns only, no removals or renames
+- Old snapshots have NULLs for new columns; dashboard handles gracefully
+- For rare breaking changes, a one-time migration is applied to `history.db`
+
+### Embedding Model Versioning
+
+- `model_id` is stored in snapshot metadata for context
+- Scores are precomputed numbers — no cross-snapshot vector comparison needed
+- If the model changes and scores shift, the dashboard shows the shift; `model_id` explains why
+
+## Sync Architecture
+
+### Write Path (CI Only)
+
+```
+CI pipeline -> POST <customer-id>.kural.io/api/snapshots
+                  |
+                  v
+              API validates, deduplicates, writes to Turso:
+                - active.db (replace if newer commit)
+                - history.db (append)
+```
+
+- Developers never push to the server — local only
+- CI is the sole writer via authenticated API
+- API is the single writer to Turso — no direct client access
+
+### Concurrency Handling
+
+- Parallel CI runs for different branches: no conflict
+- Parallel CI runs for same branch, same commit: idempotent (skip duplicate)
+- Parallel CI runs for same branch, different commits: latest commit wins, stale rejected (409)
+
+### CI Failure Policy
+
+Fail silently with a warning in CI logs. The snapshot exists locally; next CI run generates a fresh one. No retries or queuing — simplicity over completeness.
+
+## Dashboard
+
+### Branch-Aware Views
+
+The dashboard supports multi-branch, multi-project views:
+
+| View | Value |
+|---|---|
+| Single branch | Current structural health |
+| Branch comparison | Health diff between branches (e.g., alpha vs release) |
+| Branch timeline | Trend over history snapshots |
+| Pre-merge gate | Feature branch health vs main |
+
+### Data Flow
+
+- TanStack DB (`@tanstack/react-db`) provides reactive live queries over collections
+- Collections are backed by Turso via QueryCollection
+- Live queries update the UI when new snapshots arrive
+
+## Pricing Model
+
+| Tier | What | Price |
+|---|---|---|
+| Free CLI | Scan, score, local snapshots | Free, open source |
+| Pro seat | CI sync + cloud dashboard + advise + 5 viewers | $X/mo per environment |
+| Extra viewers | Additional dashboard viewers beyond 5 | $Y/mo per viewer |
+
+### Billing Unit
+
+1 environment = 1 API key = 1 seat = 1 billable unit.
+
+Each API key is scoped to one project + environment, used in that CI pipeline's config. Branches within an environment are data, not separately billed.
+
+### Retention Policy
+
+| Plan | History retention | Stale branch cleanup |
+|---|---|---|
+| Starter | 30 days | 30 days of inactivity |
+| Team | 90 days | 90 days of inactivity |

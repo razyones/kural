@@ -1,0 +1,204 @@
+---
+title: Embedding
+description: How every unit becomes a vector — faceted embedding that carries structural information
+---
+
+Kural places every type, function, file, and directory into vector space. But not with naive semantic embedding — with facets engineered to carry structural information alongside meaning.
+
+---
+
+## 1. Why Not Just Semantic Embedding?
+
+Semantic embedding models capture meaning, but they lose structure. Two functions with similar vocabulary land near each other even when they serve different architectural roles.
+
+In the Kural codebase, `typeSignature` and `typeLeafSignature` both live in `src/ingestion/signals/signatures.ts`. Both take a `KuralType` and return a `string`. A semantic embedding model sees two functions with nearly identical names and identical type signatures — and places them close together. But `typeSignature` produces the identity-level text (what a type claims to be), while `typeLeafSignature` produces the leaf-level text (what it structurally contains). They serve different stages of the pipeline.
+
+Similarly, `parse()` in `src/ingestion/parse/pipeline.ts` and `parseResidualTag()` in `src/ingestion/parse/jsdoc.ts` both start with "parse" — but one reads an entire directory tree from disk, while the other reads a single JSDoc tag from an AST node.
+
+Pure semantic embedding conflates these. Kural compensates by embedding multiple **facets**, each capturing a different aspect of a unit's meaning, modified by **signals** that anchor it in structural context.
+
+---
+
+## 2. Facets and Signals
+
+Three facets capture what a unit is. Four signals steer those facets toward the right neighborhood.
+
+### Facets
+
+| Facet           | What it captures                      | Source                         |
+| :-------------- | :------------------------------------ | :----------------------------- |
+| **Name**        | What the unit is called               | AST identifier                 |
+| **Description** | What the unit claims to be            | JSDoc comment or KURAL.md      |
+| **Signature**   | What the unit structurally looks like | Fields, params, returns, calls |
+
+### Signals
+
+| Signal     | Target facet | Weight      | Source                            |
+| :--------- | :----------- | :---------- | :-------------------------------- |
+| **Path**   | Name         | 0.3         | Filesystem path + domain keywords |
+| **Parent** | Description  | 0.3         | Parent file's JSDoc description   |
+| **Causes** | Signature    | 0.3 or 0.25 | `@kuralCauses` description        |
+| **Calls**  | Signature    | 0.3 or 0.15 | Call-graph function names         |
+
+Signals never stand on their own. They nudge a facet toward the right context — `parse` under `ingestion/` means something different from `parse` under `cli/`.
+
+---
+
+## 3. Two Vectors Per Unit
+
+Every unit gets two vectors that capture different aspects of its identity.
+
+### Identity — "what it claims to be"
+
+```
+nameFacet  = 0.7 × emb(name)  + 0.3 × emb(path)
+descFacet  = 0.7 × emb(description) + 0.3 × emb(parentDescription)
+identity   = 0.5 × nameFacet  + 0.5 × descFacet
+```
+
+Description carries **50% weight** in identity. This is why description quality directly affects scoring accuracy — a vague description produces a vague identity vector.
+
+In the Kural codebase, `src/sost/KURAL.md` describes the scoring module as: _"The brain. Computes structural health metrics from embedding vectors."_ This produces a vector anchored in "computation" and "health metrics" — distinct from `src/audits/KURAL.md`: _"The stethoscope. Applies statistical fences and deterministic rules to surface localized anomalies."_ Same domain (code quality), completely different vectors because the descriptions capture different actions.
+
+For **leaf units** (types, functions) whose parent file has a description, the parent signal anchors the description in its file's unique identity. For **container units** (files, directories), the description facet uses the raw description without a parent signal.
+
+### Leaf — "what it actually is"
+
+```
+leaf = 0.5 × identity + 0.5 × signatureFacet
+```
+
+The leaf vector adds structural information to the identity. A function's signature — its parameters, return type, side effects, and call graph — grounds the identity claim in reality.
+
+`computeFit` in `src/sost/metrics.ts` claims to compute fit. Its signature confirms: it takes a `CodeNode` and `NodeMap`, returns `number | null`, and calls `cosineSimilarity`. The leaf vector captures both the claim and the proof.
+
+---
+
+## 4. "Does" Over "Is"
+
+Embedding models are trained on natural language where nouns and categories dominate. They naturally capture taxonomy — **what something is** — better than behavior — **what something does**. Two modules both described as "handles code quality" get pulled together even if one computes scores and the other renders terminal output.
+
+Kural deliberately corrects for this. The `identity-language` audit measures every directory's description against the **is-does axis** — 60 multilingual anchor sentences that define the semantic spectrum from identity to action:
+
+- Negative pole: _"What is this thing?"_, _"What category does this belong to?"_, _"¿Qué tipo de cosa es esto?"_
+- Positive pole: _"What does this do?"_, _"What action does this perform?"_, _"これはどんな動作をしますか？"_
+
+Multilingual anchors reduce surface-form bias — the semantic axis holds regardless of which language patterns the embedding model learned.
+
+In practice, every KURAL.md in the Kural codebase follows the "does" pattern:
+
+| Module           | Description                                                                                                                                   |
+| :--------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/ingestion/` | _"The reader and translator. Everything between raw source code on disk and the numerical representations that downstream scoring consumes."_ |
+| `src/sost/`      | _"The brain. Computes structural health metrics from embedding vectors."_                                                                     |
+| `src/audits/`    | _"The stethoscope. Applies statistical fences and deterministic rules to surface localized anomalies."_                                       |
+| `src/db/`        | _"The memory. Persists and retrieves all application state in branch-scoped SQLite snapshot databases."_                                      |
+| `src/ui/`        | _"The face. Renders all terminal output."_                                                                                                    |
+
+None says "is a scoring module" or "is a database layer." Every one says what it **does** — computes, applies, persists, renders.
+
+---
+
+## 5. Vocabulary Discipline
+
+Each unit's description must use vocabulary exclusive to its own domain. Borrowing a sibling's vocabulary pulls vectors together in embedding space, collapsing the separation the tree needs.
+
+The Kural codebase enforces this through description conventions. Every KURAL.md uses a unique metaphor — brain, stethoscope, memory, face, blueprint, dispatch, reader, encoder, voice — and each claims exactly one exclusive capability:
+
+- `src/ingestion/embed/`: _"The encoder. It is the only module that crosses the network to produce vectors — no other part of the system calls external model APIs."_
+- `src/ingestion/signals/`: _"The voice. It is the only module that produces human-readable text from code — no other module turns structural data into descriptive language."_
+- `src/config/`: _"The blueprint. It is the only module that owns declarative settings — no other module defines tuning parameters, reference data, or configuration contracts."_
+
+"It is the only..." language creates semantic separation. If `embed/` says "crosses the network" and `signals/` says "produces human-readable text", their vectors point in different directions — even though both live under `ingestion/`.
+
+The `vocabulary-bleed` audit catches drift automatically. It measures whether a directory's identity embedding has drifted closer to a non-sibling module than to its weakest sibling — a direct signal that the description borrows vocabulary from outside its domain.
+
+---
+
+## 6. Structural Information
+
+Beyond name and description, the signature facet captures what a unit structurally looks like — its parameters, return type, fields, and behavioral context.
+
+### Causes and Calls
+
+Two signals extend the signature for functions with side effects or outbound dependencies:
+
+- **`@kuralCauses`** describes non-type side effects: _"writes hero display to stdout"_, _"reads a KURAL.md file from disk"_, _"calls the embedding API via embedder"_
+- **Calls** captures the function names in the outbound call graph
+
+In `src/sost/metrics.ts`, the scoring functions are marked `@kuralPure` — they have no side effects and no calls signal. Their signatures alone capture their structural shape. But `renderHero` in `src/ui/hero.ts` is marked `@kuralCauses writes hero display to stdout` — this side effect becomes part of its leaf vector, distinguishing it from pure computation functions with similar type signatures.
+
+### Signature formula
+
+```
+signatureFacet = emb(signature)                                                    neither signal
+               = 0.7 × emb(signature) + 0.3 × emb(causes)                         only causes
+               = 0.7 × emb(signature) + 0.3 × emb(calls)                           only calls
+               = 0.6 × emb(signature) + 0.25 × emb(causes) + 0.15 × emb(calls)    both
+```
+
+The weights come from `src/ingestion/embed/blend.ts` — the only module that defines mixing rules.
+
+---
+
+## 7. Path Signal Construction
+
+The path signal grounds generic names in filesystem context. The top 3 domain keywords are auto-selected from config by cosine similarity to all unit names:
+
+| Unit position           | Path signal format                          | Example                          |
+| :---------------------- | :------------------------------------------ | :------------------------------- |
+| **Root** (e.g., `src/`) | `keyword1-keyword2-keyword3/`               | `code-structure-scoring/`        |
+| **All other units**     | `keyword1/keyword2/keyword3/ancestor/path/` | `code/structure/scoring/models/` |
+
+The root has no filesystem ancestry, so domain keywords alone set the context. For other units, the path includes ancestors but strips the unit's own name — it tells you _where_ you are without repeating _who_ you are.
+
+---
+
+## 8. Signature Formats
+
+### Prose signatures (primary)
+
+When Language Service data is available, signatures are generated as natural language:
+
+```
+takes file ([KuralFile]), count (a number). Returns nothing.
+
+[KuralFile]: a source file with functions and types
+```
+
+Primitive types map to natural language: `string` becomes "text", `number` becomes "a number", `void` becomes "nothing". Domain-specific types are wrapped as dictionary references — the dictionary maps opaque terms to definitions the embedding model can understand.
+
+### Structural signatures (fallback)
+
+| Unit          | Format                                      |
+| :------------ | :------------------------------------------ |
+| **Type**      | `fields: name (type), ...`                  |
+| **Function**  | `params: name (type), ... \| returns: type` |
+| **File**      | `exports: Name, ...`                        |
+| **Directory** | `children: name, ...`                       |
+
+---
+
+## 9. Domain Keywords
+
+Provided in config as a list. The top 3 most relevant are auto-selected:
+
+1. Embed all unit names in the codebase
+2. Embed all candidate domain keywords
+3. Score each keyword by aggregate cosine similarity to all names
+4. Select top 3 by descending score
+
+These 3 keywords are used to construct every path signal.
+
+---
+
+## 10. Embedding Call Count
+
+| Scenario                          | Embedder calls | Facets embedded                    |
+| :-------------------------------- | :------------- | :--------------------------------- |
+| Base (no optional signals)        | 4              | name, description, signature, path |
+| + impure functions                | +1             | causes                             |
+| + functions with outbound calls   | +1             | calls                              |
+| + leaves with parent descriptions | +1             | parent context                     |
+
+Causes, calls, and parent descriptions are embedded selectively — only non-empty texts are sent to the embedder. Units without a signal receive empty vectors, and `applySignatureSignals` returns their signature unchanged.
