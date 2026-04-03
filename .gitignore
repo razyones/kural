@@ -21,6 +21,10 @@ docs-site/.source/
 docs-site/.output/
 docs-site/src/routeTree.gen.ts
 
+# Claude Code
+.agents/
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
