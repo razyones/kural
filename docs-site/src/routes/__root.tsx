@@ -53,7 +53,12 @@ export const Route = createRootRoute({
 function KuralSearchDialog(props: SharedProps) {
   const base = import.meta.env.BASE_URL ?? "/";
   const { search, setSearch, query } = useDocsSearch({
-    client: { type: "static", from: `${base}api/search.json` },
+    client: {
+      search: async (query: string) => {
+        const { searchDocs } = await import("@/lib/search");
+        return searchDocs(query);
+      },
+    },
     delayMs: 300,
   });
 

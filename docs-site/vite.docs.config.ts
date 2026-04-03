@@ -117,47 +117,38 @@ function docsDataPlugin(): Plugin {
         data: { $id: "root", name: "Docs", children },
       };
 
-      // Also generate the search index and write to public output
-      const { writeFileSync: writeFile, mkdirSync: mkDir } = await import("node:fs");
-      const apiDir = join(import.meta.dirname, ".output/public/api");
-      {
-        const { initSimpleSearch } = await import("fumadocs-core/search/server");
-        const indexes = Object.entries(pathMap).map(([key, rel]) => {
-          const filePath = join(docsDir, rel);
-          const src = readFileSync(filePath, "utf-8");
-          const fmMatch = /^---\s*\n([\s\S]*?)\n---/.exec(src);
-          const fm: Record<string, string> = {};
-          if (fmMatch) {
-            for (const line of fmMatch[1].split("\n")) {
-              const [k, ...rest] = line.split(":");
-              if (k && rest.length) fm[k.trim()] = rest.join(":").trim();
-            }
+      // Build search entries for client-side indexing
+      const searchEntries = Object.entries(pathMap).map(([key, rel]) => {
+        const filePath = join(docsDir, rel);
+        const src = readFileSync(filePath, "utf-8");
+        const fmMatch = /^---\s*\n([\s\S]*?)\n---/.exec(src);
+        const fm: Record<string, string> = {};
+        if (fmMatch) {
+          for (const line of fmMatch[1].split("\n")) {
+            const [k, ...rest] = line.split(":");
+            if (k && rest.length) fm[k.trim()] = rest.join(":").trim();
           }
-          const body = (fmMatch ? src.slice(fmMatch[0].length) : src)
-            .replace(/^import\s+.*$/gm, "")
-            .replace(/<[^>]+>/g, " ")
-            .replace(/```[\s\S]*?```/g, " ")
-            .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-            .replace(/#{1,6}\s+/g, "")
-            .replace(/\s+/g, " ")
-            .trim();
-          return {
-            title: fm.title ?? key,
-            description: fm.description ?? "",
-            url: key === "" ? "/docs" : `/docs/${key}`,
-            content: body.slice(0, 2000),
-            keywords: "",
-          };
-        });
-        const search = initSimpleSearch({ indexes });
-        const exported = await search.export();
-        mkDir(apiDir, { recursive: true });
-        writeFile(join(apiDir, "search.json"), JSON.stringify(exported));
-      }
+        }
+        const body = (fmMatch ? src.slice(fmMatch[0].length) : src)
+          .replace(/^import\s+.*$/gm, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/```[\s\S]*?```/g, " ")
+          .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+          .replace(/#{1,6}\s+/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+        return {
+          title: fm.title ?? key,
+          description: fm.description ?? "",
+          url: key === "" ? "/docs" : `/docs/${key}`,
+          content: body.slice(0, 2000),
+        };
+      });
 
       return [
         `export const pathMap = ${JSON.stringify(pathMap)};`,
         `export const pageTree = ${JSON.stringify(pageTree)};`,
+        `export const searchEntries = ${JSON.stringify(searchEntries)};`,
       ].join("\n");
     },
   };
