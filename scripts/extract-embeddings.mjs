@@ -4,7 +4,7 @@
  */
 
 import { dirname, relative } from "node:path";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import BetterSqlite3 from "better-sqlite3";
 
 const NONE = 0;
@@ -30,6 +30,11 @@ const COLLECTIONS = {
 };
 const SCORES_TABLE = "c_ddocgqs_6";
 const DESCRIPTION_MAX_LENGTH = 120;
+
+if (!existsSync(DB_PATH)) {
+  console.log(`Skipping embedding extraction — database not found at ${DB_PATH}`);
+  process.exit(NONE);
+}
 
 const db = new BetterSqlite3(DB_PATH, { readonly: true });
 
