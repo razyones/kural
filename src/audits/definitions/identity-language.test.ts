@@ -282,6 +282,22 @@ describe("identity-language format", () => {
     expect(result.heading).toContain("does");
     expect(result.details[NONE]).toContain("Axis score");
   });
+
+  test("formats with 0 when value and fence are undefined", () => {
+    const fctx = makeFormatCtx({
+      finding: {
+        audit: "identity-language",
+        key: "dir:/src/bad",
+        name: "bad",
+        hash: "abcd1234",
+        value: undefined,
+        fence: undefined,
+      },
+    });
+    const result = identityLanguage.format(fctx);
+
+    expect(result.details[NONE]).toContain("0.00");
+  });
 });
 
 describe("identity-language detect — ignores non-directory", () => {

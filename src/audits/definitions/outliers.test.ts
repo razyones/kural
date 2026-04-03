@@ -256,6 +256,22 @@ describe("outliers format", () => {
     expect(result.details[NONE]).toContain("80%");
   });
 
+  test("formats with 0% when value and groupValue are undefined", () => {
+    const fctx = makeFormatCtx({
+      finding: {
+        audit: "outliers",
+        key: "func:k",
+        name: "fn",
+        hash: "12345678",
+        value: undefined,
+        groupValue: undefined,
+      },
+    });
+    const result = outliers.format(fctx);
+
+    expect(result.details[NONE]).toContain("0%");
+  });
+
   test("includes location in heading", () => {
     const fctx = makeFormatCtx({
       finding: {

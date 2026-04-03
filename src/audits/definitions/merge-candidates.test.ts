@@ -216,6 +216,25 @@ describe("merge-candidates format", () => {
     expect(result.details[NONE]).toContain("95%");
   });
 
+  test("formats similarity as 0% when value is undefined", () => {
+    const fctx = makeFormatCtx({
+      finding: {
+        audit: "merge-candidates",
+        key: "k1",
+        name: "a",
+        hash: "12345678",
+        pairKey: "k2",
+        pairName: "b",
+        value: undefined,
+      },
+      label: "a",
+      labelNode: (k: string): string => k,
+    });
+    const result = mergeCandidates.format(fctx);
+
+    expect(result.details[NONE]).toContain("0%");
+  });
+
   test("uses pairName when pairKey is undefined", () => {
     const fctx = makeFormatCtx({
       finding: {

@@ -1,3 +1,4 @@
+export COLUMNS=120
 vp staged
 vp test --coverage --exclude 'tests/e2e/**'
 vp test tests/e2e/

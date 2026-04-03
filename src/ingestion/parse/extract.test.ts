@@ -247,3 +247,9 @@ describe("extractFile auto-detects inward-bound barrel exports", () => {
     expect(result.bound).toBeUndefined();
   });
 });
+
+describe("extractFile error handling", () => {
+  it("throws when the file does not exist", () => {
+    expect(() => extractFile("/nonexistent/path/missing.ts")).toThrow("Failed to read source file");
+  });
+});
