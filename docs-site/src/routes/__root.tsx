@@ -1,4 +1,4 @@
-import { type ComponentProps, useRef } from "react";
+import type { ComponentProps } from "react";
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import {
   SearchDialog,
@@ -23,23 +23,25 @@ import config from "../../docs.config";
  * Wraps SearchDialogListItem to suppress scrollIntoView when
  * activation is triggered by pointer (hover). Only keyboard
  * navigation (ArrowUp/ArrowDown) should auto-scroll.
+ *
+ * Uses a module-level flag instead of useRef because SearchDialogList
+ * calls Item as a render function, not a component — hooks would
+ * change the hook count in the parent.
  */
+let pointerActive = false;
 function StableSearchItem(props: ComponentProps<typeof SearchDialogListItem>) {
-  const pointerActive = useRef(false);
   return (
     <SearchDialogListItem
       {...props}
       onPointerMove={(e) => {
-        pointerActive.current = true;
+        pointerActive = true;
         props.onPointerMove?.(e);
       }}
       ref={(el) => {
-        // Skip scrollIntoView when pointer triggered the activation
-        if (pointerActive.current) {
-          pointerActive.current = false;
+        if (pointerActive) {
+          pointerActive = false;
           return;
         }
-        // For keyboard activation, let the original ref handle scroll
         if (typeof props.ref === "function") props.ref(el);
       }}
     />
