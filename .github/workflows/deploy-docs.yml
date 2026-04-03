@@ -43,27 +43,13 @@ jobs:
         env:
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
 
-      - name: Determine base path
-        id: base
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            echo "path=/" >> "$GITHUB_OUTPUT"
-            echo "dir=stable" >> "$GITHUB_OUTPUT"
-          else
-            echo "path=/${{ github.ref_name }}/" >> "$GITHUB_OUTPUT"
-            echo "dir=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Build docs site
         run: pnpm run docs:build
-        env:
-          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
-          BASE_PATH: ${{ steps.base.outputs.path }}
 
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
-          name: docs-${{ steps.base.outputs.dir }}
+          name: docs-${{ github.ref_name == 'main' && 'stable' || github.ref_name }}
           path: docs-site/.output/public
 
   deploy:
