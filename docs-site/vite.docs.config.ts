@@ -117,7 +117,26 @@ function docsDataPlugin(): Plugin {
         data: { $id: "root", name: "Docs", children },
       };
 
-      // Build search entries for client-side indexing
+      // Build search entries with structured data (headings + content)
+      function stripMarkdown(text: string): string {
+        return text
+          .replace(/^import\s+.*$/gm, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/```[\s\S]*?```/g, " ")
+          .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+          .replace(/\*{1,2}([^*]*)\*{1,2}/g, "$1")
+          .replace(/`([^`]*)`/g, "$1")
+          .replace(/\s+/g, " ")
+          .trim();
+      }
+
+      function slugify(text: string): string {
+        return text
+          .toLowerCase()
+          .replace(/[^\w]+/g, "-")
+          .replace(/^-|-$/g, "");
+      }
+
       const searchEntries = Object.entries(pathMap).map(([key, rel]) => {
         const filePath = join(docsDir, rel);
         const src = readFileSync(filePath, "utf-8");
@@ -129,19 +148,55 @@ function docsDataPlugin(): Plugin {
             if (k && rest.length) fm[k.trim()] = rest.join(":").trim();
           }
         }
-        const body = (fmMatch ? src.slice(fmMatch[0].length) : src)
-          .replace(/^import\s+.*$/gm, "")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/```[\s\S]*?```/g, " ")
-          .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-          .replace(/#{1,6}\s+/g, "")
-          .replace(/\s+/g, " ")
-          .trim();
+        const body = fmMatch ? src.slice(fmMatch[0].length) : src;
+        const url = key === "" ? "/docs" : `/docs/${key}`;
+
+        // Extract headings and content sections
+        const headings: Array<{ id: string; content: string }> = [];
+        const contents: Array<{ heading?: string; content: string }> = [];
+        let currentHeading: string | undefined;
+        let currentContent = "";
+
+        for (const line of body.split("\n")) {
+          const hMatch = /^#{2,4}\s+(.+)/.exec(line);
+          if (hMatch) {
+            if (currentContent.trim()) {
+              contents.push({
+                heading: currentHeading,
+                content: stripMarkdown(currentContent).slice(0, 500),
+              });
+            }
+            const heading = hMatch[1].trim();
+            const id = slugify(heading);
+            headings.push({ id, content: heading });
+            currentHeading = id;
+            currentContent = "";
+          } else {
+            currentContent += line + "\n";
+          }
+        }
+        if (currentContent.trim()) {
+          contents.push({
+            heading: currentHeading,
+            content: stripMarkdown(currentContent).slice(0, 500),
+          });
+        }
+
+        // Build breadcrumbs from URL path
+        const segments = key.split("/").filter(Boolean);
+        const breadcrumbs =
+          segments.length > 1
+            ? segments
+                .slice(0, -1)
+                .map((s) => s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
+            : undefined;
+
         return {
           title: fm.title ?? key,
           description: fm.description ?? "",
-          url: key === "" ? "/docs" : `/docs/${key}`,
-          content: body.slice(0, 2000),
+          url,
+          breadcrumbs,
+          structuredData: { headings, contents },
         };
       });
 
