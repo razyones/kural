@@ -1,3 +1,4 @@
+import { type ComponentProps, useRef } from "react";
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import {
   SearchDialog,
@@ -8,6 +9,7 @@ import {
   SearchDialogIcon,
   SearchDialogInput,
   SearchDialogList,
+  SearchDialogListItem,
   SearchDialogOverlay,
 } from "fumadocs-ui/components/dialog/search";
 import type { SharedProps } from "fumadocs-ui/contexts/search";
@@ -16,6 +18,33 @@ import { useDocsSearch } from "fumadocs-core/search/client";
 import { AnimatedBg } from "@/components/animated-bg";
 import appCss from "@/styles/app.css?url";
 import config from "../../docs.config";
+
+/**
+ * Wraps SearchDialogListItem to suppress scrollIntoView when
+ * activation is triggered by pointer (hover). Only keyboard
+ * navigation (ArrowUp/ArrowDown) should auto-scroll.
+ */
+function StableSearchItem(props: ComponentProps<typeof SearchDialogListItem>) {
+  const pointerActive = useRef(false);
+  return (
+    <SearchDialogListItem
+      {...props}
+      onPointerMove={(e) => {
+        pointerActive.current = true;
+        props.onPointerMove?.(e);
+      }}
+      ref={(el) => {
+        // Skip scrollIntoView when pointer triggered the activation
+        if (pointerActive.current) {
+          pointerActive.current = false;
+          return;
+        }
+        // For keyboard activation, let the original ref handle scroll
+        if (typeof props.ref === "function") props.ref(el);
+      }}
+    />
+  );
+}
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -74,7 +103,10 @@ function KuralSearchDialog(props: SharedProps) {
           )}
           <SearchDialogClose />
         </SearchDialogHeader>
-        <SearchDialogList items={query.data === "empty" ? null : query.data} />
+        <SearchDialogList
+          items={query.data === "empty" ? null : query.data}
+          Item={StableSearchItem}
+        />
       </SearchDialogContent>
       <SearchDialogFooter />
     </SearchDialog>

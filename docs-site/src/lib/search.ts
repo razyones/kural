@@ -87,6 +87,7 @@ export async function searchDocs(query: string) {
   const results = await search(db, {
     term: query,
     tolerance: 1,
+    limit: 8,
     boost: { content: 2 },
   });
 
