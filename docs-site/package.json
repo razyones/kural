@@ -20,7 +20,6 @@
     "vite": "^8"
   },
   "devDependencies": {
-    "@orama/orama": "^3.1.18",
     "@tailwindcss/vite": "^4",
     "@types/mdx": "^2",
     "@types/react": "^19",

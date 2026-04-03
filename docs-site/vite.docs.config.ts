@@ -121,18 +121,8 @@ function docsDataPlugin(): Plugin {
       const { writeFileSync: writeFile, mkdirSync: mkDir } = await import("node:fs");
       const apiDir = join(import.meta.dirname, ".output/public/api");
       {
-        const { create, insert, save } = await import("@orama/orama");
-        const db = await create({
-          schema: {
-            url: "string",
-            title: "string",
-            breadcrumbs: "string[]",
-            description: "string",
-            content: "string",
-            keywords: "string",
-          },
-        });
-        for (const [key, rel] of Object.entries(pathMap)) {
+        const { initSimpleSearch } = await import("fumadocs-core/search/server");
+        const indexes = Object.entries(pathMap).map(([key, rel]) => {
           const filePath = join(docsDir, rel);
           const src = readFileSync(filePath, "utf-8");
           const fmMatch = /^---\s*\n([\s\S]*?)\n---/.exec(src);
@@ -151,18 +141,16 @@ function docsDataPlugin(): Plugin {
             .replace(/#{1,6}\s+/g, "")
             .replace(/\s+/g, " ")
             .trim();
-          const breadcrumbs = key ? key.split("/").map((s) => s.replace(/-/g, " ")) : [];
-          await insert(db, {
+          return {
             title: fm.title ?? key,
             description: fm.description ?? "",
             url: key === "" ? "/docs" : `/docs/${key}`,
             content: body.slice(0, 2000),
-            breadcrumbs,
             keywords: "",
-          });
-        }
-        const exported = await save(db);
-        (exported as Record<string, string>).type = "simple";
+          };
+        });
+        const search = initSimpleSearch({ indexes });
+        const exported = await search.export();
         mkDir(apiDir, { recursive: true });
         writeFile(join(apiDir, "search.json"), JSON.stringify(exported));
       }
