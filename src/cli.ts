@@ -20,7 +20,9 @@ if (existsSync(".env")) {
   try {
     loadEnvFile(".env");
   } catch (err) {
-    console.error(`Warning: failed to load .env file: ${err instanceof Error ? err.message : err}`);
+    console.error(
+      `Warning: failed to load .env file: ${err instanceof Error ? err.message : String(err)}`,
+    );
   }
 }
 

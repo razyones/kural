@@ -36,9 +36,13 @@ export function AnimatedBg({ intensity = 1 }: AnimatedBgProps) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      return;
+    }
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {
+      return;
+    }
 
     function resize() {
       canvas!.width = window.innerWidth * devicePixelRatio;
@@ -78,8 +82,12 @@ export function AnimatedBg({ intensity = 1 }: AnimatedBgProps) {
       for (const b of blobs.current) {
         b.x += b.vx;
         b.y += b.vy;
-        if (b.x < -b.r || b.x > w + b.r) b.vx *= -1;
-        if (b.y < -b.r || b.y > h + b.r) b.vy *= -1;
+        if (b.x < -b.r || b.x > w + b.r) {
+          b.vx *= -1;
+        }
+        if (b.y < -b.r || b.y > h + b.r) {
+          b.vy *= -1;
+        }
 
         const grad = ctx!.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
         grad.addColorStop(0, `rgba(${accent[0]}, ${accent[1]}, ${accent[2]}, ${0.08 * k})`);
@@ -122,7 +130,9 @@ export function AnimatedBg({ intensity = 1 }: AnimatedBgProps) {
           }
 
           // Skip dots outside any influence
-          if (alpha <= 0) continue;
+          if (alpha <= 0) {
+            continue;
+          }
 
           ctx!.fillStyle = `rgba(${accent[0]}, ${accent[1]}, ${accent[2]}, ${alpha * k})`;
           ctx!.beginPath();
@@ -143,10 +153,5 @@ export function AnimatedBg({ intensity = 1 }: AnimatedBgProps) {
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 w-screen h-screen pointer-events-none"
-    />
-  );
+  return <canvas ref={canvasRef} className="fixed inset-0 w-screen h-screen pointer-events-none" />;
 }

@@ -92,7 +92,9 @@ async function parse(dir: string): Promise<ParseResult> {
         leafEmbedding: EMPTY_EMBEDDING,
       };
     } catch (err) {
-      console.error(`Warning: skipping ${filePath}: ${err instanceof Error ? err.message : err}`);
+      console.error(
+        `Warning: skipping ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
+      );
     }
   }
 

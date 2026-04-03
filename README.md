@@ -57,7 +57,9 @@ Annotate functions with `@kuralPure` (no side effects) or `@kuralCauses` (descri
  * @returns Cosine similarity in range [-1, 1]
  * @kuralPure
  */
-function cosineSimilarity(a: number[], b: number[]): number { /* ... */ }
+function cosineSimilarity(a: number[], b: number[]): number {
+  /* ... */
+}
 
 /**
  * Persists computed health metrics so downstream commands can query scores
@@ -70,7 +72,9 @@ function cosineSimilarity(a: number[], b: number[]): number { /* ... */ }
 async function writeScoreCards(
   collections: SnapshotCollections,
   cards: ScoreCard[],
-): Promise<void> { /* ... */ }
+): Promise<void> {
+  /* ... */
+}
 ```
 
 See the [description principles](docs/getting-started.mdx#description-principles) and [Kural Params](docs/codebase-realities/kural-params.md) for full guidance.

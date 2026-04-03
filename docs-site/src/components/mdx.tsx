@@ -20,7 +20,9 @@ const defaultComponents = {
 } satisfies MDXComponents;
 
 export function getMDXComponents(components?: MDXComponents) {
-  if (!components) {return defaultComponents;}
+  if (!components) {
+    return defaultComponents;
+  }
   return { ...defaultComponents, ...components } satisfies MDXComponents;
 }
 

@@ -1,30 +1,11 @@
 /** The dissector. Breaks a source file into structural parts — the only module that reads AST nodes. */
 
-import type {
-  BoundDirection,
-  KuralFunction,
-  KuralType,
-  ModuleImports,
-  ResidualEntry,
-} from "./types.ts";
+import type { ExtractedFile, KuralFunction, KuralType, ModuleImports } from "./types.ts";
 import { getJSDoc, hasExportModifier, isUtilModule } from "./jsdoc.ts";
 import type { JSDocInfo } from "./jsdoc.ts";
 import { basename } from "node:path";
 import { readFileSync } from "node:fs";
 import ts from "typescript";
-
-/** Extracted contents of a single source file before embedding. */
-type ExtractedFile = {
-  name: string;
-  path: string;
-  description?: string;
-  functions: Record<string, KuralFunction>;
-  types: Record<string, KuralType>;
-  imports: ModuleImports;
-  companion?: string;
-  bound?: BoundDirection;
-  residuals: ResidualEntry[];
-};
 
 const EMPTY_EMBEDDING: number[] = [];
 
@@ -233,27 +214,22 @@ function extractCalls(node: ts.FunctionDeclaration): string[] {
 }
 
 /**
- * Reads a TypeScript source file and extracts its types, functions, and imports.
- * @param filePath - Absolute path to the .ts file to extract
- * @returns Extracted file with name, types, functions, imports, and description
- * @kuralCauses Reads a source file from disk via readFileSync
+ * Collects function and type declarations from a parsed source file.
+ * @param sourceFile - The parsed TypeScript source file AST
+ * @param filePath - Absolute path to the source file
+ * @param imports - Resolved imports from the containing file
+ * @param fileJSDoc - File-level JSDoc metadata
+ * @returns Functions and types keyed by name
+ * @kuralPure
  */
-function extractFile(filePath: string): ExtractedFile {
-  let sourceText: string;
-  try {
-    sourceText = readFileSync(filePath, "utf-8");
-  } catch (err) {
-    throw new Error(
-      `Failed to read source file ${filePath}: ${err instanceof Error ? err.message : err}`,
-    );
-  }
-  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true);
-
+function collectDeclarations(
+  sourceFile: ts.SourceFile,
+  filePath: string,
+  imports: ModuleImports,
+  fileJSDoc: JSDocInfo,
+): { functions: Record<string, KuralFunction>; types: Record<string, KuralType> } {
   const functions: Record<string, KuralFunction> = {};
   const types: Record<string, KuralType> = {};
-  const imports = extractImports(sourceFile);
-  const fileJSDoc =
-    sourceFile.statements.length === FIRST ? EMPTY_JSDOC : getJSDoc(sourceFile.statements[FIRST]);
   const moduleIsUtil = isUtilModule(filePath, fileJSDoc);
 
   ts.forEachChild(sourceFile, (node) => {
@@ -276,12 +252,35 @@ function extractFile(filePath: string): ExtractedFile {
     }
   });
 
-  // Auto-detect: index.ts with no functions or types is an inward-bound barrel export
+  return { functions, types };
+}
+
+/**
+ * Reads a TypeScript source file and extracts its types, functions, and imports.
+ * @param filePath - Absolute path to the .ts file to extract
+ * @returns Extracted file with name, types, functions, imports, and description
+ * @kuralCauses Reads a source file from disk via readFileSync
+ */
+function extractFile(filePath: string): ExtractedFile {
+  let sourceText: string;
+  try {
+    sourceText = readFileSync(filePath, "utf-8");
+  } catch (err) {
+    throw new Error(
+      `Failed to read source file ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
+  }
+  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true);
+  const imports = extractImports(sourceFile);
+  const fileJSDoc =
+    sourceFile.statements.length === FIRST ? EMPTY_JSDOC : getJSDoc(sourceFile.statements[FIRST]);
+  const { functions, types } = collectDeclarations(sourceFile, filePath, imports, fileJSDoc);
+
   const isBarrelExport =
     basename(filePath) === INDEX_FILENAME &&
     Object.keys(functions).length === NO_LEAVES &&
     Object.keys(types).length === NO_LEAVES;
-  const bound = fileJSDoc.bound ?? (isBarrelExport ? "inward" : undefined);
 
   return {
     name: basename(filePath),
@@ -291,10 +290,9 @@ function extractFile(filePath: string): ExtractedFile {
     types,
     imports,
     companion: fileJSDoc.companion,
-    bound,
+    bound: fileJSDoc.bound ?? (isBarrelExport ? "inward" : undefined),
     residuals: fileJSDoc.residuals,
   };
 }
 
-export { extractFile };
-export type { ExtractedFile };
+export { extractFile, type ExtractedFile };

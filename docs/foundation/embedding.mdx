@@ -128,25 +128,11 @@ In `src/sost/metrics.ts`, the scoring functions are marked `@kuralPure` — they
 ### Signature formula
 
 <Tabs items={["Neither signal", "Only causes", "Only calls", "Both"]}>
-  <Tab value="Neither signal">
-    ```
-    signatureFacet = emb(signature)
-    ```
-  </Tab>
-  <Tab value="Only causes">
-    ```
-    signatureFacet = 0.7 × emb(signature) + 0.3 × emb(causes)
-    ```
-  </Tab>
-  <Tab value="Only calls">
-    ```
-    signatureFacet = 0.7 × emb(signature) + 0.3 × emb(calls)
-    ```
-  </Tab>
+  <Tab value="Neither signal">``` signatureFacet = emb(signature) ```</Tab>
+  <Tab value="Only causes">``` signatureFacet = 0.7 × emb(signature) + 0.3 × emb(causes) ```</Tab>
+  <Tab value="Only calls">``` signatureFacet = 0.7 × emb(signature) + 0.3 × emb(calls) ```</Tab>
   <Tab value="Both">
-    ```
-    signatureFacet = 0.6 × emb(signature) + 0.25 × emb(causes) + 0.15 × emb(calls)
-    ```
+    ``` signatureFacet = 0.6 × emb(signature) + 0.25 × emb(causes) + 0.15 × emb(calls) ```
   </Tab>
 </Tabs>
 

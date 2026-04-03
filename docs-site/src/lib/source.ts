@@ -9,7 +9,7 @@ export const source = loader({
   baseUrl: "/docs",
   icon: (name) => {
     if (!name || !(name in icons)) {
-      return undefined;
+      return;
     }
     return createElement(icons[name as keyof typeof icons]);
   },

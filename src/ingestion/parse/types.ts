@@ -148,6 +148,19 @@ export type KuralDirectory = KuralUnit & {
   residuals: ResidualEntry[];
 };
 
+/** Extracted contents of a single source file before embedding. */
+export type ExtractedFile = {
+  name: string;
+  path: string;
+  description?: string;
+  functions: Record<string, KuralFunction>;
+  types: Record<string, KuralType>;
+  imports: ModuleImports;
+  companion?: string;
+  bound?: BoundDirection;
+  residuals: ResidualEntry[];
+};
+
 /**
  * A single part of a symbol's display representation from the Language Service.
  */

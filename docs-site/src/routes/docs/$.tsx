@@ -34,7 +34,9 @@ const getPageData = createServerFn({
   .middleware([staticFunctionMiddleware])
   .handler(async ({ data: slugs }) => {
     const page = source.getPage(slugs);
-    if (!page) {throw notFound();}
+    if (!page) {
+      throw notFound();
+    }
 
     return {
       path: page.path,
@@ -62,7 +64,11 @@ function Page() {
   const { pageTree, path } = useFumadocsLoader(Route.useLoaderData());
 
   return (
-    <DocsLayout tree={pageTree} nav={{ title: config.name }} githubUrl="https://github.com/user/kural">
+    <DocsLayout
+      tree={pageTree}
+      nav={{ title: config.name }}
+      githubUrl="https://github.com/user/kural"
+    >
       <Suspense>{clientLoader.useContent(path)}</Suspense>
     </DocsLayout>
   );

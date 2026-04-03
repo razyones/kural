@@ -31,7 +31,7 @@ function loadProjectConfig(root: string = process.cwd()): Partial<KuralConfig> {
     return {};
   } catch (err) {
     console.error(
-      `Warning: failed to parse ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : err} — using defaults`,
+      `Warning: failed to parse ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : String(err)} — using defaults`,
     );
     return {};
   }

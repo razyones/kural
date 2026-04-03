@@ -97,11 +97,15 @@ Audits and scores cross-validate:
   <Step>**Audit reveals specifics** — `merge-candidates` names the exact pair</Step>
   <Step>**Fix the finding** — move, rename, merge, or split as the audit suggests</Step>
   <Step>**Re-run** — if the score improves, the fix helped</Step>
-  <Step>**Chain fixes** — if the score drops, check what new audit finding appeared. The chain continues until no new findings are introduced and scores improve</Step>
+  <Step>
+    **Chain fixes** — if the score drops, check what new audit finding appeared. The chain continues
+    until no new findings are introduced and scores improve
+  </Step>
 </Steps>
 
 <Callout type="info">
-A single fix that drops the score isn't a failure — it's a signal that the fix introduced another issue. A proper chained fix sequence resolves cleanly.
+  A single fix that drops the score isn't a failure — it's a signal that the fix introduced another
+  issue. A proper chained fix sequence resolves cleanly.
 </Callout>
 
 ---

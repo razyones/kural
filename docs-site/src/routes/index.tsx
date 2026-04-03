@@ -33,8 +33,8 @@ function Home() {
             KURAL
           </h1>
           <p className="text-fd-muted-foreground text-base md:text-lg max-w-md mb-8 font-light leading-relaxed">
-            Answers &ldquo;where should this code live?&rdquo; — embeds, scores,
-            audits, and places every unit in your codebase.
+            Answers &ldquo;where should this code live?&rdquo; — embeds, scores, audits, and places
+            every unit in your codebase.
           </p>
           <div className="flex items-center gap-4">
             <Link

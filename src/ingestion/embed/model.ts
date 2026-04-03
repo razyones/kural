@@ -80,7 +80,7 @@ function createEmbeddingModel(config: KuralConfig["embeddings"]): {
 
   const provider = createOpenAI({
     ...(baseURL !== undefined && baseURL !== "" ? { baseURL } : {}),
-    ...(apiKey !== "" ? { apiKey } : {}),
+    ...(apiKey === "" ? {} : { apiKey }),
   });
   const model = provider.embedding(modelId);
 
@@ -95,7 +95,8 @@ function createEmbeddingModel(config: KuralConfig["embeddings"]): {
         return embeddings;
       } catch (err) {
         throw new Error(
-          `Embedding API call failed (provider: ${config.provider}, model: ${modelId}): ${err instanceof Error ? err.message : err}`,
+          `Embedding API call failed (provider: ${config.provider}, model: ${modelId}): ${err instanceof Error ? err.message : String(err)}`,
+          { cause: err },
         );
       }
     },

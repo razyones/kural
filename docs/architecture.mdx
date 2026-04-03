@@ -9,7 +9,9 @@ icon: Network
 Kural is a five-stage pipeline that transforms source code into structural health scores:
 
 <Steps>
-  <Step>**Parse** — Walk the filesystem, extract functions, types, and descriptions from the AST</Step>
+  <Step>
+    **Parse** — Walk the filesystem, extract functions, types, and descriptions from the AST
+  </Step>
   <Step>**Embed** — Produce identity and leaf vectors via 7-facet embedding</Step>
   <Step>**Score** — Compute fit, uniqueness, and subtree health for every node</Step>
   <Step>**Store** — Persist units, scores, and metadata to a snapshot database</Step>
@@ -24,13 +26,13 @@ The system is split into three tiers:
 
 ## Tech Stack
 
-| Layer | Tool | Role |
-|---|---|---|
-| CLI framework | Gunshi | Command routing, plugin system |
-| AI | Vercel AI SDK via AI Gateway | Embeddings, advise |
-| Local persistence | TanStack DB + node-sqlite-persistence | Snapshot storage |
-| Cloud backend | Turso (database-per-project) | `active.db` + `history.db` per project |
-| Dashboard | TanStack DB (React) | Reactive UI over collections |
+| Layer             | Tool                                  | Role                                   |
+| ----------------- | ------------------------------------- | -------------------------------------- |
+| CLI framework     | Gunshi                                | Command routing, plugin system         |
+| AI                | Vercel AI SDK via AI Gateway          | Embeddings, advise                     |
+| Local persistence | TanStack DB + node-sqlite-persistence | Snapshot storage                       |
+| Cloud backend     | Turso (database-per-project)          | `active.db` + `history.db` per project |
+| Dashboard         | TanStack DB (React)                   | Reactive UI over collections           |
 
 ## Repository Structure
 
@@ -119,14 +121,14 @@ Turso (<customer-id>.kural.io):
 
 ### Database Tables
 
-| Table | Purpose |
-|---|---|
-| `files` | Source files with embeddings, imports, descriptions |
-| `types` | Type/interface/class declarations with fields, refs |
-| `functions` | Functions with params, return types, purity, call graph |
-| `directories` | Directory hierarchy with children, descriptions |
-| `scores` | Structural health metrics per file/directory |
-| `metadata` | Key-value store (created_at, model_id, schema_version, axes) |
+| Table         | Purpose                                                      |
+| ------------- | ------------------------------------------------------------ |
+| `files`       | Source files with embeddings, imports, descriptions          |
+| `types`       | Type/interface/class declarations with fields, refs          |
+| `functions`   | Functions with params, return types, purity, call graph      |
+| `directories` | Directory hierarchy with children, descriptions              |
+| `scores`      | Structural health metrics per file/directory                 |
+| `metadata`    | Key-value store (created_at, model_id, schema_version, axes) |
 
 ### Schema Versioning
 
@@ -174,12 +176,12 @@ Fail silently with a warning in CI logs. The snapshot exists locally; next CI ru
 
 The dashboard supports multi-branch, multi-project views:
 
-| View | Value |
-|---|---|
-| Single branch | Current structural health |
+| View              | Value                                                 |
+| ----------------- | ----------------------------------------------------- |
+| Single branch     | Current structural health                             |
 | Branch comparison | Health diff between branches (e.g., alpha vs release) |
-| Branch timeline | Trend over history snapshots |
-| Pre-merge gate | Feature branch health vs main |
+| Branch timeline   | Trend over history snapshots                          |
+| Pre-merge gate    | Feature branch health vs main                         |
 
 ### Data Flow
 
@@ -189,11 +191,11 @@ The dashboard supports multi-branch, multi-project views:
 
 ## Pricing Model
 
-| Tier | What | Price |
-|---|---|---|
-| Free CLI | Scan, score, local snapshots | Free, open source |
-| Pro seat | CI sync + cloud dashboard + advise + 5 viewers | $X/mo per environment |
-| Extra viewers | Additional dashboard viewers beyond 5 | $Y/mo per viewer |
+| Tier          | What                                           | Price                 |
+| ------------- | ---------------------------------------------- | --------------------- |
+| Free CLI      | Scan, score, local snapshots                   | Free, open source     |
+| Pro seat      | CI sync + cloud dashboard + advise + 5 viewers | $X/mo per environment |
+| Extra viewers | Additional dashboard viewers beyond 5          | $Y/mo per viewer      |
 
 ### Billing Unit
 
@@ -203,7 +205,7 @@ Each API key is scoped to one project + environment, used in that CI pipeline's 
 
 ### Retention Policy
 
-| Plan | History retention | Stale branch cleanup |
-|---|---|---|
-| Starter | 30 days | 30 days of inactivity |
-| Team | 90 days | 90 days of inactivity |
+| Plan    | History retention | Stale branch cleanup  |
+| ------- | ----------------- | --------------------- |
+| Starter | 30 days           | 30 days of inactivity |
+| Team    | 90 days           | 90 days of inactivity |

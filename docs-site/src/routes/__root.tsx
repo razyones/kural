@@ -53,7 +53,7 @@ export const Route = createRootRoute({
 
 function KuralSearchDialog(props: SharedProps) {
   const { search, setSearch, query } = useDocsSearch({
-    client: { search: (q) => searchDocs({ data: q }) },
+    client: { search: async (q) => searchDocs({ data: q }) },
     delayMs: 300,
   });
 
