@@ -1,10 +1,18 @@
-import { loader } from 'fumadocs-core/source';
-import type { InferPageType } from 'fumadocs-core/source';
+import { loader } from "fumadocs-core/source";
+import type { InferPageType } from "fumadocs-core/source";
 import { docs } from "collections/server";
+import { icons } from "lucide-react";
+import { createElement } from "react";
 
 export const source = loader({
   source: docs.toFumadocsSource(),
   baseUrl: "/docs",
+  icon: (name) => {
+    if (!name || !(name in icons)) {
+      return undefined;
+    }
+    return createElement(icons[name as keyof typeof icons]);
+  },
 });
 
 export async function getLLMText(page: InferPageType<typeof source>) {

@@ -1,4 +1,5 @@
 {
   "title": "Codebase realities",
+  "icon": "Puzzle",
   "pages": ["kural-params", "pattern-nodes", "bound-nodes"]
 }

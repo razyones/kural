@@ -13,7 +13,7 @@ type TreeNode = {
   children?: TreeNode[];
 };
 
-const root = treeData as TreeNode;
+const root = treeData as unknown as TreeNode;
 
 // ── Isometric projection ──
 // Maps 3D [-1,1] coords to 2D SVG coords
@@ -440,8 +440,7 @@ export function EmbeddingSpace() {
                   fill="hsl(0, 0%, 55%)"
                   fontSize={8}
                   fontFamily="var(--font-body)"
-                  textTransform="uppercase"
-                  letterSpacing="0.05em"
+                  style={{ textTransform: "uppercase", letterSpacing: "0.05em" }}
                 >
                   {label}
                 </text>

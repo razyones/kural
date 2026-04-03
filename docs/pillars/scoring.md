@@ -1,6 +1,7 @@
 ---
 title: Scoring
 description: Structural health metrics for every node in the codebase tree
+icon: Gauge
 ---
 
 The scoring system produces a **ScoreCard** for every node in the codebase tree — types, functions, files, and directories. Each card captures three perspectives: the node as a **child** (does it belong here?), as a **parent** (are its children well-organized?), and as a **subtree root** (is everything below healthy?).

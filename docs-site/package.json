@@ -14,6 +14,7 @@
     "fumadocs-mdx": "latest",
     "fumadocs-ui": "latest",
     "katex": "^0.16.44",
+    "lucide-react": "^1.7.0",
     "react": "^19",
     "react-dom": "^19",
     "vite": "^8"

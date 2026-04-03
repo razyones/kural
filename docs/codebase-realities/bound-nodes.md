@@ -1,6 +1,7 @@
 ---
 title: Bound Nodes
 description: Units whose identity is inseparable from their hierarchical context
+icon: Anchor
 ---
 
 They exist because the architecture demands them — barrel exports, entry points, primary exports — but they carry no autonomous semantic content. Their embedding profile is either diffuse (borrowed from many) or collapsed (identical to one child). The audit system correctly detects these as statistical anomalies, but the anomalies are structurally inevitable, not design flaws.

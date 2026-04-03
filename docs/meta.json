@@ -1,9 +1,11 @@
 {
   "pages": [
     "index",
+    "getting-started",
+    "architecture",
     "foundation",
     "pillars",
     "codebase-realities",
-    "infrastructure"
+    "db"
   ]
 }

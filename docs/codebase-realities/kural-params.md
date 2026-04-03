@@ -1,6 +1,7 @@
 ---
 title: Kural Params
 description: Annotations that declare structural realities the vector space can't capture alone
+icon: Tags
 ---
 
 The vector space is optimized for domain separation. But real codebases have constraints — cross-cutting utilities, repeated structural patterns, architectural entry points, intentional anomalies, side effects that type signatures hide. Each Kural Param declares a specific constraint so the four pillars can adjust.

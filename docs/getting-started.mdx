@@ -1,0 +1,335 @@
+---
+title: Getting Started
+description: Install Kural and run your first structural analysis
+icon: Rocket
+---
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) v18 or later
+- A TypeScript codebase with `"type": "module"` in `package.json`
+- An API key for an embedding provider (or use Ollama for local inference)
+
+## Install
+
+<Tabs items={["npm", "pnpm", "yarn"]}>
+  <Tab value="npm">```bash npm install -g kural ```</Tab>
+  <Tab value="pnpm">```bash pnpm add -g kural ```</Tab>
+  <Tab value="yarn">```bash yarn global add kural ```</Tab>
+</Tabs>
+
+Verify the installation:
+
+```bash
+kural --version
+```
+
+## Configure an embedding provider
+
+Kural needs an embedding provider to generate vectors. Set the `AI_GATEWAY_API_KEY` environment variable, or pass `--api-key` on each command.
+
+<Tabs items={["Vercel (default)", "OpenAI", "OpenRouter", "Ollama (local)"]}>
+  <Tab value="Vercel (default)">
+    ```bash
+    export AI_GATEWAY_API_KEY=your-vercel-api-key
+    ```
+    Default model: `google/gemini-embedding-2`
+  </Tab>
+  <Tab value="OpenAI">
+    ```bash
+    export AI_GATEWAY_API_KEY=your-openai-api-key
+    ```
+    ```bash
+    kural snapshot generate src --provider openai
+    ```
+    Default model: `text-embedding-3-small`
+  </Tab>
+  <Tab value="OpenRouter">
+    ```bash
+    export AI_GATEWAY_API_KEY=your-openrouter-api-key
+    ```
+    ```bash
+    kural snapshot generate src --provider openrouter
+    ```
+    Default model: `google/gemini-embedding-001`
+  </Tab>
+  <Tab value="Ollama (local)">
+    No API key required. Start [Ollama](https://ollama.com/) locally, then:
+
+    ```bash
+    kural snapshot generate src --provider ollama
+    ```
+    Default model: `qwen3-embedding:latest`
+
+  </Tab>
+</Tabs>
+
+You can also set a `.env` file in your project root:
+
+```bash
+AI_GATEWAY_API_KEY=your-api-key
+```
+
+## Prepare your codebase
+
+<Callout type="warn">
+  This is the most important step. Description quality directly determines scoring accuracy. Every
+  description -- directory KURAL.md, file-level JSDoc, function JSDoc, and type JSDoc -- is embedded
+  and carries **50% weight** in the identity vector. Poor descriptions produce misleading scores.
+  Good descriptions produce scores you can act on.
+</Callout>
+
+Kural reads two things from your code before it can score anything: **JSDoc comments** on files, functions, and types, and **KURAL.md files** in directories. These descriptions are the primary signal that tells Kural what each unit _is_ and where it belongs.
+
+### Write descriptions
+
+Every unit needs a JSDoc description. Kural extracts the leading comment from each file, function, and type:
+
+```ts
+/**
+ * The gateway. Crosses the network boundary to turn text into vectors
+ * via an external AI service. It is the only module that speaks the
+ * AI SDK protocol -- no other part of the system calls embedding APIs
+ * directly.
+ */
+
+import { createOpenAI } from "@ai-sdk/openai";
+import { embedMany } from "ai";
+```
+
+For directories, create a `KURAL.md` file with a plain-text description:
+
+```md
+The reader and translator -- turns source files into numerical vectors.
+It is the only pipeline stage that touches the AST and the embedding API.
+```
+
+### Description principles
+
+Follow these principles to maximize the semantic separation between sibling units -- which is what scoring measures.
+
+<Steps>
+  <Step>
+    **Describe what only THIS unit does, in its own vocabulary.** Use exclusivity language: "It is
+    the only module that...", "Nothing else in the system...". This creates semantic separation
+    between siblings.
+  </Step>
+  <Step>
+    **Never borrow sibling vocabulary.** Naming other modules' concepts (e.g., "embedding providers"
+    in a config module, "parse-embed-store pipeline" in a command) pulls the description toward
+    those modules in embedding space. Use abstract terms instead: "provider selection", "the
+    engine".
+  </Step>
+  <Step>
+    **Anchor identity with a metaphor.** Lead with a one-word role ("The brain", "The memory", "The
+    toolbox") that captures the unit's irreplaceable character. Most impactful for directories and
+    files; optional for functions and types.
+  </Step>
+  <Step>
+    **Describe the role in the system, not a generic job.** "Persists and retrieves all application
+    state in a local database" beats "SQLite database schema and operations" -- the former says what
+    makes it unique here, the latter describes any database module anywhere.
+  </Step>
+  <Step>
+    **For directories, combine children's identities.** A parent KURAL.md should describe the shared
+    boundary its children own, not repeat their individual descriptions. Example: "The reader and
+    translator -- turns source files into numerical vectors" combines the roles of parse and embed.
+  </Step>
+</Steps>
+
+### Annotate with Kural Params
+
+Not everything in a codebase fits neatly into a domain hierarchy. Kural Params are JSDoc tags that declare structural realities the vector space can't capture alone. Without them, Kural produces false scores and false audit findings for structurally valid code.
+
+**Mark side effects with `@kuralPure` and `@kuralCauses`:**
+
+Every function should declare whether it has side effects. This is the most common annotation and the one that affects scoring the most broadly. `@kuralCauses` descriptions are embedded and blended into the function's signature vector.
+
+```ts
+/**
+ * Computes the cosine similarity between two vectors.
+ * @kuralPure
+ */
+function cosineSimilarity(a: number[], b: number[]): number { ... }
+
+/**
+ * Persists computed score cards to the snapshot database.
+ * @kuralCauses writes score rows to SQLite via TanStack DB
+ */
+async function writeScoreCards(collections, cards): Promise<void> { ... }
+```
+
+**Mark utilities with `@kuralUtil`:**
+
+Utilities serve every domain equally -- `cosineSimilarity`, `formatPath`, `slugify`. They don't belong in the domain hierarchy and should be scored separately. Tag the file-level JSDoc or the containing directory's KURAL.md.
+
+```ts
+/** @kuralUtil */
+```
+
+**Mark structural patterns with `@kuralPatterns`:**
+
+When multiple siblings are intentional repetitions of one concept (e.g., `computeFit` and `computeChildrenFit`), group them so they count as one concept in the parent's scoring.
+
+```ts
+/**
+ * Computes fit for a leaf node against its parent.
+ * @kuralPatterns fitMetric
+ */
+function computeFit(...) { ... }
+
+/**
+ * Computes aggregate fit across a container's children.
+ * @kuralPatterns fitMetric
+ */
+function computeChildrenFit(...) { ... }
+```
+
+**Mark architectural entry points with `@kuralBound`:**
+
+Entry points, barrel exports, and primary exports have identity that depends on context rather than content. Without this tag, they trigger false outlier findings.
+
+```ts
+/**
+ * The entry point. Bootstraps the CLI router and dispatches to subcommands.
+ * @kuralBound inward
+ */
+```
+
+**Suppress known findings with `@kuralResidual`:**
+
+When an audit finding describes intentional architecture, suppress it so it stops appearing in reports.
+
+```ts
+/**
+ * The root. Spans the full lifecycle by design.
+ * @kuralResidual bloated-container [a3f8b2c]
+ */
+```
+
+<Callout type="info">
+  You don't need every annotation on day one. Start with file-level JSDoc descriptions and
+  `@kuralPure` / `@kuralCauses` on functions. Run `kural audit` -- the `incomplete-docs` audit will
+  tell you exactly what's missing. Add `@kuralUtil`, `@kuralPatterns`, and `@kuralBound` as false
+  findings guide you.
+</Callout>
+
+See [Kural Params](/docs/codebase-realities/kural-params) for the full specification and impact matrix.
+
+## Generate your first snapshot
+
+Navigate to your project root and run:
+
+```bash
+kural snapshot generate src
+```
+
+This walks the `src` directory, extracts types and functions from the AST, embeds them using 7 structural facets, computes fit and uniqueness scores, and stores everything in `.kural-db/`.
+
+<Callout type="info">
+  Add `.kural-db/` to your `.gitignore`. Snapshots are local and should not be committed.
+</Callout>
+
+## View scores
+
+```bash
+kural score
+```
+
+This shows the root-level structural health score. Use flags to drill into specific areas:
+
+```bash
+# Score a specific path
+kural score -p src/commands
+
+# Show detailed breakdown table
+kural score -e
+
+# Compare against a previous snapshot
+kural score -c <snapshot-id>
+```
+
+## Run audits
+
+```bash
+kural audit
+```
+
+Kural runs 14 statistical audits that surface specific, actionable structural issues -- outliers, duplicates, containment problems, and more.
+
+```bash
+# Filter by audit category
+kural audit -f outliers
+
+# Show all findings (no truncation)
+kural audit -e
+
+# Disable specific audits
+kural audit -d incomplete-docs,identity-language
+
+# Output as JSON
+kural audit --json
+```
+
+## Manage snapshots
+
+Each `generate` run creates a new snapshot. Kural keeps up to 10 history entries per branch and evicts the oldest automatically.
+
+```bash
+# List all snapshots
+kural snapshot list
+
+# Pin a snapshot to prevent eviction
+kural snapshot pin <id> baseline
+
+# Remove a pin
+kural snapshot unpin baseline
+
+# Delete a snapshot
+kural snapshot delete <id>
+```
+
+## Project configuration
+
+Create a `kural.config.json` in your project root to persist settings:
+
+```json
+{
+  "embeddings": {
+    "provider": "vercel"
+  },
+  "domainKeywords": ["scoring", "embedding", "audit"],
+  "dictionary": {
+    "SOST": "structural scoring tree"
+  },
+  "audits": {
+    "sensitivity": 2.0,
+    "disable": ["incomplete-docs"]
+  }
+}
+```
+
+| Field                     | Description                                              |
+| ------------------------- | -------------------------------------------------------- |
+| `embeddings.provider`     | `vercel`, `openai`, `openrouter`, or `ollama`            |
+| `embeddings.model`        | Model ID override                                        |
+| `embeddings.baseURL`      | Custom base URL for the provider                         |
+| `embeddings.apiKey`       | API key (overrides env var)                              |
+| `domainKeywords`          | Top domain terms for path signal context                 |
+| `dictionary`              | Codebase-specific term definitions for richer signatures |
+| `audits.sensitivity`      | Standard deviations from mean to flag (default: 2.0)     |
+| `audits.containmentFloor` | Absolute floor for containment detection (default: 0.9)  |
+| `audits.minGroup`         | Minimum group size for statistical tests (default: 4)    |
+| `audits.disable`          | Audit names to skip                                      |
+
+## Typical workflow
+
+<Steps>
+  <Step>**Describe** your codebase: JSDoc on files, functions, and types; KURAL.md in directories</Step>
+  <Step>**Annotate** structural realities: `@kuralPure`/`@kuralCauses` on all functions, `@kuralUtil` on utilities</Step>
+  <Step>**Generate** a snapshot: `kural snapshot generate src`</Step>
+  <Step>**Score** the overall structure: `kural score`</Step>
+  <Step>**Audit** for specific issues: `kural audit`</Step>
+  <Step>**Fix** the flagged issues, then regenerate to verify improvement</Step>
+  <Step>**Compare** before and after: `kural score -c <old-snapshot-id>`</Step>
+</Steps>

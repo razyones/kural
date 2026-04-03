@@ -1,6 +1,7 @@
 ---
 title: Database
 description: Local snapshot persistence — schema, lifecycle, and serialization
+icon: Database
 ---
 
 All data lives on disk as SQLite databases under `.kural-db/`.
