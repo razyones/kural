@@ -103,6 +103,13 @@ jobs:
           path: site/alpha
         continue-on-error: true
 
+      - name: Generate root 404 fallback
+        run: |
+          if [ ! -f site/404.html ]; then
+            # Use alpha shell as the root 404 fallback if no stable build exists
+            cp site/alpha/404.html site/404.html 2>/dev/null || true
+          fi
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
