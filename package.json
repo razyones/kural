@@ -41,6 +41,7 @@
     "overrides": {
       "kural>vite": "npm:@voidzero-dev/vite-plus-core@latest",
       "vitest": "npm:@voidzero-dev/vite-plus-test@latest",
+      "h3": "2.0.1-rc.20",
       "@tanstack/start-server-core>h3-v2": "npm:h3@2.0.1-rc.20",
       "srvx": ">=0.11.13",
       "picomatch": ">=4.0.4"
