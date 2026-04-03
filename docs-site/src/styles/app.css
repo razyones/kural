@@ -27,6 +27,12 @@ body {
   letter-spacing: -0.01em;
 }
 
+/* Prevent layout shift from Radix Dialog's react-remove-scroll
+   scrollbar compensation on dialog open/close */
+html {
+  scrollbar-gutter: stable;
+}
+
 h1,
 h2,
 h3,
