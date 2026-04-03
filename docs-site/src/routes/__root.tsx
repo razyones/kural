@@ -106,7 +106,7 @@ function KuralSearchDialog(props: SharedProps) {
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList
-          items={query.data === "empty" ? null : query.data}
+          items={query.isLoading || query.data === "empty" ? null : query.data}
           Item={StableSearchItem}
         />
       </SearchDialogContent>

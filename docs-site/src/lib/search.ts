@@ -99,7 +99,7 @@ export async function searchDocs(query: string) {
       content: highlighter.highlightMarkdown(hit.document.content),
       // Only page entries get breadcrumbs — headings/text inherit context
       breadcrumbs: type === "page" ? meta?.breadcrumbs : undefined,
-      id: hit.document.url,
+      id: hit.id,
       url: hit.document.url,
     };
   });
