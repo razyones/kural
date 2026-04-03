@@ -15,10 +15,8 @@ export default defineConfig({
     tanstackStart({
       spa: {
         enabled: true,
-        prerender: {
-          enabled: true,
-          crawlLinks: true,
-        },
+        // Prerender disabled — blocked by nitro@3 + TanStack Start race condition
+        // (TanStack/router#6275, #6322). Re-enable when nitro@4 ships.
       },
     }),
     react(),
