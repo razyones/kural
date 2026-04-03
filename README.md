@@ -48,11 +48,29 @@ Add JSDoc comments to files, functions, and types. Add `KURAL.md` files to direc
 Annotate functions with `@kuralPure` (no side effects) or `@kuralCauses` (describes side effects):
 
 ```ts
-/** @kuralPure */
-function cosineSimilarity(a: number[], b: number[]): number { ... }
+/**
+ * Computes cosine similarity between two vectors.
+ * Wraps DruidJS cosine distance: cos(acos(similarity)) recovers similarity.
+ * Returns 0 if either vector is empty.
+ * @param a - First vector
+ * @param b - Second vector
+ * @returns Cosine similarity in range [-1, 1]
+ * @kuralPure
+ */
+function cosineSimilarity(a: number[], b: number[]): number { /* ... */ }
 
-/** @kuralCauses writes score rows to SQLite via TanStack DB */
-async function writeScoreCards(collections, cards): Promise<void> { ... }
+/**
+ * Persists computed health metrics so downstream commands can query scores
+ * without re-running the pipeline.
+ * @param collections - Snapshot collections to write into
+ * @param cards - Computed score cards to persist
+ * @returns Resolves when score card rows are persisted
+ * @kuralCauses persists score card rows to the snapshot database
+ */
+async function writeScoreCards(
+  collections: SnapshotCollections,
+  cards: ScoreCard[],
+): Promise<void> { /* ... */ }
 ```
 
 See the [description principles](docs/getting-started.mdx#description-principles) and [Kural Params](docs/codebase-realities/kural-params.md) for full guidance.
@@ -146,16 +164,16 @@ Create `kural.config.json` in your project root:
 
 JSDoc annotations that declare structural realities the vector space can't capture alone:
 
-| Param | Purpose |
-|---|---|
-| `@kuralPure` | Marks functions with no side effects |
-| `@kuralCauses <desc>` | Describes what a function does beyond its type signature |
-| `@kuralUtil` | Excludes from domain scoring, scored in own sandbox |
-| `@kuralHelper` | Participates in scoring, excluded from audits |
-| `@kuralPatterns <group>` | Deduplicates siblings to a centroid representative |
-| `@kuralCompanion <group>` | Groups structurally coupled units |
-| `@kuralBound inward/outward` | Adjusts scoring for entry points and primary exports |
-| `@kuralResidual <audit> [hash]` | Suppresses a specific audit finding |
+| Param                           | Purpose                                                  |
+| ------------------------------- | -------------------------------------------------------- |
+| `@kuralPure`                    | Marks functions with no side effects                     |
+| `@kuralCauses <desc>`           | Describes what a function does beyond its type signature |
+| `@kuralUtil`                    | Excludes from domain scoring, scored in own sandbox      |
+| `@kuralHelper`                  | Participates in scoring, excluded from audits            |
+| `@kuralPatterns <group>`        | Deduplicates siblings to a centroid representative       |
+| `@kuralCompanion <group>`       | Groups structurally coupled units                        |
+| `@kuralBound inward/outward`    | Adjusts scoring for entry points and primary exports     |
+| `@kuralResidual <audit> [hash]` | Suppresses a specific audit finding                      |
 
 ## How it works
 
@@ -180,12 +198,12 @@ Every node gets a score card:
 
 ## Tech stack
 
-| Layer | Tool |
-|---|---|
-| CLI framework | [Gunshi](https://github.com/poppinss/gunshi) |
-| AI | [Vercel AI SDK](https://sdk.vercel.ai/) via AI Gateway |
-| Local persistence | [TanStack DB](https://tanstack.com/db) + SQLite |
-| Runtime | Node.js, ESM |
+| Layer             | Tool                                                   |
+| ----------------- | ------------------------------------------------------ |
+| CLI framework     | [Gunshi](https://github.com/poppinss/gunshi)           |
+| AI                | [Vercel AI SDK](https://sdk.vercel.ai/) via AI Gateway |
+| Local persistence | [TanStack DB](https://tanstack.com/db) + SQLite        |
+| Runtime           | Node.js, ESM                                           |
 
 ## Typical workflow
 
