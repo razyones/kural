@@ -4,7 +4,51 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import mdx from "fumadocs-mdx/vite";
 import { nitro } from "nitro/vite";
-import type { Plugin } from "vite";
+import type { Plugin, ResolvedConfig } from "vite";
+
+/**
+ * Generates a virtual module `virtual:docs-data` that embeds the
+ * slug-to-path mapping at build time. This lets the SPA resolve
+ * page paths on static hosting without server functions.
+ */
+function docsDataPlugin(): Plugin {
+  const virtualId = "virtual:docs-data";
+  const resolvedId = "\0" + virtualId;
+
+  return {
+    name: "docs-data",
+    resolveId(id) {
+      if (id === virtualId) {
+        return resolvedId;
+      }
+    },
+    async load(id) {
+      if (id !== resolvedId) {
+        return;
+      }
+      const { readdirSync, statSync } = await import("node:fs");
+      const { join, relative } = await import("node:path");
+      const docsDir = join(import.meta.dirname, "../docs");
+      const pathMap: Record<string, string> = {};
+
+      function walk(dir: string): void {
+        for (const entry of readdirSync(dir)) {
+          const full = join(dir, entry);
+          if (statSync(full).isDirectory()) {
+            walk(full);
+          } else if (/\.mdx?$/.test(entry)) {
+            const rel = relative(docsDir, full);
+            const slug = rel.replace(/\.mdx?$/, "").replace(/\/index$/, "");
+            const key = slug === "index" ? "" : slug;
+            pathMap[key] = rel;
+          }
+        }
+      }
+      walk(docsDir);
+      return `export const pathMap = ${JSON.stringify(pathMap)};`;
+    },
+  };
+}
 
 /**
  * Workaround for nitro@3 + TanStack Start prerender incompatibility.
@@ -75,6 +119,7 @@ export default defineConfig({
     react(),
     nitro(),
     fixNitroPrerender(),
+    docsDataPlugin(),
   ],
   resolve: {
     tsconfigPaths: true,
