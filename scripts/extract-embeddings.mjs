@@ -3,9 +3,10 @@
  * builds a navigable tree, and computes per-level 3D positions via PCA.
  */
 
-import { dirname, relative } from "node:path";
+import { dirname, join, relative, resolve } from "node:path";
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import BetterSqlite3 from "better-sqlite3";
+import { execSync } from "node:child_process";
 
 const NONE = 0;
 const SINGLE = 1;
@@ -17,19 +18,22 @@ const PRECISION = 1000;
 const FIRST_INDEX = 0;
 const LAST_OFFSET = -1;
 const JSON_INDENT = 2;
-
-const PROJECT_ROOT = "/Users/harshinivignesh/Documents/projects/kural-2";
-const DB_PATH = `${PROJECT_ROOT}/.kural-db/feat/new-audits/active.db`;
-const OUTPUT_PATH = `${PROJECT_ROOT}/docs-site/src/data/embeddings.json`;
-
-const COLLECTIONS = {
-  files: { table: "c_7ooqeq_5", kind: "file" },
-  types: { table: "c_d76bre2_5", kind: "type" },
-  functions: { table: "c_bcuuqko_9", kind: "func" },
-  directories: { table: "c_b7xiuu4_b", kind: "dir" },
-};
-const SCORES_TABLE = "c_ddocgqs_6";
 const DESCRIPTION_MAX_LENGTH = 120;
+
+const PROJECT_ROOT = resolve(import.meta.dirname, "..");
+const OUTPUT_PATH = join(PROJECT_ROOT, "docs-site/src/data/embeddings.json");
+
+/** @returns {string} */
+function currentBranch() {
+  try {
+    return execSync("git rev-parse --abbrev-ref HEAD", { encoding: "utf-8" }).trim();
+  } catch {
+    return "main";
+  }
+}
+
+const branch = currentBranch();
+const DB_PATH = join(PROJECT_ROOT, ".kural-db", branch, "active.db");
 
 if (!existsSync(DB_PATH)) {
   console.log(`Skipping embedding extraction — database not found at ${DB_PATH}`);
@@ -38,18 +42,32 @@ if (!existsSync(DB_PATH)) {
 
 const db = new BetterSqlite3(DB_PATH, { readonly: true });
 
+// Resolve collection table names from the registry
+const COLLECTION_KINDS = { files: "file", types: "type", functions: "func", directories: "dir" };
+
+/** @type {{ collection_id: string, table_name: string }[]} */
+const registry = db.prepare("SELECT collection_id, table_name FROM collection_registry").all();
+const tableMap = new Map(registry.map((r) => [r.collection_id, r.table_name]));
+
 // ── Load all units ──
 const allUnits = [];
 const scoreMap = new Map();
 
-/** @type {{ key: string, value: string }[]} */
-const scoreRows = db.prepare(`SELECT key, value FROM ${SCORES_TABLE}`).all();
-for (const row of scoreRows) {
-  const data = JSON.parse(row.value);
-  scoreMap.set(data.key, data);
+const scoresTable = tableMap.get("scores");
+if (scoresTable) {
+  /** @type {{ key: string, value: string }[]} */
+  const scoreRows = db.prepare(`SELECT key, value FROM ${scoresTable}`).all();
+  for (const row of scoreRows) {
+    const data = JSON.parse(row.value);
+    scoreMap.set(data.key, data);
+  }
 }
 
-for (const [, { table, kind }] of Object.entries(COLLECTIONS)) {
+for (const [collectionId, kind] of Object.entries(COLLECTION_KINDS)) {
+  const table = tableMap.get(collectionId);
+  if (!table) {
+    continue;
+  }
   /** @type {{ key: string, value: string }[]} */
   const rows = db.prepare(`SELECT key, value FROM ${table}`).all();
   for (const row of rows) {
@@ -59,7 +77,7 @@ for (const [, { table, kind }] of Object.entries(COLLECTIONS)) {
       continue;
     }
 
-    const relPath = relative(PROJECT_ROOT + "/src", data.path);
+    const relPath = relative(join(PROJECT_ROOT, "src"), data.path);
     const scoreKey =
       kind === "file" || kind === "dir"
         ? `${kind}:${data.path}`

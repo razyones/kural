@@ -35,6 +35,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build CLI
+        run: pnpm exec vp pack
+
+      - name: Generate snapshot
+        run: node dist/cli.mjs snapshot generate src
+        env:
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+
       - name: Determine base path
         id: base
         run: |
