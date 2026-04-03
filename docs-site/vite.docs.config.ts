@@ -26,26 +26,101 @@ function docsDataPlugin(): Plugin {
       if (id !== resolvedId) {
         return;
       }
-      const { readdirSync, statSync } = await import("node:fs");
+      const { readdirSync, readFileSync, statSync, existsSync } = await import("node:fs");
       const { join, relative } = await import("node:path");
       const docsDir = join(import.meta.dirname, "../docs");
       const pathMap: Record<string, string> = {};
 
-      function walk(dir: string): void {
-        for (const entry of readdirSync(dir)) {
-          const full = join(dir, entry);
-          if (statSync(full).isDirectory()) {
-            walk(full);
-          } else if (/\.mdx?$/.test(entry)) {
-            const rel = relative(docsDir, full);
-            const slug = rel.replace(/\.mdx?$/, "").replace(/\/index$/, "");
-            const key = slug === "index" ? "" : slug;
-            pathMap[key] = rel;
+      type TreeNode =
+        | { type: "page"; name: string; url: string; $ref: { file: string } }
+        | { type: "folder"; name: string; children: TreeNode[] };
+
+      /** Extract title from YAML frontmatter. */
+      function frontmatterTitle(file: string): string {
+        const src = readFileSync(file, "utf-8");
+        const m = /^---\s*\n[\s\S]*?^title:\s*(.+)/m.exec(src);
+        return m
+          ? m[1].trim()
+          : file
+              .split("/")
+              .pop()!
+              .replace(/\.mdx?$/, "");
+      }
+
+      /** Build tree for a directory, ordered by meta.json if present. */
+      function buildTree(dir: string, urlPrefix: string): TreeNode[] {
+        const metaPath = join(dir, "meta.json");
+        const meta = existsSync(metaPath)
+          ? (JSON.parse(readFileSync(metaPath, "utf-8")) as {
+              pages?: string[];
+              title?: string;
+            })
+          : null;
+        const order: string[] = meta?.pages ?? [];
+        const seen = new Set<string>();
+        const nodes: TreeNode[] = [];
+
+        function addEntry(name: string): void {
+          if (seen.has(name)) return;
+          seen.add(name);
+          const full = join(dir, name);
+
+          // Directory → folder node
+          if (existsSync(full) && statSync(full).isDirectory()) {
+            const folderMeta = join(full, "meta.json");
+            const fm = existsSync(folderMeta)
+              ? (JSON.parse(readFileSync(folderMeta, "utf-8")) as {
+                  title?: string;
+                })
+              : null;
+            nodes.push({
+              type: "folder",
+              name: fm?.title ?? name,
+              children: buildTree(full, `${urlPrefix}/${name}`),
+            });
+            return;
+          }
+
+          // File → page node
+          for (const ext of [".mdx", ".md"]) {
+            const filePath = join(dir, name + ext);
+            if (existsSync(filePath)) {
+              const rel = relative(docsDir, filePath);
+              const slug = rel.replace(/\.mdx?$/, "").replace(/\/index$/, "");
+              const key = slug === "index" ? "" : slug;
+              const url = key === "" ? "/docs" : `/docs/${key}`;
+              pathMap[key] = rel;
+              nodes.push({
+                type: "page",
+                name: frontmatterTitle(filePath),
+                url,
+                $ref: { file: rel },
+              });
+              return;
+            }
           }
         }
+
+        // Add ordered entries first, then remaining files
+        for (const name of order) addEntry(name);
+        for (const entry of readdirSync(dir)) {
+          if (entry === "meta.json") continue;
+          const name = entry.replace(/\.mdx?$/, "");
+          addEntry(name);
+        }
+        return nodes;
       }
-      walk(docsDir);
-      return `export const pathMap = ${JSON.stringify(pathMap)};`;
+
+      const children = buildTree(docsDir, "");
+      const pageTree = {
+        $fumadocs_loader: "page-tree",
+        data: { $id: "root", name: "Docs", children },
+      };
+
+      return [
+        `export const pathMap = ${JSON.stringify(pathMap)};`,
+        `export const pageTree = ${JSON.stringify(pageTree)};`,
+      ].join("\n");
     },
   };
 }
