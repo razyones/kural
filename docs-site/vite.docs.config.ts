@@ -117,6 +117,51 @@ function docsDataPlugin(): Plugin {
         data: { $id: "root", name: "Docs", children },
       };
 
+      // Also generate the search index and write to public output
+      const { writeFileSync: writeFile, mkdirSync: mkDir } = await import("node:fs");
+      const apiDir = join(import.meta.dirname, ".output/public/api");
+      {
+        const { create, insert, save } = await import("@orama/orama");
+        const db = await create({
+          schema: {
+            title: "string",
+            description: "string",
+            url: "string",
+            content: "string",
+          },
+        });
+        for (const [key, rel] of Object.entries(pathMap)) {
+          const filePath = join(docsDir, rel);
+          const src = readFileSync(filePath, "utf-8");
+          const fmMatch = /^---\s*\n([\s\S]*?)\n---/.exec(src);
+          const fm: Record<string, string> = {};
+          if (fmMatch) {
+            for (const line of fmMatch[1].split("\n")) {
+              const [k, ...rest] = line.split(":");
+              if (k && rest.length) fm[k.trim()] = rest.join(":").trim();
+            }
+          }
+          const body = (fmMatch ? src.slice(fmMatch[0].length) : src)
+            .replace(/^import\s+.*$/gm, "")
+            .replace(/<[^>]+>/g, " ")
+            .replace(/```[\s\S]*?```/g, " ")
+            .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+            .replace(/#{1,6}\s+/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+          await insert(db, {
+            title: fm.title ?? key,
+            description: fm.description ?? "",
+            url: key === "" ? "/docs" : `/docs/${key}`,
+            content: body.slice(0, 2000),
+          });
+        }
+        const exported = await save(db);
+        (exported as Record<string, string>).type = "simple";
+        mkDir(apiDir, { recursive: true });
+        writeFile(join(apiDir, "search.json"), JSON.stringify(exported));
+      }
+
       return [
         `export const pathMap = ${JSON.stringify(pathMap)};`,
         `export const pageTree = ${JSON.stringify(pageTree)};`,

@@ -13,7 +13,6 @@ import {
 import type { SharedProps } from "fumadocs-ui/contexts/search";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import { useDocsSearch } from "fumadocs-core/search/client";
-import { searchDocs } from "@/lib/search";
 import { AnimatedBg } from "@/components/animated-bg";
 import appCss from "@/styles/app.css?url";
 import config from "../../docs.config";
@@ -52,8 +51,9 @@ export const Route = createRootRoute({
 });
 
 function KuralSearchDialog(props: SharedProps) {
+  const base = import.meta.env.BASE_URL ?? "/";
   const { search, setSearch, query } = useDocsSearch({
-    client: { search: async (q) => searchDocs({ data: q }) },
+    client: { type: "orama-static", from: `${base}api/search.json` },
     delayMs: 300,
   });
 
