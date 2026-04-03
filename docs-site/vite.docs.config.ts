@@ -124,10 +124,12 @@ function docsDataPlugin(): Plugin {
         const { create, insert, save } = await import("@orama/orama");
         const db = await create({
           schema: {
-            title: "string",
-            description: "string",
             url: "string",
+            title: "string",
+            breadcrumbs: "string[]",
+            description: "string",
             content: "string",
+            keywords: "string",
           },
         });
         for (const [key, rel] of Object.entries(pathMap)) {
@@ -149,11 +151,14 @@ function docsDataPlugin(): Plugin {
             .replace(/#{1,6}\s+/g, "")
             .replace(/\s+/g, " ")
             .trim();
+          const breadcrumbs = key ? key.split("/").map((s) => s.replace(/-/g, " ")) : [];
           await insert(db, {
             title: fm.title ?? key,
             description: fm.description ?? "",
             url: key === "" ? "/docs" : `/docs/${key}`,
             content: body.slice(0, 2000),
+            breadcrumbs,
+            keywords: "",
           });
         }
         const exported = await save(db);
