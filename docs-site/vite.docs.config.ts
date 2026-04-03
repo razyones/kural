@@ -56,6 +56,7 @@ function fixNitroPrerender(): Plugin {
 }
 
 export default defineConfig({
+  base: process.env.BASE_PATH ?? "/",
   server: {
     port: 3000,
   },

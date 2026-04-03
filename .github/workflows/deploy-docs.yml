@@ -43,8 +43,19 @@ jobs:
         env:
           AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
 
+      - name: Determine base path
+        id: base
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "path=/kural/" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=/kural/${{ github.ref_name }}/" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build docs site
         run: pnpm run docs:build
+        env:
+          BASE_PATH: ${{ steps.base.outputs.path }}
 
       - name: Generate SPA fallback pages
         run: |

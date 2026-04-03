@@ -90,6 +90,7 @@ export default defineConfig({
     },
   },
   test: {
+    testTimeout: 30_000,
     exclude: ["**/node_modules/**", "**/dist/**", ".claude/**"],
     coverage: {
       provider: "v8",

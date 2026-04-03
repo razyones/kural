@@ -77,7 +77,7 @@ function runCli(args: string[], cwd: string): CliResult {
       cwd,
       encoding: "utf-8",
       stdio: "pipe",
-      env: { ...process.env, NO_COLOR: "1" },
+      env: { ...process.env, NO_COLOR: "1", COLUMNS: "120" },
       timeout: TIMEOUT_MS,
     });
     return { stdout, stderr: "", exitCode: NONE };
