@@ -221,7 +221,10 @@ Every node gets a score card:
 
 ## Documentation
 
-Full documentation available at the [docs site](docs/):
+- [Stable docs](https://razyones.github.io/kural/) — latest release (`main`)
+- [Alpha docs](https://razyones.github.io/kural/alpha/) — preview of upcoming changes (`alpha`)
+
+### Topics
 
 - [Getting Started](docs/getting-started.mdx) — installation, codebase preparation, and first run
 - [Architecture](docs/architecture.mdx) — pipeline, tiers, data model, and sync design

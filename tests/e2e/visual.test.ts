@@ -71,6 +71,10 @@ function normalize(stdout: string, root: string): string {
   out = out.replaceAll(/(?:\.\.\/)+[\w/.-]*kural-e2e-[\w/.-]*/g, "<ROOT_REL>");
   // Replace 8-char hex hashes in brackets (e.g., [abcd1234])
   out = out.replaceAll(/\[[0-9a-f]{8}\]/g, "[<HASH>]");
+  // Normalize table widths — collapse repeated ─ and fluid column padding
+  // so snapshots are independent of terminal width
+  out = out.replaceAll(/─{4,}/g, "────");
+  out = out.replaceAll(/ {2,}│/g, " │");
   return out;
 }
 
