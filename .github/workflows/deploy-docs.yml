@@ -46,6 +46,11 @@ jobs:
       - name: Build docs site
         run: pnpm run docs:build
 
+      - name: Generate SPA fallback pages
+        run: |
+          cp docs-site/.output/public/_shell.html docs-site/.output/public/index.html
+          cp docs-site/.output/public/_shell.html docs-site/.output/public/404.html
+
       - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
