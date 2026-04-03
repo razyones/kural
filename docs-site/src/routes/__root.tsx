@@ -53,7 +53,7 @@ export const Route = createRootRoute({
 function KuralSearchDialog(props: SharedProps) {
   const base = import.meta.env.BASE_URL ?? "/";
   const { search, setSearch, query } = useDocsSearch({
-    client: { type: "orama-static", from: `${base}api/search.json` },
+    client: { type: "static", from: `${base}api/search.json` },
     delayMs: 300,
   });
 
