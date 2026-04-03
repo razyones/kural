@@ -65,9 +65,9 @@ async function buildDB() {
       });
     }
 
-    // Content entries
+    // Content entries — skip very short snippets
     for (const section of entry.structuredData.contents) {
-      if (!section.content) continue;
+      if (!section.content || section.content.length < 30) continue;
       await insert(db, {
         page_id: entry.url,
         type: "text",
@@ -91,11 +91,13 @@ export async function searchDocs(query: string) {
   });
 
   return results.hits.map((hit) => {
+    const type = hit.document.type as "page" | "heading" | "text";
     const meta = pageMeta.get(hit.document.page_id);
     return {
-      type: hit.document.type as "page" | "heading" | "text",
+      type,
       content: highlighter.highlightMarkdown(hit.document.content),
-      breadcrumbs: meta?.breadcrumbs,
+      // Only page entries get breadcrumbs — headings/text inherit context
+      breadcrumbs: type === "page" ? meta?.breadcrumbs : undefined,
       id: hit.document.url,
       url: hit.document.url,
     };

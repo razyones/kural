@@ -158,15 +158,21 @@ function docsDataPlugin(): Plugin {
         let currentContent = "";
 
         for (const line of body.split("\n")) {
-          const hMatch = /^#{2,4}\s+(.+)/.exec(line);
+          // Only index h2 headings — skip h3/h4 (too granular)
+          const hMatch = /^##\s+(.+)/.exec(line);
           if (hMatch) {
             if (currentContent.trim()) {
               contents.push({
                 heading: currentHeading,
-                content: stripMarkdown(currentContent).slice(0, 500),
+                content: stripMarkdown(currentContent).slice(0, 300),
               });
             }
-            const heading = hMatch[1].trim();
+            const heading = stripMarkdown(hMatch[1].trim());
+            // Skip code-like headings (camelCase, snake_case, backticks)
+            if (/^[a-z].*[A-Z]|_|`/.test(heading)) {
+              currentContent = "";
+              continue;
+            }
             const id = slugify(heading);
             headings.push({ id, content: heading });
             currentHeading = id;
