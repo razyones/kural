@@ -5,6 +5,7 @@
  * other part of the pipeline decides what code exists.
  */
 
+import type { Dirent } from "node:fs";
 import { readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -36,7 +37,14 @@ async function walk(dir: string): Promise<WalkResult> {
   const directories: string[] = [];
 
   async function traverse(current: string): Promise<void> {
-    const entries = await readdir(current, { withFileTypes: true });
+    let entries: Dirent[];
+    try {
+      entries = await readdir(current, { withFileTypes: true });
+    } catch (err) {
+      throw new Error(
+        `Failed to read directory ${current}: ${err instanceof Error ? err.message : err}`,
+      );
+    }
 
     for (const entry of entries) {
       const fullPath = resolve(current, entry.name);

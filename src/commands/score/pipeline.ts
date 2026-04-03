@@ -86,7 +86,12 @@ function parseWorstPair(raw?: string): [string, string] | null {
   if (raw === undefined || raw === "") {
     return null;
   }
-  const parsed: unknown = JSON.parse(raw);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return null;
+  }
   if (
     Array.isArray(parsed) &&
     typeof parsed[NONE] === "string" &&
@@ -166,10 +171,13 @@ async function loadScores(
 
   const snapshot = await openSnapshot(dbPath);
   const all: LoadedScore[] = [];
-  snapshot.collections.scores.forEach((row) => {
-    all.push(toLoadedScore(row));
-  });
-  await closeSnapshot(snapshot);
+  try {
+    snapshot.collections.scores.forEach((row) => {
+      all.push(toLoadedScore(row));
+    });
+  } finally {
+    await closeSnapshot(snapshot);
+  }
 
   const filtered =
     pathFilter === undefined

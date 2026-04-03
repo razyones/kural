@@ -88,10 +88,24 @@ function advisePath(root: string, branch: string): string {
  * @kuralCauses opens SQLite database and preloads collections
  */
 async function openSnapshot(dbPath: string): Promise<OpenSnapshot> {
-  const database = new BetterSqlite3(dbPath);
-  const collections = createSnapshotCollections(database);
-  await preloadAll(collections);
-  return { database, collections };
+  let database: BetterSqlite3.Database;
+  try {
+    database = new BetterSqlite3(dbPath);
+  } catch (err) {
+    throw new Error(
+      `Failed to open database ${dbPath}: ${err instanceof Error ? err.message : err}`,
+    );
+  }
+  try {
+    const collections = createSnapshotCollections(database);
+    await preloadAll(collections);
+    return { database, collections };
+  } catch (err) {
+    database.close();
+    throw new Error(
+      `Failed to initialize snapshot ${dbPath}: ${err instanceof Error ? err.message : err}`,
+    );
+  }
 }
 
 /**
@@ -102,7 +116,13 @@ async function openSnapshot(dbPath: string): Promise<OpenSnapshot> {
  * @kuralCauses creates directories and opens a new SQLite database
  */
 async function createActive(root: string, branch: string): Promise<OpenSnapshot> {
-  mkdirSync(historyDir(root, branch), { recursive: true });
+  try {
+    mkdirSync(historyDir(root, branch), { recursive: true });
+  } catch (err) {
+    throw new Error(
+      `Failed to create database directory: ${err instanceof Error ? err.message : err}`,
+    );
+  }
   const path = activePath(root, branch);
   const snapshot = await openSnapshot(path);
   return snapshot;
@@ -144,15 +164,25 @@ async function rotateActive(root: string, branch: string): Promise<void> {
   const snapshotId = buildSnapshotId(timestamp, commitHash);
   const historyPath = join(historyDir(root, branch), `${snapshotId}${HISTORY_SUFFIX}`);
 
-  mkdirSync(historyDir(root, branch), { recursive: true });
-  renameSync(active, historyPath);
+  try {
+    mkdirSync(historyDir(root, branch), { recursive: true });
+    renameSync(active, historyPath);
+  } catch (err) {
+    throw new Error(
+      `Failed to rotate active database to history: ${err instanceof Error ? err.message : err}`,
+    );
+  }
 
   const snapshots = getHistorySnapshots(root, branch);
   const unpinned = snapshots.filter((s) => s.pinName === undefined);
   while (unpinned.length > MAX_HISTORY) {
     const oldest = unpinned.shift();
     if (oldest) {
-      rmSync(oldest.path);
+      try {
+        rmSync(oldest.path);
+      } catch {
+        // eviction is best-effort — skip files that can't be removed
+      }
     }
   }
 }
@@ -164,7 +194,13 @@ async function rotateActive(root: string, branch: string): Promise<void> {
  * @kuralCauses opens and closes a SQLite database to read metadata
  */
 function readPinName(dbPath: string): string | undefined {
-  const db = new BetterSqlite3(dbPath);
+  let db: BetterSqlite3.Database;
+  try {
+    db = new BetterSqlite3(dbPath);
+  } catch {
+    // database file unreadable — treat as no pin
+    return undefined;
+  }
   try {
     const reg: unknown = db
       .prepare("SELECT table_name FROM collection_registry WHERE collection_id = 'metadata'")
@@ -177,13 +213,19 @@ function readPinName(dbPath: string): string | undefined {
       .prepare(`SELECT value FROM ${table} WHERE key = ?`)
       .get(`s:${PIN_NAME_KEY}`);
     if (row !== null && row !== undefined && typeof row === "object" && "value" in row) {
-      const parsed: unknown = JSON.parse(String(row.value));
-      if (parsed !== null && typeof parsed === "object" && "value" in parsed) {
-        return String(parsed.value);
+      try {
+        const parsed: unknown = JSON.parse(String(row.value));
+        if (parsed !== null && typeof parsed === "object" && "value" in parsed) {
+          return String(parsed.value);
+        }
+      } catch {
+        // malformed pin metadata JSON — treat as no pin
+        return undefined;
       }
     }
     return undefined;
   } catch {
+    // schema mismatch or corrupt database — treat as no pin
     return undefined;
   } finally {
     db.close();

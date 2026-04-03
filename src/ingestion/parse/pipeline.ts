@@ -84,12 +84,16 @@ async function parse(dir: string): Promise<ParseResult> {
 
   const files: Record<string, KuralFile> = {};
   for (const filePath of walkResult.files) {
-    const extracted = extractFile(filePath);
-    files[filePath] = {
-      ...extracted,
-      identityEmbedding: EMPTY_EMBEDDING,
-      leafEmbedding: EMPTY_EMBEDDING,
-    };
+    try {
+      const extracted = extractFile(filePath);
+      files[filePath] = {
+        ...extracted,
+        identityEmbedding: EMPTY_EMBEDDING,
+        leafEmbedding: EMPTY_EMBEDDING,
+      };
+    } catch (err) {
+      console.error(`Warning: skipping ${filePath}: ${err instanceof Error ? err.message : err}`);
+    }
   }
 
   const directories: Record<string, KuralDirectory> = {};

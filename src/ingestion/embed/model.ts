@@ -60,7 +60,8 @@ function createEmbeddingModel(config: KuralConfig["embeddings"]): {
   modelId: string;
 } {
   if (!(config.provider in PROVIDER_DEFAULTS)) {
-    throw new Error(`Unsupported embedding provider: ${config.provider}`);
+    const supported = Object.keys(PROVIDER_DEFAULTS).join(", ");
+    throw new Error(`Unsupported embedding provider "${config.provider}". Supported: ${supported}`);
   }
   const defaults = PROVIDER_DEFAULTS[config.provider];
   const modelId = config.model ?? defaults.model;
@@ -70,20 +71,33 @@ function createEmbeddingModel(config: KuralConfig["embeddings"]): {
     config.apiKey ??
     process.env.AI_GATEWAY_API_KEY ??
     (defaults.apiKeyOptional === true ? "ollama" : undefined);
+
+  if (apiKey === undefined) {
+    throw new Error(
+      `No API key for provider "${config.provider}". Set AI_GATEWAY_API_KEY or pass --api-key`,
+    );
+  }
+
   const provider = createOpenAI({
     ...(baseURL !== undefined && baseURL !== "" ? { baseURL } : {}),
-    ...(apiKey !== undefined && apiKey !== "" ? { apiKey } : {}),
+    ...(apiKey !== "" ? { apiKey } : {}),
   });
   const model = provider.embedding(modelId);
 
   return {
     embed: async (values: string[]) => {
-      const { embeddings } = await embedMany({
-        model,
-        values,
-        maxRetries: DEFAULT_RETRIES,
-      });
-      return embeddings;
+      try {
+        const { embeddings } = await embedMany({
+          model,
+          values,
+          maxRetries: DEFAULT_RETRIES,
+        });
+        return embeddings;
+      } catch (err) {
+        throw new Error(
+          `Embedding API call failed (provider: ${config.provider}, model: ${modelId}): ${err instanceof Error ? err.message : err}`,
+        );
+      }
     },
     modelId,
   };

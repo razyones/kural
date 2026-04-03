@@ -17,7 +17,13 @@ import { logger } from "../../../ui/log.ts";
 function handleDelete(values: { id: string }): void {
   const root = process.cwd();
   const branch = currentBranch();
-  deleteSnapshot(root, branch, values.id);
+  try {
+    deleteSnapshot(root, branch, values.id);
+  } catch (err) {
+    logger.error(err instanceof Error ? err.message : `Failed to delete snapshot ${values.id}`);
+    process.exitCode = 1;
+    return;
+  }
   logger.success(`Deleted snapshot ${values.id}`);
 }
 

@@ -239,7 +239,14 @@ function extractCalls(node: ts.FunctionDeclaration): string[] {
  * @kuralCauses Reads a source file from disk via readFileSync
  */
 function extractFile(filePath: string): ExtractedFile {
-  const sourceText = readFileSync(filePath, "utf-8");
+  let sourceText: string;
+  try {
+    sourceText = readFileSync(filePath, "utf-8");
+  } catch (err) {
+    throw new Error(
+      `Failed to read source file ${filePath}: ${err instanceof Error ? err.message : err}`,
+    );
+  }
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true);
 
   const functions: Record<string, KuralFunction> = {};

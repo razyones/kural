@@ -18,7 +18,13 @@ import { pinSnapshot } from "../../../db/pin.ts";
 async function handlePin(values: { id: string; name: string }): Promise<void> {
   const root = process.cwd();
   const branch = currentBranch();
-  await pinSnapshot(root, branch, values.id, values.name);
+  try {
+    await pinSnapshot(root, branch, values.id, values.name);
+  } catch (err) {
+    logger.error(err instanceof Error ? err.message : `Failed to pin snapshot ${values.id}`);
+    process.exitCode = 1;
+    return;
+  }
   logger.success(`Pinned ${values.id} as "${values.name}"`);
 }
 

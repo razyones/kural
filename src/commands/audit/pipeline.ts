@@ -37,7 +37,12 @@ type AuditPipelineResult = {
  * @kuralHelper
  */
 function parseNumberRecord(text: string): Record<string, number> | null {
-  const parsed: unknown = JSON.parse(text);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch {
+    return null;
+  }
   if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
     return null;
   }

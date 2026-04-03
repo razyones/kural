@@ -86,17 +86,14 @@ async function loadEmbeddingCache(
     try {
       const meta = snapshot.collections.metadata.get("model_id");
       if (meta === undefined || meta.value !== modelId) {
-        await closeSnapshot(snapshot);
         return undefined;
       }
-      const cache = readCollectionsIntoCache(snapshot.collections);
+      return readCollectionsIntoCache(snapshot.collections);
+    } finally {
       await closeSnapshot(snapshot);
-      return cache;
-    } catch {
-      await closeSnapshot(snapshot);
-      return undefined;
     }
   } catch {
+    // cache load failure is non-fatal — embeddings will be recomputed
     return undefined;
   }
 }

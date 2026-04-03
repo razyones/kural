@@ -17,7 +17,11 @@ import snapshot from "./commands/snapshot/command.ts";
 const ARGV_START = 2;
 
 if (existsSync(".env")) {
-  loadEnvFile(".env");
+  try {
+    loadEnvFile(".env");
+  } catch (err) {
+    console.error(`Warning: failed to load .env file: ${err instanceof Error ? err.message : err}`);
+  }
 }
 
 await cli(process.argv.slice(ARGV_START), snapshot, {

@@ -27,8 +27,12 @@ function loadProjectConfig(root: string = process.cwd()): Partial<KuralConfig> {
     if (typeof parsed === "object" && parsed !== null) {
       return parsed as Partial<KuralConfig>;
     }
+    console.error(`Warning: ${CONFIG_FILENAME} does not contain a JSON object — using defaults`);
     return {};
-  } catch {
+  } catch (err) {
+    console.error(
+      `Warning: failed to parse ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : err} — using defaults`,
+    );
     return {};
   }
 }

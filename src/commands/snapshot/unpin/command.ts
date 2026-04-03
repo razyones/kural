@@ -18,7 +18,13 @@ import { unpinSnapshot } from "../../../db/pin.ts";
 async function handleUnpin(values: { id: string }): Promise<void> {
   const root = process.cwd();
   const branch = currentBranch();
-  await unpinSnapshot(root, branch, values.id);
+  try {
+    await unpinSnapshot(root, branch, values.id);
+  } catch (err) {
+    logger.error(err instanceof Error ? err.message : `Failed to unpin snapshot ${values.id}`);
+    process.exitCode = 1;
+    return;
+  }
   logger.success(`Unpinned ${values.id}`);
 }
 

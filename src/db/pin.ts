@@ -38,20 +38,26 @@ async function pinSnapshot(
   const existing = snapshots.find((s) => s.pinName === pinName);
   if (existing && existing.snapshotId !== target.snapshotId) {
     const snapshot = await openSnapshot(existing.path);
-    const delTx = snapshot.collections.metadata.delete(PIN_NAME_KEY);
-    await delTx.isPersisted.promise;
-    await closeSnapshot(snapshot);
+    try {
+      const delTx = snapshot.collections.metadata.delete(PIN_NAME_KEY);
+      await delTx.isPersisted.promise;
+    } finally {
+      await closeSnapshot(snapshot);
+    }
   }
 
   const snapshot = await openSnapshot(target.path);
-  const current = snapshot.collections.metadata.get(PIN_NAME_KEY);
-  if (current !== undefined) {
-    const delTx = snapshot.collections.metadata.delete(PIN_NAME_KEY);
-    await delTx.isPersisted.promise;
+  try {
+    const current = snapshot.collections.metadata.get(PIN_NAME_KEY);
+    if (current !== undefined) {
+      const delTx = snapshot.collections.metadata.delete(PIN_NAME_KEY);
+      await delTx.isPersisted.promise;
+    }
+    const tx = snapshot.collections.metadata.insert([{ key: PIN_NAME_KEY, value: pinName }]);
+    await tx.isPersisted.promise;
+  } finally {
+    await closeSnapshot(snapshot);
   }
-  const tx = snapshot.collections.metadata.insert([{ key: PIN_NAME_KEY, value: pinName }]);
-  await tx.isPersisted.promise;
-  await closeSnapshot(snapshot);
 }
 
 /**
@@ -75,9 +81,12 @@ async function unpinSnapshot(root: string, branch: string, idOrName: string): Pr
   }
 
   const snapshot = await openSnapshot(target.path);
-  const delTx = snapshot.collections.metadata.delete(PIN_NAME_KEY);
-  await delTx.isPersisted.promise;
-  await closeSnapshot(snapshot);
+  try {
+    const delTx = snapshot.collections.metadata.delete(PIN_NAME_KEY);
+    await delTx.isPersisted.promise;
+  } finally {
+    await closeSnapshot(snapshot);
+  }
 }
 
 /**

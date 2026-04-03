@@ -40,6 +40,53 @@ type GenerateResult = {
 };
 
 /**
+ * Rotates the previous active database, creates a new one, writes all
+ * data, and optionally pins the result.
+ * @param root - Absolute path to the project root
+ * @param branch - Current git branch name
+ * @param result - Parsed codebase to persist
+ * @param cards - Computed score cards to persist
+ * @param modelId - Embedding model ID for cache validation
+ * @param pinName - Optional pin name to assign
+ * @returns The database path and snapshot ID
+ * @kuralCauses rotates, creates, writes, and optionally pins a snapshot
+ */
+async function persistSnapshot(
+  root: string,
+  branch: string,
+  result: Awaited<ReturnType<typeof parse>>,
+  cards: ReturnType<typeof score>,
+  modelId: string,
+  pinName?: string,
+): Promise<{ dbPath: string; snapshotId: string }> {
+  await rotateActive(root, branch);
+  const snapshot = await createActive(root, branch);
+  const dbPath = `${root}/.kural-db/${branch}/active.db`;
+
+  const createdAt = Date.now();
+  const commitHash = currentCommitHash();
+  const snapshotId = buildSnapshotId(createdAt, commitHash);
+
+  try {
+    await writeMetadata(snapshot.collections, modelId, createdAt, commitHash);
+    await writeUnits(snapshot.collections, result);
+    await writeScoreCards(snapshot.collections, cards);
+  } finally {
+    await closeSnapshot(snapshot);
+  }
+
+  if (pinName !== undefined) {
+    try {
+      await pinSnapshot(root, branch, snapshotId, pinName);
+    } catch (err) {
+      throw new Error(`Snapshot created but pinning failed`, { cause: err });
+    }
+  }
+
+  return { dbPath, snapshotId };
+}
+
+/**
  * Runs the full generation pipeline: parse → embed → score → store.
  * @param root - Absolute path to the project root (where .kural-db lives)
  * @param targetPath - Absolute path to the directory to parse
@@ -73,32 +120,17 @@ async function generate(
   const cards = score(result);
   callbacks?.onScored?.(cards.length);
 
-  await rotateActive(root, branch);
-  const snapshot = await createActive(root, branch);
-  const dbPath = `${root}/.kural-db/${branch}/active.db`;
-
-  const createdAt = Date.now();
-  const commitHash = currentCommitHash();
-  const snapshotId = buildSnapshotId(createdAt, commitHash);
-
-  await writeMetadata(snapshot.collections, modelId, createdAt, commitHash);
-  await writeUnits(snapshot.collections, result);
-  await writeScoreCards(snapshot.collections, cards);
-  await closeSnapshot(snapshot);
+  const { dbPath, snapshotId } = await persistSnapshot(
+    root,
+    branch,
+    result,
+    cards,
+    modelId,
+    pinName,
+  );
   callbacks?.onStored?.(dbPath, snapshotId);
 
-  if (pinName !== undefined) {
-    await pinSnapshot(root, branch, snapshotId, pinName);
-  }
-
-  return {
-    fileCount,
-    dirCount,
-    unitCount,
-    branch,
-    dbPath,
-    snapshotId,
-  };
+  return { fileCount, dirCount, unitCount, branch, dbPath, snapshotId };
 }
 
 export { generate };
