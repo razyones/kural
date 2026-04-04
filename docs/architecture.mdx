@@ -18,11 +18,10 @@ Kural is a five-stage pipeline that transforms source code into structural healt
   <Step>**Query** — Read snapshots for scoring, auditing, and comparison</Step>
 </Steps>
 
-The system is split into three tiers:
+The system is split into two tiers:
 
-- **CLI (free, open source)** — scan, score, local snapshots
-- **Paid plugin (`kural-pro`)** — advise (AI suggestions), CI sync, cloud dashboard
-- **Dashboard (web UI)** — reactive views over snapshot data, served from customer infra
+- **CLI** — scan, score, local snapshots
+- **Dashboard (web UI)** — reactive views over snapshot data
 
 ## Tech Stack
 
@@ -33,13 +32,6 @@ The system is split into three tiers:
 | Local persistence | TanStack DB + node-sqlite-persistence | Snapshot storage                       |
 | Cloud backend     | Turso (database-per-project)          | `active.db` + `history.db` per project |
 | Dashboard         | TanStack DB (React)                   | Reactive UI over collections           |
-
-## Repository Structure
-
-- **`kural`** (public) — CLI core, open source
-- **`kural-pro`** (private) — Gunshi plugin that registers `suggest` and `dashboard` commands, gated by auth
-
-The paid plugin hooks into the CLI via Gunshi's first-class plugin system. Users without the plugin never see paid commands.
 
 ## Data Model
 
@@ -96,15 +88,15 @@ Format: `<timestamp>-<short-commit-hash>`
 .kural-db/
   <branch>/
     active.db       # current snapshot, clone-able
-    advise.db       # ephemeral clone for AI simulation (paid)
+    advise.db       # ephemeral clone for AI simulation
     history/        # rotated snapshots (max 10)
       <snapshot-id>.db
 ```
 
-### Server Storage Layout (Paid Tier)
+### Server Storage Layout
 
 ```
-Turso (<customer-id>.kural.io):
+Turso (<user-id>.kural.io):
   <project>/
     <branch>/active.db    # live, clone-able snapshot
     history.db            # consolidated, all branches + timestamps
@@ -148,7 +140,7 @@ Turso (<customer-id>.kural.io):
 ### Write Path (CI Only)
 
 ```
-CI pipeline -> POST <customer-id>.kural.io/api/snapshots
+CI pipeline -> POST <user-id>.kural.io/api/snapshots
                   |
                   v
               API validates, deduplicates, writes to Turso:
@@ -188,24 +180,3 @@ The dashboard supports multi-branch, multi-project views:
 - TanStack DB (`@tanstack/react-db`) provides reactive live queries over collections
 - Collections are backed by Turso via QueryCollection
 - Live queries update the UI when new snapshots arrive
-
-## Pricing Model
-
-| Tier          | What                                           | Price                 |
-| ------------- | ---------------------------------------------- | --------------------- |
-| Free CLI      | Scan, score, local snapshots                   | Free, open source     |
-| Pro seat      | CI sync + cloud dashboard + advise + 5 viewers | $X/mo per environment |
-| Extra viewers | Additional dashboard viewers beyond 5          | $Y/mo per viewer      |
-
-### Billing Unit
-
-1 environment = 1 API key = 1 seat = 1 billable unit.
-
-Each API key is scoped to one project + environment, used in that CI pipeline's config. Branches within an environment are data, not separately billed.
-
-### Retention Policy
-
-| Plan    | History retention | Stale branch cleanup  |
-| ------- | ----------------- | --------------------- |
-| Starter | 30 days           | 30 days of inactivity |
-| Team    | 90 days           | 90 days of inactivity |
