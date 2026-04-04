@@ -52,8 +52,13 @@ jobs:
             echo "path=/kural/${{ github.ref_name }}/" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Extract embeddings and build search index
+        run: |
+          node scripts/extract-embeddings.mjs
+          node docs-site/scripts/build-search-index.mjs
+
       - name: Build docs site
-        run: pnpm run docs:build
+        run: pnpm run --filter kural-docs build
         env:
           BASE_PATH: ${{ steps.base.outputs.path }}
 
