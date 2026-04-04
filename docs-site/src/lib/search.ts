@@ -67,7 +67,9 @@ async function buildDB() {
 
     // Content entries — skip very short snippets
     for (const section of entry.structuredData.contents) {
-      if (!section.content || section.content.length < 30) continue;
+      if (!section.content || section.content.length < 30) {
+        continue;
+      }
       await insert(db, {
         page_id: entry.url,
         type: "text",
@@ -92,13 +94,13 @@ export async function searchDocs(query: string) {
   });
 
   return results.hits.map((hit) => {
-    const type = hit.document.type as "page" | "heading" | "text";
+    const rawType = hit.document.type as "page" | "heading" | "text";
     const meta = pageMeta.get(hit.document.page_id);
     return {
-      type,
+      type: rawType === "heading" ? "text" : rawType,
       content: highlighter.highlightMarkdown(hit.document.content),
-      // Only page entries get breadcrumbs — headings/text inherit context
-      breadcrumbs: type === "page" ? meta?.breadcrumbs : undefined,
+      breadcrumbs:
+        rawType === "page" ? meta?.breadcrumbs : [...(meta?.breadcrumbs ?? []), meta?.title ?? ""],
       id: hit.id,
       url: hit.document.url,
     };

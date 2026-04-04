@@ -20,29 +20,34 @@ import appCss from "@/styles/app.css?url";
 import config from "../../docs.config";
 
 /**
- * Wraps SearchDialogListItem to suppress scrollIntoView when
- * activation is triggered by pointer (hover). Only keyboard
- * navigation (ArrowUp/ArrowDown) should auto-scroll.
+ * Suppress scrollIntoView when activation is triggered by pointer
+ * (hover). Only keyboard navigation should auto-scroll.
  *
- * Uses a module-level flag instead of useRef because SearchDialogList
- * calls Item as a render function, not a component — hooks would
- * change the hook count in the parent.
+ * Global listeners set/clear a flag — no per-item event overrides
+ * needed, so fumadocs' internal setActive (hover highlight) works
+ * unmodified.
  */
 let pointerActive = false;
+if (typeof document !== "undefined") {
+  document.addEventListener("pointermove", () => {
+    pointerActive = true;
+  });
+  document.addEventListener("keydown", () => {
+    pointerActive = false;
+  });
+}
+
 function StableSearchItem(props: ComponentProps<typeof SearchDialogListItem>) {
   return (
     <SearchDialogListItem
       {...props}
-      onPointerMove={(e) => {
-        pointerActive = true;
-        props.onPointerMove?.(e);
-      }}
       ref={(el) => {
         if (pointerActive) {
-          pointerActive = false;
           return;
         }
-        if (typeof props.ref === "function") props.ref(el);
+        if (typeof props.ref === "function") {
+          props.ref(el);
+        }
       }}
     />
   );
@@ -100,9 +105,6 @@ function KuralSearchDialog(props: SharedProps) {
         <SearchDialogHeader>
           <SearchDialogIcon />
           <SearchDialogInput />
-          {query.isLoading && (
-            <div className="size-5 animate-spin rounded-full border-2 border-fd-muted-foreground border-t-transparent" />
-          )}
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList
