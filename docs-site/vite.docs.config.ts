@@ -61,7 +61,9 @@ function docsDataPlugin(): Plugin {
         const nodes: TreeNode[] = [];
 
         function addEntry(name: string): void {
-          if (seen.has(name)) return;
+          if (seen.has(name)) {
+            return;
+          }
           seen.add(name);
           const full = join(dir, name);
 
@@ -102,9 +104,13 @@ function docsDataPlugin(): Plugin {
         }
 
         // Add ordered entries first, then remaining files
-        for (const name of order) addEntry(name);
+        for (const name of order) {
+          addEntry(name);
+        }
         for (const entry of readdirSync(dir)) {
-          if (entry === "meta.json") continue;
+          if (entry === "meta.json") {
+            continue;
+          }
           const name = entry.replace(/\.mdx?$/, "");
           addEntry(name);
         }
@@ -120,21 +126,21 @@ function docsDataPlugin(): Plugin {
       // Build search entries with structured data (headings + content)
       function stripMarkdown(text: string): string {
         return text
-          .replace(/^import\s+.*$/gm, "")
-          .replace(/<[^>]+>/g, " ")
-          .replace(/```[\s\S]*?```/g, " ")
-          .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-          .replace(/\*{1,2}([^*]*)\*{1,2}/g, "$1")
-          .replace(/`([^`]*)`/g, "$1")
-          .replace(/\s+/g, " ")
+          .replaceAll(/^import\s+.*$/gm, "")
+          .replaceAll(/<[^>]+>/g, " ")
+          .replaceAll(/```[\s\S]*?```/g, " ")
+          .replaceAll(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+          .replaceAll(/\*{1,2}([^*]*)\*{1,2}/g, "$1")
+          .replaceAll(/`([^`]*)`/g, "$1")
+          .replaceAll(/\s+/g, " ")
           .trim();
       }
 
       function slugify(text: string): string {
         return text
           .toLowerCase()
-          .replace(/[^\w]+/g, "-")
-          .replace(/^-|-$/g, "");
+          .replaceAll(/[^\w]+/g, "-")
+          .replaceAll(/^-|-$/g, "");
       }
 
       const searchEntries = Object.entries(pathMap).map(([key, rel]) => {
@@ -145,7 +151,9 @@ function docsDataPlugin(): Plugin {
         if (fmMatch) {
           for (const line of fmMatch[1].split("\n")) {
             const [k, ...rest] = line.split(":");
-            if (k && rest.length) fm[k.trim()] = rest.join(":").trim();
+            if (k && rest.length > 0) {
+              fm[k.trim()] = rest.join(":").trim();
+            }
           }
         }
         const body = fmMatch ? src.slice(fmMatch[0].length) : src;
@@ -194,7 +202,7 @@ function docsDataPlugin(): Plugin {
           segments.length > 1
             ? segments
                 .slice(0, -1)
-                .map((s) => s.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
+                .map((s) => s.replaceAll("-", " ").replaceAll(/\b\w/g, (c) => c.toUpperCase()))
             : undefined;
 
         return {

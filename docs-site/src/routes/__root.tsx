@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import { type ComponentProps, useEffect, useRef, useState } from "react";
 import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import {
   SearchDialog,
@@ -15,6 +15,8 @@ import {
 import type { SharedProps } from "fumadocs-ui/contexts/search";
 import { RootProvider } from "fumadocs-ui/provider/tanstack";
 import { useDocsSearch } from "fumadocs-core/search/client";
+import { Loader2, Sparkles } from "lucide-react";
+import type { EmbedderStatus } from "@/lib/search";
 import { AnimatedBg } from "@/components/animated-bg";
 import appCss from "@/styles/app.css?url";
 import config from "../../docs.config";
@@ -86,38 +88,90 @@ export const Route = createRootRoute({
   }),
 });
 
+function useEmbedderStatus(): EmbedderStatus {
+  const [status, setStatus] = useState<EmbedderStatus>("idle");
+  useEffect(() => {
+    let mounted = true;
+    import("@/lib/search").then((m) => {
+      if (!mounted) return;
+      setStatus(m.getEmbedderStatus());
+      return m.onEmbedderStatus((s) => {
+        if (mounted) setStatus(s);
+      });
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+  return status;
+}
+
+const STATUS_LABEL: Record<EmbedderStatus, string> = {
+  idle: "",
+  loading: "Loading semantic model…",
+  ready: "Semantic search active",
+  error: "Semantic search unavailable",
+};
+
 function KuralSearchDialog(props: SharedProps) {
   const base = import.meta.env.BASE_URL ?? "/";
+  const lastQuery = useRef("");
   const { search, setSearch, query } = useDocsSearch({
     client: {
-      search: async (query: string) => {
+      search: async (q: string) => {
         const { searchDocs } = await import("@/lib/search");
-        return searchDocs(query);
+        const results = await searchDocs(q);
+        lastQuery.current = q;
+        return results;
       },
     },
     delayMs: 300,
   });
+  const embedderStatus = useEmbedderStatus();
+
+  const isSearching = search.length > 0 && (query.isLoading || search !== lastQuery.current);
 
   return (
-    <SearchDialog {...props} search={search} onSearchChange={setSearch} isLoading={query.isLoading}>
+    <SearchDialog {...props} search={search} onSearchChange={setSearch} isLoading={isSearching}>
       <SearchDialogOverlay />
       <SearchDialogContent>
         <SearchDialogHeader>
           <SearchDialogIcon />
           <SearchDialogInput />
+          {isSearching && <Loader2 className="size-4 animate-spin text-fd-muted-foreground" />}
           <SearchDialogClose />
         </SearchDialogHeader>
         <SearchDialogList
-          items={query.isLoading || query.data === "empty" ? null : query.data}
+          items={isSearching || query.data === "empty" ? null : query.data}
           Item={StableSearchItem}
         />
+        <SearchDialogFooter className="py-1.5 px-3">
+          {embedderStatus !== "idle" && (
+            <span className="inline-flex items-center gap-1.5 text-xs text-fd-muted-foreground">
+              {embedderStatus === "loading" && <Loader2 className="size-3 animate-spin" />}
+              {embedderStatus === "ready" && <Sparkles className="size-3" />}
+              {STATUS_LABEL[embedderStatus]}
+            </span>
+          )}
+        </SearchDialogFooter>
       </SearchDialogContent>
-      <SearchDialogFooter />
     </SearchDialog>
   );
 }
 
+function useIdlePreload() {
+  if (typeof window !== "undefined") {
+    const idle = window.requestIdleCallback ?? ((cb: () => void) => setTimeout(cb, 1));
+    idle(async () =>
+      import("@/lib/search").then((m) => {
+        m.preloadEmbedder();
+      }),
+    );
+  }
+}
+
 function RootComponent() {
+  useIdlePreload();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

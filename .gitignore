@@ -20,6 +20,7 @@ dist-ssr
 docs-site/.source/
 docs-site/.output/
 docs-site/src/routeTree.gen.ts
+docs-site/src/data/search-index.json
 
 # Claude Code
 .agents/
