@@ -32,19 +32,32 @@ function docsDataPlugin(): Plugin {
       const pathMap: Record<string, string> = {};
 
       type TreeNode =
-        | { type: "page"; name: string; url: string; $ref: { file: string } }
-        | { type: "folder"; name: string; children: TreeNode[] };
+        | { type: "page"; name: string; url: string; icon?: string; $ref: { file: string } }
+        | { type: "folder"; name: string; icon?: string; children: TreeNode[] };
 
-      /** Extract title from YAML frontmatter. */
-      function frontmatterTitle(file: string): string {
+      // Resolve Lucide icon names to SVG strings at build time
+      const { icons } = await import("lucide-react");
+      const { renderToString } = await import("react-dom/server");
+      const { createElement } = await import("react");
+      function resolveIcon(name: string | undefined): string | undefined {
+        if (!name || !(name in icons)) {
+          return;
+        }
+        return renderToString(createElement(icons[name as keyof typeof icons], { strokeWidth: 1 }));
+      }
+
+      /** Extract title and icon from YAML frontmatter. */
+      function frontmatter(file: string): { title: string; icon?: string } {
         const src = readFileSync(file, "utf-8");
-        const m = /^---\s*\n[\s\S]*?^title:\s*(.+)/m.exec(src);
-        return m
-          ? m[1].trim()
+        const titleMatch = /^---\s*\n[\s\S]*?^title:\s*(.+)/m.exec(src);
+        const iconMatch = /^---\s*\n[\s\S]*?^icon:\s*(.+)/m.exec(src);
+        const title = titleMatch
+          ? titleMatch[1].trim()
           : file
               .split("/")
               .pop()!
               .replace(/\.mdx?$/, "");
+        return { title, icon: iconMatch ? iconMatch[1].trim() : undefined };
       }
 
       /** Build tree for a directory, ordered by meta.json if present. */
@@ -54,6 +67,7 @@ function docsDataPlugin(): Plugin {
           ? (JSON.parse(readFileSync(metaPath, "utf-8")) as {
               pages?: string[];
               title?: string;
+              icon?: string;
             })
           : null;
         const order: string[] = meta?.pages ?? [];
@@ -73,13 +87,19 @@ function docsDataPlugin(): Plugin {
             const fm = existsSync(folderMeta)
               ? (JSON.parse(readFileSync(folderMeta, "utf-8")) as {
                   title?: string;
+                  icon?: string;
                 })
               : null;
-            nodes.push({
+            const folderIcon = resolveIcon(fm?.icon);
+            const folder: TreeNode = {
               type: "folder",
               name: fm?.title ?? name,
               children: buildTree(full, `${urlPrefix}/${name}`),
-            });
+            };
+            if (folderIcon) {
+              folder.icon = folderIcon;
+            }
+            nodes.push(folder);
             return;
           }
 
@@ -92,12 +112,18 @@ function docsDataPlugin(): Plugin {
               const key = slug === "index" ? "" : slug;
               const url = key === "" ? "/docs" : `/docs/${key}`;
               pathMap[key] = rel;
-              nodes.push({
+              const fm = frontmatter(filePath);
+              const pageIcon = resolveIcon(fm.icon);
+              const page: TreeNode = {
                 type: "page",
-                name: frontmatterTitle(filePath),
+                name: fm.title,
                 url,
                 $ref: { file: rel },
-              });
+              };
+              if (pageIcon) {
+                page.icon = pageIcon;
+              }
+              nodes.push(page);
               return;
             }
           }

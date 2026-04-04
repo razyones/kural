@@ -11,7 +11,7 @@ export const source = loader({
     if (!name || !(name in icons)) {
       return;
     }
-    return createElement(icons[name as keyof typeof icons]);
+    return createElement(icons[name as keyof typeof icons], { strokeWidth: 1 });
   },
 });
 
