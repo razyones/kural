@@ -1,5 +1,13 @@
 # Kural
 
+```
+    {\_/}  │
+    (O,O)  │  "Round eyes.
+    (:::)  │   Sharp placement."
+    -^-^v--│
+           └──────────────────────────────────────
+```
+
 Structural scoring system for TypeScript codebases — answers **"where should this code live?"**
 
 Kural embeds every type, function, file, and directory into vector space, measures how well the codebase is distributed in that space, and surfaces specific, actionable structural issues.

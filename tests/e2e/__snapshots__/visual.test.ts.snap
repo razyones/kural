@@ -3,11 +3,11 @@
 exports[`visual: audit > renders clean audit (no findings) 1`] = `
 "kural (kural v0.0.0)
 
-kural · audit
-on snapshot: .kural-db/main/active.db
-taken on: <DATE>
-identified issues: 0
-────
+  {\\_/} │ kural · audit
+  (O,O) │ on snapshot: .kural-db/main/active.db
+  (:::) │ taken on: <DATE>
+  -^-^v--│ identified issues: 0
+         └────
 
 [ success ] No structural issues detected
 
@@ -36,11 +36,11 @@ kural snapshot generate — regenerate snapshot after fixing issues
 exports[`visual: audit > renders the audit report with findings 1`] = `
 "kural (kural v0.0.0)
 
-kural · audit
-on snapshot: .kural-db/main/active.db
-taken on: <DATE>
-identified issues: 1
-────
+  {\\_/} │ kural · audit
+  (O,O) │ on snapshot: .kural-db/main/active.db
+  (:::) │ taken on: <DATE>
+  -^-^v--│ identified issues: 1
+         └────
 
 Incomplete Documentation [#incomplete-docs] (1)
 
@@ -80,11 +80,11 @@ exports[`visual: score > renders empty state warning 1`] = `
 exports[`visual: score > renders the hero score display 1`] = `
 "kural (kural v0.0.0)
 
-kural · score
-path: all
-branch: main
-snapshot: active
-────
+  {\\_/} │ kural · score
+  (O,O) │ path: all
+  (:::) │ branch: main
+  -^-^v--│ snapshot: active
+         └────
 
 Score:
 
@@ -115,11 +115,11 @@ kural score --json — output as JSON
 exports[`visual: score > renders the score breakdown table with -e 1`] = `
 "kural (kural v0.0.0)
 
-kural · score
-path: all
-branch: main
-snapshot: active
-────
+  {\\_/} │ kural · score
+  (O,O) │ path: all
+  (:::) │ branch: main
+  -^-^v--│ snapshot: active
+         └────
 
 Score:
 
@@ -162,9 +162,11 @@ kural score --json — output as JSON
 exports[`visual: snapshot list > renders empty state warning 1`] = `
 "kural (kural v0.0.0)
 
-kural · snapshot list
-branch: main
-────
+  {\\_/} │ kural · snapshot list
+  (O,O) │ branch: main
+  (:::) │ 
+  -^-^v--│ 
+         └────
 
 [ warn ] No snapshots found. Run snapshot generate first.
 "
@@ -173,9 +175,11 @@ branch: main
 exports[`visual: snapshot list > renders the list banner and snapshot rows 1`] = `
 "kural (kural v0.0.0)
 
-kural · snapshot list
-branch: main
-────
+  {\\_/} │ kural · snapshot list
+  (O,O) │ branch: main
+  (:::) │ 
+  -^-^v--│ 
+         └────
 
 <DATE>  1700000000000-abc0001 [baseline]
 <DATE>  1700000001000-def0002
