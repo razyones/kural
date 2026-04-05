@@ -1,4 +1,5 @@
 set -e
 vp staged
+vp check
 vp test --coverage --exclude 'tests/e2e/**'
 vp test tests/e2e/

@@ -123,7 +123,7 @@ function buildChangelog() {
 
   if (tags.length === NONE) {
     const commits = parseCommits("");
-    if (commits.length > 0) {
+    if (commits.length > NONE) {
       const heading = pending ? `## ${pending} — ${today()}` : "## Unreleased";
       sections.push(heading);
       sections.push("");
@@ -131,7 +131,7 @@ function buildChangelog() {
     }
   } else {
     const unreleased = parseCommits(`${tags[FIRST]}..HEAD`);
-    if (unreleased.length > 0) {
+    if (unreleased.length > NONE) {
       const heading = pending ? `## ${pending} — ${today()}` : "## Unreleased";
       sections.push(heading);
       sections.push("");
@@ -146,7 +146,7 @@ function buildChangelog() {
 
       sections.push(`## ${tag} — ${date}`);
       sections.push("");
-      if (commits.length > 0) {
+      if (commits.length > NONE) {
         sections.push(formatSection(commits));
       }
     }
