@@ -145,4 +145,18 @@ describe("parse @kuralBorrows", () => {
 
     expect(root.borrows).toBeUndefined();
   });
+
+  it("ignores @kuralBorrows without quotes", async () => {
+    const result = await parse(borrowsFixturesDir);
+    const noQuotes = result.directories[resolve(borrowsFixturesDir, "no-quotes")];
+
+    expect(noQuotes.borrows).toBeUndefined();
+  });
+
+  it("ignores @kuralBorrows with empty quoted role", async () => {
+    const result = await parse(borrowsFixturesDir);
+    const emptyRole = result.directories[resolve(borrowsFixturesDir, "empty-role")];
+
+    expect(emptyRole.borrows).toBeUndefined();
+  });
 });
