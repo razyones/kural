@@ -1,8 +1,8 @@
 /**
- * The lens. Reads a stored snapshot and runs the diagnostic engine to
- * produce a report. It is the only module that bridges database state
- * to the issue pipeline — no other module orchestrates the
- * read-evaluate flow.
+ * The lens. Opens a snapshot, rebuilds the code tree, and delegates
+ * to the engine for the audit command. It is the only module that
+ * bridges stored state to the engine for this command — no other
+ * module orchestrates the snapshot-to-engine flow for structural checks.
  */
 
 import type {

@@ -1,2 +1,2 @@
-The front door. Parses a query string and provider flags into a Gunshi command, delegates to the engine, and renders its response as formatted summaries and concept lists on stdout. It is the only command that owns this terminal surface — no other command defines these arguments or produces this display layout.
-@kuralBorrows analysis/place "terminal surface that formats and renders engine output as path maps and confidence summaries"
+The front door. Parses a query and model arguments into a Gunshi command, delegates to the engine, and renders its response as destination verdicts and probability trails on stdout. It is the only command that owns this terminal surface — no other command defines these arguments or produces this display layout.
+@kuralBorrows analysis/place "terminal surface that formats and renders engine output as destination verdicts and probability trails"
