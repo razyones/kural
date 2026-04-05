@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const OWL_FONT = "Menlo, DejaVu Sans Mono, Consolas, monospace";
+const OWL_FONT = '"IBM Plex Mono", monospace';
 
 export function BlinkingOwl({ className }: { className?: string }) {
   const [blink, setBlink] = useState(false);
@@ -21,9 +21,9 @@ export function BlinkingOwl({ className }: { className?: string }) {
   const eyes = blink ? "(-,-)" : "(O,O)";
   return (
     <pre
-      className={`m-0 leading-tight select-none text-[hsl(45,70%,38%)] dark:text-[hsl(45,60%,60%)] ${className ?? ""}`}
+      className={`m-0 leading-normal select-none text-[hsl(45,70%,38%)] dark:text-[hsl(45,60%,60%)] ${className ?? ""}`}
       aria-hidden="true"
-      style={{ fontFamily: OWL_FONT }}
+      style={{ fontFamily: OWL_FONT, fontWeight: 600, letterSpacing: "-0.01em" }}
     >
       {"{\\_/}\n" + eyes + "\n(:::)\n-^-^v--"}
     </pre>
