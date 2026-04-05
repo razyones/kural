@@ -42,6 +42,31 @@ describe("buildUncertainSuggestion", () => {
       expect(result.reason).toContain("50");
     }
   });
+
+  test("uses empty description when node missing from map", () => {
+    const nodes = toNodeMap();
+    const paths = [
+      { parentKey: "dir:/gone", parentName: "gone", confidence: E05, depth: NEXT, trail: [] },
+    ];
+    const result = buildUncertainSuggestion(paths, nodes, E05);
+
+    if (result.action === "ask-user") {
+      expect(result.neighborhoods?.[NONE].description).toBe("");
+    }
+  });
+
+  test("uses empty description when node has no description", () => {
+    const dir = makeDir({ key: "dir:/src/x", name: "x" });
+    const nodes = toNodeMap(dir);
+    const paths = [
+      { parentKey: "dir:/src/x", parentName: "x", confidence: E05, depth: NEXT, trail: [] },
+    ];
+    const result = buildUncertainSuggestion(paths, nodes, E05);
+
+    if (result.action === "ask-user") {
+      expect(result.neighborhoods?.[NONE].description).toBe("");
+    }
+  });
 });
 
 describe("buildResult — full assembly", () => {

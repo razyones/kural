@@ -205,7 +205,7 @@ describe("vocabulary-bleed detect — non-directory parent", () => {
 });
 
 describe("vocabulary-bleed detect — few candidates skipped", () => {
-  test("skips candidate when fewer than two others exist", () => {
+  test("skips candidate with cross-pulls but insufficient peers", () => {
     const root = makeDir({
       key: "dir:/src",
       name: "src",
@@ -227,7 +227,14 @@ describe("vocabulary-bleed detect — few candidates skipped", () => {
       childKeys: [],
       parentKey: "dir:/src",
     });
-    const nodes = toNodeMap(root, dirA, dirB);
+    const nonSibling = makeDir({
+      key: "dir:/lib",
+      name: "lib",
+      identity: ID_API,
+      childKeys: [],
+      parentKey: null,
+    });
+    const nodes = toNodeMap(root, dirA, dirB, nonSibling);
     const ctx = createContext(nodes, CONFIG);
     const findings = vocabularyBleed.detect(ctx);
 

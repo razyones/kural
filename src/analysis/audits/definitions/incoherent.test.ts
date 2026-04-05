@@ -317,4 +317,23 @@ describe("incoherent format", () => {
     expect(result.details[NONE]).toContain("45%");
     expect(result.details[NONE]).toContain("3 children");
   });
+
+  test("uses 0% when value is undefined", () => {
+    const CHILD_COUNT = 2;
+    const fctx = makeFormatCtx({
+      finding: {
+        audit: "incoherent",
+        key: "file:/src/bad.ts",
+        name: "bad.ts",
+        hash: "abcd1234",
+        value: undefined,
+        details: { childCount: CHILD_COUNT },
+      },
+      prefix: "\u25B8",
+      label: "bad.ts",
+    });
+    const result = incoherent.format(fctx);
+
+    expect(result.details[NONE]).toContain("0%");
+  });
 });

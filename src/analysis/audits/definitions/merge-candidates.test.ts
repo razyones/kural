@@ -307,6 +307,44 @@ describe("merge-candidates detect — file-level pairs", () => {
   });
 });
 
+describe("merge-candidates format — edge cases", () => {
+  test("uses empty string when pairKey and pairName both undefined", () => {
+    const fctx = makeFormatCtx({
+      finding: {
+        audit: "merge-candidates",
+        key: "k1",
+        name: "a",
+        hash: "12345678",
+        pairKey: undefined,
+        pairName: undefined,
+        value: E09,
+      },
+      label: "a",
+    });
+    const result = mergeCandidates.format(fctx);
+
+    expect(result.heading).toContain("near-duplicates");
+  });
+
+  test("uses pairName when pairKey is undefined", () => {
+    const fctx = makeFormatCtx({
+      finding: {
+        audit: "merge-candidates",
+        key: "k1",
+        name: "a",
+        hash: "12345678",
+        pairKey: undefined,
+        pairName: "fallback",
+        value: E09,
+      },
+      label: "a",
+    });
+    const result = mergeCandidates.format(fctx);
+
+    expect(result.heading).toContain("fallback");
+  });
+});
+
 describe("merge-candidates detect — sorted by descending similarity", () => {
   test("findings are sorted highest similarity first", () => {
     const fnA = makeFunction({ key: "func:/src/a.ts:a", name: "a", leaf: EMB_NEAR_A });

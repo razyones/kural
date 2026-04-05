@@ -1,6 +1,6 @@
+import { classifyBridgeType, routeByLayer } from "./bridge.ts";
 import { describe, expect, test } from "vite-plus/test";
 import { makeDir, toNodeMap } from "../../../tests/helpers/audits.ts";
-import { routeByLayer } from "./bridge.ts";
 
 const E0 = 0.0;
 const E05 = 0.5;
@@ -173,5 +173,59 @@ describe("routeByLayer — unknown layer", () => {
     const result = routeByLayer("unknown", [E1, E0], nodes, { key: root.key, node: root });
 
     expect(result).toBeNull();
+  });
+});
+
+const NONE = 0;
+
+/** Embedder that returns specific vectors per index. */
+async function confidentEmbedder(texts: string[]): Promise<number[][]> {
+  const vecs = texts.map((_, i) => (i === NONE ? [E1, E0] : [E0, E1]));
+  const resolved = await Promise.resolve(vecs);
+  return resolved;
+}
+
+/** Embedder that returns identical vectors for all types. */
+async function uniformEmbedder(texts: string[]): Promise<number[][]> {
+  const vecs = texts.map(() => [E1, E0]);
+  const resolved = await Promise.resolve(vecs);
+  return resolved;
+}
+
+/** Embedder that returns vectors orthogonal to [1,0]. */
+async function orthogonalEmbedder(texts: string[]): Promise<number[][]> {
+  const vecs = texts.map(() => [E0, E1]);
+  const resolved = await Promise.resolve(vecs);
+  return resolved;
+}
+
+describe("classifyBridgeType — confident result", () => {
+  test("returns confident when top sim high and gap large", async () => {
+    const q = [E1, E0];
+    const result = await classifyBridgeType(confidentEmbedder, q);
+
+    expect(result.confident).toBe(true);
+    expect(result.confidence).toBeGreaterThan(E05);
+    expect(result.gap).toBeGreaterThan(E0);
+    expect(result.alternatives.length).toBeGreaterThan(NONE);
+  });
+});
+
+describe("classifyBridgeType — uncertain result", () => {
+  test("returns not confident when all types equidistant", async () => {
+    const q = [E1, E0];
+    const result = await classifyBridgeType(uniformEmbedder, q);
+
+    expect(result.confident).toBe(false);
+    expect(result.gap).toBe(NONE);
+  });
+
+  test("returns not confident when top sim is low", async () => {
+    const q = [E1, E0];
+    const result = await classifyBridgeType(orthogonalEmbedder, q);
+
+    expect(result.confident).toBe(false);
+    expect(result.type).toBeDefined();
+    expect(result.layer).toBeDefined();
   });
 });

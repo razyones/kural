@@ -190,6 +190,46 @@ describe("weak-identity detect — drift detection", () => {
   });
 });
 
+describe("weak-identity detect — missing ancestry", () => {
+  test("skips when grandparent is missing from map", () => {
+    const orphan = makeDir({
+      key: "dir:/src/orphan",
+      name: "orphan",
+      identity: ID_PARENT,
+      leaf: ID_PARENT,
+      childKeys: [],
+      parentKey: "dir:/src/gone",
+    });
+    const ctx = createContext(toNodeMap(orphan), CONFIG);
+    const findings = weakIdentity.detect(ctx);
+
+    expect(findings.length).toBe(NONE);
+  });
+
+  test("skips when parent has no uncle directories", () => {
+    const root = makeDir({
+      key: "dir:/src",
+      name: "src",
+      identity: ID_ROOT,
+      leaf: ID_ROOT,
+      childKeys: ["dir:/src/only"],
+      parentKey: null,
+    });
+    const only = makeDir({
+      key: "dir:/src/only",
+      name: "only",
+      identity: ID_PARENT,
+      leaf: ID_PARENT,
+      childKeys: [],
+      parentKey: "dir:/src",
+    });
+    const ctx = createContext(toNodeMap(root, only), CONFIG);
+    const findings = weakIdentity.detect(ctx);
+
+    expect(findings.length).toBe(NONE);
+  });
+});
+
 describe("weak-identity detect — skips", () => {
   test("skips util directories", () => {
     const nodes = buildWeakTree();
