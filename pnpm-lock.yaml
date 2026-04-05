@@ -8,7 +8,7 @@ overrides:
   kural>vite: npm:@voidzero-dev/vite-plus-core@latest
   vitest: npm:@voidzero-dev/vite-plus-test@latest
   h3: 2.0.1-rc.20
-  nitro: npm:nitro-nightly@3.0.1-20260402-182549-a5a3389c
+  nitro: 3.0.260311-beta
   '@tanstack/start-server-core>h3-v2': npm:h3@2.0.1-rc.20
   srvx: '>=0.11.13'
   picomatch: '>=4.0.4'
@@ -125,8 +125,8 @@ importers:
         specifier: ^6
         version: 6.0.1(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.5)(jiti@2.6.1)(tsx@4.21.0))
       nitro:
-        specifier: npm:nitro-nightly@3.0.1-20260402-182549-a5a3389c
-        version: nitro-nightly@3.0.1-20260402-182549-a5a3389c(better-sqlite3@12.8.0)(chokidar@5.0.0)(jiti@2.6.1)(rollup@4.60.1)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.5)(jiti@2.6.1)(tsx@4.21.0))
+        specifier: 3.0.260311-beta
+        version: 3.0.260311-beta(better-sqlite3@12.8.0)(chokidar@5.0.0)(jiti@2.6.1)(rollup@4.60.1)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.5)(jiti@2.6.1)(tsx@4.21.0))
       rehype-katex:
         specifier: ^7.0.1
         version: 7.0.1
@@ -3406,16 +3406,16 @@ packages:
   nf3@0.3.16:
     resolution: {integrity: sha512-Gs0xRPpUm2nDkqbi40NJ9g7qDIcjcJzgExiydnq6LAyqhI2jfno8wG3NKTL+IiJsx799UHOb1CnSd4Wg4SG4Pw==}
 
-  nitro-nightly@3.0.1-20260402-182549-a5a3389c:
-    resolution: {integrity: sha512-FlUsSGgM0DMMl+N8pdWqpAllNguCgj983LUmWpio7HQsDv+mhX0JUc7WMwszBW+d1e+gb2pe6rjrMlJeFFiFUw==}
+  nitro@3.0.260311-beta:
+    resolution: {integrity: sha512-0o0fJ9LUh4WKUqJNX012jyieUOtMCnadkNDWr0mHzdraoHpJP/1CGNefjRyZyMXSpoJfwoWdNEZu2iGf35TUvQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
       dotenv: '*'
       giget: '*'
       jiti: ^2.6.1
-      rollup: ^4.60.1
-      vite: ^7 || ^8
+      rollup: ^4.59.0
+      vite: ^7 || ^8 || >=8.0.0-0
       xml2js: ^0.6.2
       zephyr-agent: ^0.1.15
     peerDependenciesMeta:
@@ -7426,7 +7426,7 @@ snapshots:
 
   nf3@0.3.16: {}
 
-  nitro-nightly@3.0.1-20260402-182549-a5a3389c(better-sqlite3@12.8.0)(chokidar@5.0.0)(jiti@2.6.1)(rollup@4.60.1)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.5)(jiti@2.6.1)(tsx@4.21.0)):
+  nitro@3.0.260311-beta(better-sqlite3@12.8.0)(chokidar@5.0.0)(jiti@2.6.1)(rollup@4.60.1)(vite@8.0.3(@emnapi/core@1.9.1)(@emnapi/runtime@1.9.1)(@types/node@25.5.0)(esbuild@0.27.5)(jiti@2.6.1)(tsx@4.21.0)):
     dependencies:
       consola: 3.4.2
       crossws: 0.4.4(srvx@0.11.14)
