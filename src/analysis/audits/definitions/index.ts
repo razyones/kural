@@ -17,6 +17,7 @@ import mergeCandidates from "./merge-candidates.ts";
 import misplaced from "./misplaced.ts";
 import outliers from "./outliers.ts";
 import vocabularyBleed from "./vocabulary-bleed.ts";
+import weakIdentity from "./weak-identity.ts";
 
 /** All audits in display order. */
 const allAudits: AuditDefinition[] = [
@@ -32,6 +33,7 @@ const allAudits: AuditDefinition[] = [
   incoherentUtils,
   duplicateUtils,
   vocabularyBleed,
+  weakIdentity,
   identityLanguage,
   incompleteDocs,
 ];
