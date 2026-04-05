@@ -309,18 +309,18 @@ Create a `kural.config.json` in your project root to persist settings:
 }
 ```
 
-| Field                     | Description                                              |
-| ------------------------- | -------------------------------------------------------- |
-| `embeddings.provider`     | `vercel`, `openai`, `openrouter`, or `ollama`            |
-| `embeddings.model`        | Model ID override                                        |
-| `embeddings.baseURL`      | Custom base URL for the provider                         |
-| `embeddings.apiKey`       | API key (overrides env var)                              |
-| `domainKeywords`          | Top domain terms for path signal context                 |
-| `dictionary`              | Codebase-specific term definitions for richer signatures |
-| `audits.sensitivity`      | Standard deviations from mean to flag (default: 2.0)     |
-| `audits.containmentFloor` | Absolute floor for containment detection (default: 0.9)  |
-| `audits.minGroup`         | Minimum group size for statistical tests (default: 4)    |
-| `audits.disable`          | Audit names to skip                                      |
+| Field                 | Description                                             |
+| --------------------- | ------------------------------------------------------- |
+| `embeddings.provider` | `vercel`, `openai`, `openrouter`, or `ollama`           |
+| `embeddings.model`    | Model ID override                                       |
+| `embeddings.baseURL`  | Custom base URL for the provider                        |
+| `embeddings.apiKey`   | API key (overrides env var)                             |
+| `domainKeywords`      | Candidate domain terms for path signal context          |
+| `dictionary`          | Codebase-specific term definitions for prose signatures |
+| `audits.sensitivity`  | Standard deviations from mean to flag (default: 2.0)    |
+| `audits.disable`      | Audit names to skip                                     |
+
+See [Configuration](/docs/configuration) for detailed guidance on tuning these settings after your first results.
 
 ## Typical workflow
 

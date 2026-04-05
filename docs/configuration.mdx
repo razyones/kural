@@ -1,0 +1,180 @@
+---
+title: Configuration
+description: Project settings that shape embedding and audit behavior
+icon: Settings
+---
+
+Create a `kural.config.json` in your project root to persist settings. All fields are optional — Kural applies sensible defaults when a field is missing.
+
+```json
+{
+  "embeddings": {
+    "provider": "vercel"
+  },
+  "domainKeywords": ["scoring", "embedding", "audit"],
+  "dictionary": {
+    "SOST": "structural scoring tree"
+  },
+  "audits": {
+    "sensitivity": 2.0,
+    "disable": ["incomplete-docs"]
+  }
+}
+```
+
+| Field                 | Description                                             |
+| --------------------- | ------------------------------------------------------- |
+| `embeddings.provider` | `vercel`, `openai`, `openrouter`, or `ollama`           |
+| `embeddings.model`    | Model ID override                                       |
+| `embeddings.baseURL`  | Custom base URL for the provider                        |
+| `embeddings.apiKey`   | API key (overrides env var)                             |
+| `domainKeywords`      | Candidate domain terms for path signal context          |
+| `dictionary`          | Codebase-specific term definitions for prose signatures |
+| `audits.sensitivity`  | Standard deviations from mean to flag (default: 2.0)    |
+| `audits.disable`      | Audit names to skip                                     |
+
+---
+
+## Domain keywords
+
+```json
+{
+  "domainKeywords": ["scoring", "embedding", "audit"]
+}
+```
+
+Domain keywords are a candidate list. Kural embeds every candidate alongside all unit names in the codebase and auto-selects the **top 3** by aggregate cosine similarity. These 3 keywords become the **path signal** — the context that tells the embedding model what domain a generically named unit like `utils` or `config` operates in.
+
+For the root unit, keywords are joined with hyphens: `scoring-embedding-audit/`. For all other units, they become a path prefix: `scoring/embedding/audit/ingestion/parse/`.
+
+<Callout type="info">
+  Changing domain keywords shifts path signals for every unit. Regenerate your snapshot after
+  updating.
+</Callout>
+
+---
+
+## Dictionary
+
+```json
+{
+  "dictionary": {
+    "SOST": "structural scoring tree",
+    "Unit": "a function, type, module, or directory in the codebase tree"
+  }
+}
+```
+
+The dictionary maps codebase-specific terms to plain-language definitions. When the Language Service reports that a function parameter or type field references a dictionary term, Kural wraps it as a markdown-style link and appends the definition to the **prose signature** before embedding:
+
+```
+takes tree ([SOST]), depth (a number). Returns nothing.
+
+[SOST]: structural scoring tree
+```
+
+Without the dictionary, `SOST` is an opaque token that the embedding model cannot meaningfully relate to other concepts. With it, the prose carries enough context to place the function in the right neighborhood.
+
+Add terms when your codebase uses acronyms or domain-specific names that the embedding model would otherwise treat as noise.
+
+<Callout type="info">
+  Like domain keywords, dictionary changes affect embeddings. Regenerate your snapshot after
+  updating.
+</Callout>
+
+---
+
+## Sensitivity (`-k`)
+
+```json
+{
+  "audits": {
+    "sensitivity": 2.0
+  }
+}
+```
+
+Sensitivity is the **single tuning knob** for all 14 audits. Every audit measures something different — sibling similarity, dominance gaps, axis scores, dendrogram merge distances — but every measurement ends at the same decision boundary: normal or abnormal. Sensitivity controls where that boundary falls.
+
+### Why one knob is enough
+
+**The distribution is your codebase.** When Kural computes the mean similarity between all sibling pairs in a directory, that mean is not a setting — it is a fact about your code. The standard deviation (σ) around that mean is also a fact. Together they describe how your codebase is shaped in that dimension. A codebase with tightly clustered siblings has a small σ. A codebase with varied siblings has a large σ. Neither is wrong — they are just different distributions.
+
+**The fence is where you draw the line.** A Z-score fence says: anything beyond `k` standard deviations from the mean is abnormal.
+
+```
+upperFence = mean + k × σ
+lowerFence = mean − k × σ
+```
+
+The upper fence catches values that are too high — sibling pairs that are too similar (merge candidates), dominance gaps that are too large (containments), best-uncle deltas that stand out (misplaced nodes). The lower fence catches values that are too low — identity-to-content alignment that is too weak (incoherent containers).
+
+In both directions, `mean` and `σ` come from the data. The only degree of freedom is `k` — how many standard deviations you consider "too far."
+
+**Some distributions lie.** Standard deviation assumes the data is roughly normal. When a few extreme outliers pull the mean and inflate σ, Z-score fences become unreliable — the fence drifts to accommodate the very outliers it should be catching.
+
+The robust fence replaces mean with median and σ with MAD (Median Absolute Deviation). The median ignores extreme values. MAD measures spread around the median instead of the mean, so a single outlier cannot warp the threshold. The constant 1.4826 scales MAD to match σ for normal data — it is not a tuning parameter, it is a mathematical conversion factor.
+
+```
+robustUpperFence = median + k × 1.4826 × MAD
+robustLowerFence = median − k × 1.4826 × MAD
+```
+
+The robust upper fence catches cross-pull deltas that are too high (vocabulary bleed). The robust lower fence catches per-child mean similarities that are too low (outliers) and is-does axis scores that lean too far toward identity language.
+
+The formula changed. The role of `k` did not. It is still the single multiplier that decides how far from center counts as abnormal — the only difference is which definition of "center" and "spread" the formula uses.
+
+**Dendrograms have their own geometry.** When Kural clusters a directory's children hierarchically, the merge distances form a sequence. A significant gap in that sequence — one merge step much larger than the rest — suggests the children fall into natural subgroups. The gap test is:
+
+```
+hasSignificantGap = maxGap > medianGap × (1 + k)
+```
+
+No σ, no MAD. But `k` plays the same role: it scales the threshold. At `k = 2`, the largest gap must exceed 3× the median gap to count. At `k = 3`, it must exceed 4×. The geometry is different, but the question is the same — how unusual must the gap be before Kural calls it a finding?
+
+**This is why there is one knob.** Every formula has quantities that come from the data — mean, median, σ, MAD, median gap — and one quantity that comes from you: `k`. Raising `k` makes every fence wider in every audit simultaneously. Lowering it makes every fence tighter. The statistical machinery adapts to your codebase's shape automatically. The only judgment call is yours: how strict should "abnormal" be?
+
+At **2.0** (default), findings are moderate — most real structural issues surface without excessive noise. At **3.0**, only strong deviations are flagged. Below **1.5**, expect many findings. Start at the default, then adjust based on your first audit run:
+
+```bash
+# Try a stricter threshold without changing config
+kural audit -k 2.5
+```
+
+### How each audit uses `k`
+
+| Audit                   | Fencing strategy   | What `k` fences on                                                                                                     |
+| :---------------------- | :----------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| **bloated-directories** | dendrogram gap     | `maxGap > medianGap × (1 + k)` on hierarchical merge distances                                                         |
+| **bloated-files**       | dendrogram gap     | `maxGap > medianGap × (1 + k)` on hierarchical merge distances                                                         |
+| **outliers**            | robust lower (MAD) | `median − k × 1.4826 × MAD` on per-child mean sibling similarities                                                     |
+| **merge-candidates**    | Z-score upper      | `mean + k × σ` on leaf-level and file-level sibling pair similarities                                                  |
+| **containments**        | Z-score upper      | `mean + k × σ` on dominance gaps between the top two children                                                          |
+| **misplaced**           | Z-score upper      | `mean + k × σ` on uncle-fit minus parent-fit deltas                                                                    |
+| **duplicates**          | Z-score upper      | `mean + k × σ` on leaf-level and file-level sibling pair similarities                                                  |
+| **util-duplicates**     | Z-score upper      | `mean + k × σ` on leaf-level sibling pair similarities                                                                 |
+| **vocabulary-bleed**    | robust upper (MAD) | `median + k × 1.4826 × MAD` on max cross-pull deltas (closest non-sibling similarity minus weakest sibling similarity) |
+| **incoherent**          | Z-score lower      | `mean − k × σ` on identity-to-content similarities (capped at 0.9)                                                     |
+| **incoherent-utils**    | Z-score lower      | `mean − k × σ` on identity-to-content similarities (capped at 0.9)                                                     |
+| **identity-language**   | robust lower (MAD) | `median − k × 1.4826 × MAD` on is-does axis scores                                                                     |
+| **weak-identity**       | Z-score upper      | `mean + k × σ` on child drift ratios (fraction of children fitting an uncle better than parent)                        |
+| **focal-drift**         | —                  | deterministic comparison, not influenced by `k`                                                                        |
+| **incomplete-docs**     | —                  | rule-based, not influenced by `k`                                                                                      |
+
+---
+
+## Disabling audits
+
+```json
+{
+  "audits": {
+    "disable": ["incomplete-docs"]
+  }
+}
+```
+
+During early adoption — when descriptions are still being written — audits like `incomplete-docs` produce noise rather than signal. Disable them in config or per-run:
+
+```bash
+kural audit -d incomplete-docs,identity-language
+```
