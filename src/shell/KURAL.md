@@ -1,0 +1,1 @@
+The control panel. Owns all user-facing interaction — CLI argument parsing, project configuration, and terminal display. It is the only part of the system that accepts user input and presents results — nothing else defines commands, reads settings files, or formats output for the terminal.

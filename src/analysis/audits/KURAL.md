@@ -1,0 +1,1 @@
+The stethoscope. Runs the full diagnostic pipeline — building detection contexts, collecting sibling pair baselines, applying per-rule fences, and assembling the ordered finding report. It is the only module that orchestrates issue detection from context setup through finding collection — nothing else wires the shared audit infrastructure to the individual diagnostic rules.
