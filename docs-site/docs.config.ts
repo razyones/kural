@@ -6,7 +6,7 @@ const config: DocsConfig = {
     'Structural scoring system for TypeScript codebases — answers "where should this code live?"',
   content: "../docs",
   nav: {
-    links: [{ text: "GitHub", url: "https://github.com/user/kural" }],
+    links: [{ text: "GitHub", url: "https://github.com/razyones/kural" }],
   },
 };
 

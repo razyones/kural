@@ -45,7 +45,7 @@ function Home() {
               Read Docs
             </Link>
             <a
-              href="https://github.com/user/kural"
+              href="https://github.com/razyones/kural"
               className="px-5 py-2 border border-fd-border text-fd-foreground text-[11px] uppercase tracking-[0.05em] font-medium"
             >
               GitHub

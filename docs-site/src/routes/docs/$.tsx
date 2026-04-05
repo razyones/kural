@@ -43,7 +43,7 @@ function Page() {
   const { path } = Route.useLoaderData();
 
   return (
-    <DocsLayout tree={tree} nav={{ title: "Kural" }} githubUrl="https://github.com/user/kural">
+    <DocsLayout tree={tree} nav={{ title: "Kural" }} githubUrl="https://github.com/razyones/kural">
       <Suspense>{clientLoader.useContent(path)}</Suspense>
     </DocsLayout>
   );
