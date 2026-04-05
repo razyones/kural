@@ -1,1 +1,0 @@
-The brain. Computes structural health metrics from embedding vectors — label-fit, uniqueness, subtree aggregation, and overall scores. It is the only part of the system that evaluates how well code is organized — no other module calculates placement or distribution metrics.

@@ -5,7 +5,7 @@
  */
 
 import { activePath, closeSnapshot, openSnapshot } from "./snapshot.ts";
-import type { EmbeddingCache } from "../ingestion/embed/types.ts";
+import type { EmbeddingCache } from "../analysis/ingestion/embed/types.ts";
 import type { SnapshotCollections } from "./collections.ts";
 import { existsSync } from "node:fs";
 

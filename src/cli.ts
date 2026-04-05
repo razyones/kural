@@ -7,12 +7,12 @@
  * @kuralBound inward
  */
 
-import audit from "./commands/audit/command.ts";
+import audit from "./shell/commands/audit/command.ts";
 import { cli } from "gunshi";
 import { existsSync } from "node:fs";
 import { loadEnvFile } from "node:process";
-import score from "./commands/score/command.ts";
-import snapshot from "./commands/snapshot/command.ts";
+import score from "./shell/commands/score/command.ts";
+import snapshot from "./shell/commands/snapshot/command.ts";
 
 const ARGV_START = 2;
 

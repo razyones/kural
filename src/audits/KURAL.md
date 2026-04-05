@@ -1,1 +1,0 @@
-The stethoscope. Applies statistical fences and deterministic rules to surface localized anomalies that aggregate scores miss — outliers, duplicates, misplacements, vocabulary drift, and documentation gaps. It is the only module that classifies deviations from expected distributions — nothing else decides where normal ends and abnormal begins.

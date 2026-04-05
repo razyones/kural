@@ -97,8 +97,8 @@ export default defineConfig({
       exclude: [
         "src/db/**",
         "src/cli.ts",
-        "src/commands/*/command.ts",
-        "src/commands/*/pipeline.ts",
+        "src/shell/commands/*/command.ts",
+        "src/shell/commands/*/pipeline.ts",
       ],
       thresholds: {
         statements: 90,

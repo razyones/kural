@@ -1,1 +1,0 @@
-The rulebook. Houses every individual audit detection and formatting function. It is the only directory that defines what each audit looks for — no other module declares audit-specific logic or display rules.

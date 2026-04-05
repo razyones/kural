@@ -10,9 +10,9 @@ import type {
   FunctionNode,
   NodeMap,
   TypeNode,
-} from "../../src/sost/tree.ts";
-import type { FormatCtx } from "../../src/audits/types.ts";
-import type { ResidualEntry } from "../../src/ingestion/parse/types.ts";
+} from "../../src/analysis/tree/tree.ts";
+import type { FormatCtx } from "../../src/analysis/audits/types.ts";
+import type { ResidualEntry } from "../../src/analysis/ingestion/parse/types.ts";
 
 const HASH_LEN = 8;
 const NONE = 0;
