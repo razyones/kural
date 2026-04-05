@@ -1,0 +1,1 @@
+The front door. Wires the placement CLI arguments to the routing engine and displays its suggestions. It is the only command that accepts a query description and presents placement decisions — no other command invokes the routing pipeline or formats its outcomes for the user.

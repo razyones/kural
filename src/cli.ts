@@ -7,10 +7,12 @@
  * @kuralBound inward
  */
 
+import advise from "./shell/commands/advise/command.ts";
 import audit from "./shell/commands/audit/command.ts";
 import { cli } from "gunshi";
 import { existsSync } from "node:fs";
 import { loadEnvFile } from "node:process";
+import place from "./shell/commands/place/command.ts";
 import score from "./shell/commands/score/command.ts";
 import snapshot from "./shell/commands/snapshot/command.ts";
 
@@ -29,5 +31,5 @@ if (existsSync(".env")) {
 await cli(process.argv.slice(ARGV_START), snapshot, {
   name: "kural",
   version: "0.0.0",
-  subCommands: { audit, score },
+  subCommands: { advise, audit, place, score },
 });
