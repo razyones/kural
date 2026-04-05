@@ -7,6 +7,7 @@ settings:
 overrides:
   kural>vite: npm:@voidzero-dev/vite-plus-core@latest
   vitest: npm:@voidzero-dev/vite-plus-test@latest
+  h3: 2.0.1-rc.20
   '@tanstack/start-server-core>h3-v2': npm:h3@2.0.1-rc.20
   srvx: '>=0.11.13'
   picomatch: '>=4.0.4'
@@ -2932,15 +2933,6 @@ packages:
     resolution: {integrity: sha512-0E2ifZq5aJs2TzX3aCdkON72Mg4FjTSJDjhmaVw3OgQAdZNeyS3EfA4FybHS3NP5YxqiMj43NFcu0ezccJPGzw==}
     engines: {node: '>= 20'}
 
-  h3@2.0.1-rc.2:
-    resolution: {integrity: sha512-2vS7OETzPDzGQxmmcs6ttu7p0NW25zAdkPXYOr43dn4GZf81uUljJvupa158mcpUGpsQUqIy4O4THWUQT1yVeA==}
-    engines: {node: '>=20.11.1'}
-    peerDependencies:
-      crossws: ^0.4.1
-    peerDependenciesMeta:
-      crossws:
-        optional: true
-
   h3@2.0.1-rc.20:
     resolution: {integrity: sha512-28ljodXuUp0fZovdiSRq4G9OgrxCztrJe5VdYzXAB7ueRvI7pIUqLU14Xi3XqdYJ/khXjfpUOOD2EQa6CmBgsg==}
     engines: {node: '>=20.11.1'}
@@ -3778,9 +3770,6 @@ packages:
     resolution: {integrity: sha512-VmtB2rFU/GroZ4oL8+ZqXgSA38O6GR8KSIvWmEFv63pQ0G6KaBH9s07PO8XTXP4vI+3UJUEypOfjkGfmSBBR0w==}
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
-
-  rou3@0.7.12:
-    resolution: {integrity: sha512-iFE4hLDuloSWcD7mjdCDhx2bKcIsYbtOTpfH5MHHLSKMOUyjqQXTeZVa289uuwEGEKFoE/BAPbhaU4B774nceg==}
 
   rou3@0.8.1:
     resolution: {integrity: sha512-ePa+XGk00/3HuCqrEnK3LxJW7I0SdNg6EFzKUJG73hMAdDcOUC/i/aSz7LSDwLrGr33kal/rqOGydzwl6U7zBA==}
@@ -6690,15 +6679,6 @@ snapshots:
 
   gunshi@0.29.3: {}
 
-  h3@2.0.1-rc.2(crossws@0.4.4(srvx@0.11.14)):
-    dependencies:
-      cookie-es: 2.0.1
-      fetchdts: 0.1.7
-      rou3: 0.7.12
-      srvx: 0.11.14
-    optionalDependencies:
-      crossws: 0.4.4(srvx@0.11.14)
-
   h3@2.0.1-rc.20(crossws@0.4.4(srvx@0.11.14)):
     dependencies:
       rou3: 0.8.1
@@ -7541,7 +7521,7 @@ snapshots:
       db0: 0.3.4(better-sqlite3@12.8.0)
       esbuild: 0.25.12
       fetchdts: 0.1.7
-      h3: 2.0.1-rc.2(crossws@0.4.4(srvx@0.11.14))
+      h3: 2.0.1-rc.20(crossws@0.4.4(srvx@0.11.14))
       jiti: 2.6.1
       nf3: 0.1.12
       ofetch: 1.5.1
@@ -8060,8 +8040,6 @@ snapshots:
       '@rollup/rollup-win32-x64-gnu': 4.60.1
       '@rollup/rollup-win32-x64-msvc': 4.60.1
       fsevents: 2.3.3
-
-  rou3@0.7.12: {}
 
   rou3@0.8.1: {}
 
