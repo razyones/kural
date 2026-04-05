@@ -1,37 +1,8 @@
-import { useEffect, useState } from "react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { HomeLayout } from "fumadocs-ui/layouts/home";
+import { BlinkingOwl, NavLogo } from "@/components/nav-logo";
 import { EmbeddingSpace } from "@/components/embedding-space";
 import { AnimatedBg } from "@/components/animated-bg";
-import config from "../../docs.config";
-
-function BlinkingOwl() {
-  const [blink, setBlink] = useState(false);
-
-  useEffect(() => {
-    const schedule = () => {
-      const delay = 2000 + Math.random() * 2000;
-      return setTimeout(() => {
-        setBlink(true);
-        setTimeout(() => setBlink(false), 150);
-        id = schedule();
-      }, delay);
-    };
-    let id = schedule();
-    return () => clearTimeout(id);
-  }, []);
-
-  const eyes = blink ? "(-,-)" : "(O,O)";
-  return (
-    <pre
-      className="text-xs md:text-sm leading-tight select-none text-[hsl(45,70%,38%)] dark:text-[hsl(45,60%,60%)]"
-      aria-hidden="true"
-      style={{ fontFamily: "Menlo, DejaVu Sans Mono, Consolas, monospace" }}
-    >
-      {"{\\_/}\n" + eyes + "\n(:::)\n-^-^v--"}
-    </pre>
-  );
-}
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -39,8 +10,8 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   return (
-    <HomeLayout nav={{ title: config.name }}>
-      <div className="flex flex-1 min-h-0 max-h-[calc(100vh-var(--fd-nav-height,56px))] overflow-hidden relative">
+    <HomeLayout nav={{ title: <NavLogo /> }}>
+      <div className="flex flex-1 min-h-0 max-h-[calc(100vh-var(--fd-nav-height,56px))] overflow-hidden relative w-full mx-auto max-w-[var(--fd-layout-width)]">
         <AnimatedBg />
         {/* Left: Embedding space */}
         <div className="hidden md:flex md:w-1/2 border-r border-fd-border">
@@ -56,7 +27,7 @@ function Home() {
             className="flex items-center gap-4 text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-fd-foreground mb-5 leading-[1.05]"
             style={{ fontFamily: '"Lexend Peta", sans-serif' }}
           >
-            <BlinkingOwl />
+            <BlinkingOwl className="text-xs md:text-sm" />
             KURAL
           </h1>
           <p className="text-fd-muted-foreground text-base md:text-lg max-w-md mb-8 font-light leading-relaxed">
