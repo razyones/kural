@@ -116,7 +116,7 @@ function faceGrid(
   return lines;
 }
 
-const ACCENT = "hsl(187, 40%, 55%)";
+const ACCENT = "var(--kural-accent)";
 const POINT_R = 4;
 const ACTIVE_R = 5;
 

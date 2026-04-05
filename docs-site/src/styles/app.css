@@ -18,6 +18,11 @@
   --font-display: "Archivo", sans-serif;
   --font-body: "Archivo", sans-serif;
   --font-mono: "IBM Plex Mono", monospace;
+  --kural-accent: hsl(187, 50%, 35%);
+}
+
+.dark {
+  --kural-accent: hsl(187, 40%, 55%);
 }
 
 /* ── Typography ── */
