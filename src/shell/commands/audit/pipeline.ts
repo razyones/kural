@@ -222,6 +222,7 @@ function rebuildParseResult(collections: SnapshotCollections): ParseResult {
       children: row.children,
       description: row.description,
       residuals: row.residuals,
+      borrows: row.borrows,
     };
   });
 

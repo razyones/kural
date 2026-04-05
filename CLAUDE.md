@@ -127,9 +127,8 @@ A KURAL.md directive for directories that intentionally share vocabulary with a 
 ### Format
 
 ```markdown
-@kuralBorrows analysis/advise "terminal surface that formats and renders engine output as diagrams and tables"
-
 The consultant's desk. Parses directory targets and display flags...
+@kuralBorrows analysis/advise "terminal surface that formats and renders engine output as diagrams and tables"
 ```
 
 - **Target path** (optional): relative path like `analysis/advise` — excludes that module from the vocabulary bleed audit's cross-pull comparison.

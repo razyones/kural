@@ -199,6 +199,7 @@ async function writeDirectories(
       leafEmbedding: d.leafEmbedding,
       facetHash: d.facetHash,
       residuals: d.residuals,
+      borrows: d.borrows,
     })),
   );
 }

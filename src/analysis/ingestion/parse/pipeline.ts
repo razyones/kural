@@ -108,14 +108,6 @@ async function readKuralMd(
 }
 
 /**
- * Parses a directory into structured code units and assembles the folder tree.
- * Walks the filesystem, extracts types and functions from each .ts file,
- * and builds the parent-child directory hierarchy.
- * @param dir - Absolute path to the root directory to parse
- * @returns Files and directories keyed by absolute path, with empty embeddings
- * @kuralCauses Reads source files from disk via walk and extract
- */
-/**
  * Wires parent-child relationships between files, subdirectories, and their parent directories.
  * @param directories - The directory map to mutate
  * @param filePaths - Absolute paths of parsed files
@@ -142,6 +134,12 @@ function wireChildren(
   }
 }
 
+/**
+ * Parses a directory into structured code units and assembles the folder tree.
+ * @param dir - Absolute path to the root directory to parse
+ * @returns Files and directories keyed by absolute path, with empty embeddings
+ * @kuralCauses Reads source files from disk via walk and extract
+ */
 async function parse(dir: string): Promise<ParseResult> {
   const walkResult = await walk(dir);
 
