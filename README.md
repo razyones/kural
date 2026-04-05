@@ -242,6 +242,39 @@ Every node gets a score card:
 - [Kural Params](docs/codebase-realities/kural-params.md) — annotations for codebase realities
 - [Database](docs/db.md) — SQLite snapshot persistence and schema
 
+## Acknowledgments
+
+Kural is built on the shoulders of these open-source projects:
+
+**Core**
+
+- [Gunshi](https://github.com/kazupon/gunshi) — CLI framework
+- [Vercel AI SDK](https://github.com/vercel/ai) — embedding provider gateway
+- [TanStack DB](https://github.com/TanStack/db) — reactive persistence layer
+- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) — SQLite driver
+- [Zod](https://github.com/colinhacks/zod) — schema validation
+- [DruidJS](https://github.com/saehm/DruidJS) — dimensionality reduction and vector math
+- [Poppinss CLI UI](https://github.com/poppinss/cliui) — terminal formatting
+- [TypeScript](https://github.com/microsoft/TypeScript) — language service for AST parsing
+
+**Toolchain**
+
+- [Vite+](https://github.com/nicepkg/vite-plus) — unified dev, build, lint, test, and format
+- [Vitest](https://github.com/vitest-dev/vitest) — test runner
+- [Oxlint](https://github.com/nicepkg/oxlint) — linter
+- [tsdown](https://github.com/nicepkg/tsdown) — library bundler
+
+**Documentation site**
+
+- [Fumadocs](https://github.com/fuma-nama/fumadocs) — documentation framework
+- [TanStack Start](https://github.com/TanStack/router) — full-stack React framework
+- [Tailwind CSS](https://github.com/tailwindlabs/tailwindcss) — styling
+- [Orama](https://github.com/oramasearch/orama) — client-side search
+- [KaTeX](https://github.com/KaTeX/KaTeX) — math rendering
+- [Lucide](https://github.com/lucide-icons/lucide) — icons
+
+Thank you to every maintainer and contributor behind these projects.
+
 ## License
 
-MIT
+Apache 2.0 — see [LICENSE](LICENSE) for details.

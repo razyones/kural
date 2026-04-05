@@ -1,0 +1,85 @@
+name: Bug Report
+description: Report something that isn't working correctly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the sections below so we can reproduce and fix it.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps or a sample project structure that triggers the issue.
+      placeholder: |
+        1. Create a project with ...
+        2. Run `kural snapshot generate src`
+        3. Run `kural audit`
+        4. See unexpected output ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Actual output
+      description: Paste the relevant CLI output or error message.
+      render: text
+
+  - type: dropdown
+    id: command
+    attributes:
+      label: Command
+      description: Which command were you running?
+      options:
+        - snapshot generate
+        - score
+        - audit
+        - place
+        - advise
+        - snapshot list / pin / unpin / delete
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Kural version
+      description: Output of `kural --version`
+      placeholder: 0.0.1-alpha.1
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Embedding provider
+      options:
+        - Vercel (default)
+        - OpenAI
+        - OpenRouter
+        - Ollama
+        - N/A
+
+  - type: input
+    id: node-version
+    attributes:
+      label: Node.js version
+      description: Output of `node --version`
+      placeholder: v22.0.0
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15.4 / Ubuntu 24.04 / Windows 11

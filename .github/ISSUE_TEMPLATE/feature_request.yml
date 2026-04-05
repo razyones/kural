@@ -1,0 +1,46 @@
+name: Feature Request
+description: Suggest an improvement or new capability
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have an idea for Kural? We'd love to hear it.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What limitation or friction are you running into?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How do you think this should work? CLI examples, config changes, or output sketches are helpful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you thought of, and why they fall short.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of Kural does this relate to?
+      options:
+        - Scoring
+        - Audits
+        - Embedding
+        - Place / routing
+        - Advise
+        - CLI / UX
+        - Configuration
+        - Documentation
+        - Other
