@@ -1,0 +1,1 @@
+The consultant's desk. Accepts a directory path or raw descriptions and presents grouping recommendations. It is the only command that displays reorganization proposals with projected score improvements — no other command wires user input to the what-if analysis pipeline or formats its suggestions for the terminal.
