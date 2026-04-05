@@ -121,6 +121,7 @@ function makeDir(overrides: Partial<DirectoryNode> = {}): DirectoryNode {
     exported: overrides.exported ?? false,
     description: overrides.description ?? undefined,
     bound: overrides.bound ?? null,
+    borrows: overrides.borrows,
   };
 }
 

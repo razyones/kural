@@ -1,7 +1,8 @@
 /**
- * The dendrogrammer. Builds hierarchical clusterings from embedding vectors
- * and detects significant merge gaps. It is the only module that groups
- * siblings by embedding distance — no other module invokes hierarchical
+ * The dendrogrammer. Computes hierarchical distance trees for diagnostic
+ * split detection — the core algorithm behind bloat analysis. It is the
+ * only module in the diagnostic suite that constructs merge-gap dendrograms
+ * for issue detection — no other audit infrastructure performs hierarchical
  * clustering.
  */
 

@@ -16,6 +16,14 @@ export type ResidualEntry = {
   hash?: string;
 };
 
+/** Parsed data from a @kuralBorrows directive in KURAL.md. */
+export type BorrowsEntry = {
+  /** Optional target module path for audit exclusion (e.g. "analysis/advise") */
+  target?: string;
+  /** Role description used as instruction prefix for name and description embeddings */
+  role: string;
+};
+
 /**
  * Base properties shared by all code units in the codebase tree.
  */
@@ -146,6 +154,8 @@ export type KuralDirectory = KuralUnit & {
   description?: string;
   /** Audit-specific suppression annotations from KURAL.md @kuralResidual lines */
   residuals: ResidualEntry[];
+  /** Cross-layer borrowing declaration from @kuralBorrows */
+  borrows?: BorrowsEntry;
 };
 
 /** Extracted contents of a single source file before embedding. */

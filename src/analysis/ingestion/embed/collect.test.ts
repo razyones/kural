@@ -416,6 +416,47 @@ describe("collectContainers", () => {
   });
 });
 
+describe("collectContainers — @kuralBorrows prefix", () => {
+  it("prepends borrows role to directory name", () => {
+    const dir = makeDir("advise", [], "The desk.");
+    dir.borrows = { target: "analysis/advise", role: "terminal surface" };
+    const result: ParseResult = {
+      files: {},
+      directories: { "/src/advise": dir },
+    };
+
+    const containers = collectContainers(result, ROOT_PATH, KEYWORDS);
+
+    expect(containers.names[ARRAY_FIRST]).toBe("terminal surface: advise");
+  });
+
+  it("prepends borrows role to directory description", () => {
+    const dir = makeDir("advise", [], "The desk.");
+    dir.borrows = { role: "terminal surface" };
+    const result: ParseResult = {
+      files: {},
+      directories: { "/src/advise": dir },
+    };
+
+    const containers = collectContainers(result, ROOT_PATH, KEYWORDS);
+
+    expect(containers.descs[ARRAY_FIRST]).toBe("Represent a terminal surface: The desk.");
+  });
+
+  it("leaves name and desc unchanged without borrows", () => {
+    const dir = makeDir("utils", [], "Helpers.");
+    const result: ParseResult = {
+      files: {},
+      directories: { "/src/utils": dir },
+    };
+
+    const containers = collectContainers(result, ROOT_PATH, KEYWORDS);
+
+    expect(containers.names[ARRAY_FIRST]).toBe("utils");
+    expect(containers.descs[ARRAY_FIRST]).toBe("Helpers.");
+  });
+});
+
 describe("collapseByPattern", () => {
   it("passes ungrouped leaves through unchanged", () => {
     const solo = makeFunction({ name: "solo" });

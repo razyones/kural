@@ -1,8 +1,7 @@
 /**
- * The assembler. Aggregates every configuration domain into the single
- * top-level shape the system reads at startup. It is the only module that
- * composes individual setting groups into a unified contract — no other
- * module defines the root configuration type.
+ * The assembler. Merges sibling type shapes into one root import. It is
+ * the only module that composes individual setting groups into a single
+ * aggregate type — no other module defines the combined root shape.
  */
 
 import type { AuditsConfig } from "./audits.ts";

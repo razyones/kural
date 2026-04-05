@@ -1,8 +1,8 @@
 /**
- * The console. Defines the CLI argument schema and wires user input to
- * the placement engine. It is the only module that speaks the Gunshi
- * command protocol for placement — no other module defines the place
- * command's arguments or output.
+ * The console. Defines the CLI argument schema for the place command
+ * and wires parsed flags to the engine. It is the only module that
+ * speaks the Gunshi command protocol for this workflow — no other
+ * module defines these arguments or renders this output.
  */
 
 import type { PlacementResult, PlacementSuggestion } from "../../../analysis/place/types.ts";

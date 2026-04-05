@@ -109,15 +109,44 @@ Every unit's description — directory KURAL.md, file-level JSDoc, function JSDo
 
 ## Kural Params
 
-| Param                         | Role in scoring                                       |
-| :---------------------------- | :---------------------------------------------------- |
-| `@kuralHelper`                | Participates in scoring, excluded from audits         |
-| `@kuralUtil`                  | Excluded from domain scoring, scored in own sandbox   |
-| `@kuralPatterns`              | Deduplicated to centroid representative               |
-| `@kuralCompanion`             | Deduplicated to centroid representative               |
-| `@kuralResidual`              | No role in scoring, audit suppression only            |
-| `@kuralBound inward/outward`  | Adjusted scoring + selective audit suppression        |
-| `@kuralPure` / `@kuralCauses` | Influences what gets embedded, not how scores compute |
+| Param                         | Role in scoring                                              |
+| :---------------------------- | :----------------------------------------------------------- |
+| `@kuralHelper`                | Participates in scoring, excluded from audits                |
+| `@kuralUtil`                  | Excluded from domain scoring, scored in own sandbox          |
+| `@kuralPatterns`              | Deduplicated to centroid representative                      |
+| `@kuralCompanion`             | Deduplicated to centroid representative                      |
+| `@kuralResidual`              | No role in scoring, audit suppression only                   |
+| `@kuralBound inward/outward`  | Adjusted scoring + selective audit suppression               |
+| `@kuralBorrows target "role"` | Instruction prefix for name/desc embedding + audit exclusion |
+| `@kuralPure` / `@kuralCauses` | Influences what gets embedded, not how scores compute        |
+
+## `@kuralBorrows` — Cross-Layer Vocabulary Borrowing
+
+A KURAL.md directive for directories that intentionally share vocabulary with a non-sibling module (e.g., a shell command that presents an analysis engine's output).
+
+### Format
+
+```markdown
+@kuralBorrows analysis/advise "terminal surface that formats and renders engine output as diagrams and tables"
+
+The consultant's desk. Parses directory targets and display flags...
+```
+
+- **Target path** (optional): relative path like `analysis/advise` — excludes that module from the vocabulary bleed audit's cross-pull comparison.
+- **Quoted role** (required): natural-language description of the borrower's role — used as an instruction prefix when embedding the directory's name and description.
+
+### How it works
+
+1. **Embedding pipeline**: The role text is prepended to both the name and description before embedding. Instead of embedding `"advise"`, the system embeds `"terminal surface that formats and renders engine output as diagrams and tables: advise"`. This contextualizes shared vocabulary through the attention mechanism — "advise" in a display context encodes differently from "advise" in a computation context.
+2. **Vocabulary bleed audit**: If a target path is declared, the audit skips that module when computing cross-pulls, since the overlap is intentional.
+
+### Principles for writing the role text
+
+The role text follows the same description principles as KURAL.md:
+
+1. **Describe the borrower's role, not the target's domain.** "terminal surface that formats and renders engine output as diagrams and tables" describes what the shell module does. "presentation layer for the directory advice engine" names the analysis module's domain, which pulls embeddings toward it.
+2. **Describe the role in this system, not a generic job.** "formats and renders engine output as diagrams and tables" is specific to this module. "renders output" is generic and provides weak separation.
+3. **Never use the target module's vocabulary.** The same rule as descriptions — borrowed terms in the role text increase cross-pull instead of reducing it.
 
 ## Build & Run
 

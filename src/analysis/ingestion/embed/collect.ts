@@ -228,8 +228,13 @@ function collectContainers(
   data.fileCount = data.units.length;
 
   for (const dir of Object.values(result.directories)) {
-    data.names.push(dir.name);
-    data.descs.push(dir.description ?? "");
+    const borrowsRole = dir.borrows?.role ?? "";
+    data.names.push(borrowsRole === "" ? dir.name : `${borrowsRole}: ${dir.name}`);
+    data.descs.push(
+      borrowsRole === ""
+        ? (dir.description ?? "")
+        : `Represent a ${borrowsRole}: ${dir.description ?? ""}`,
+    );
     data.paths.push(buildPathSignal(dir.path, rootPath, keywords));
     data.units.push(dir);
     data.unitPaths.push(dir.path);

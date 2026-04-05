@@ -87,6 +87,10 @@ describe("parse metadata", () => {
 });
 
 const edgeFixturesDir = resolve(import.meta.dirname, "../../../../tests/fixtures/pipeline-edge");
+const borrowsFixturesDir = resolve(
+  import.meta.dirname,
+  "../../../../tests/fixtures/borrows-project",
+);
 
 describe("parse edge cases", () => {
   it("skips @kuralResidual lines with empty audit name", async () => {
@@ -104,5 +108,41 @@ describe("parse edge cases", () => {
 
     // All lines are @kuralResidual, so description should be undefined
     expect(root.description).toBeUndefined();
+  });
+});
+
+describe("parse @kuralBorrows", () => {
+  it("parses target and quoted role from KURAL.md", async () => {
+    const result = await parse(borrowsFixturesDir);
+    const root = result.directories[borrowsFixturesDir];
+
+    expect(root.borrows).toEqual({
+      target: "analysis/advise",
+      role: "terminal surface that renders engine output as diagrams",
+    });
+  });
+
+  it("parses borrows without target path", async () => {
+    const result = await parse(borrowsFixturesDir);
+    const commands = result.directories[resolve(borrowsFixturesDir, "commands")];
+
+    expect(commands.borrows).toEqual({
+      target: undefined,
+      role: "terminal surface that renders path maps",
+    });
+  });
+
+  it("strips @kuralBorrows line from description", async () => {
+    const result = await parse(borrowsFixturesDir);
+    const root = result.directories[borrowsFixturesDir];
+
+    expect(root.description).toBe("The consultant's desk. Displays results on stdout.");
+  });
+
+  it("leaves borrows undefined when not present", async () => {
+    const result = await parse(fixturesDir);
+    const root = result.directories[fixturesDir];
+
+    expect(root.borrows).toBeUndefined();
   });
 });

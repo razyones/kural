@@ -1,8 +1,8 @@
 /**
- * The bridge. Loads a snapshot, builds a tree, and runs the placement
- * engine against a user query. It is the only module that connects
- * database state to the placement algorithm — no other module
- * orchestrates the read-embed-place flow.
+ * The bridge. Opens a snapshot, builds a tree, and delegates to the
+ * engine for the place command. It is the only module that bridges
+ * stored state to the engine for this command — no other module
+ * orchestrates the snapshot-to-engine flow for code queries.
  */
 
 import { activePath, closeSnapshot, currentBranch, openSnapshot } from "../../../db/snapshot.ts";

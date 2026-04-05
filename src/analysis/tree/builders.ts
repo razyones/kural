@@ -154,6 +154,7 @@ function directoryNode(dir: KuralDirectory, dirPath: string, childKeys: string[]
     exported: false,
     description: dir.description,
     bound: null,
+    borrows: dir.borrows,
   };
 }
 

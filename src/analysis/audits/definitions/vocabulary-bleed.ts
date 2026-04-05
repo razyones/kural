@@ -4,7 +4,7 @@
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
-import type { CodeNode } from "../../tree/tree.ts";
+import type { CodeNode, DirectoryNode } from "../../tree/tree.ts";
 import { cosineSimilarity } from "../../../utils/vectors.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../../utils/format.ts";
@@ -17,6 +17,17 @@ import { stripKeyPrefix } from "../../../utils/paths.ts";
 const NONE = 0;
 const HALF = 2;
 const MAX_CROSS_PULLS = 3;
+
+/**
+ * Type guard for directory nodes that carry the borrows field.
+ * @param node - The code node to check
+ * @returns True if the node is a DirectoryNode
+ * @kuralPure
+ * @kuralHelper
+ */
+function isDirectoryNode(node: CodeNode): node is DirectoryNode {
+  return node.kind === "directory";
+}
 
 /**
  * Tests whether a directory's identity embedding drifts closer to a non-sibling module than to its nearest sibling.
@@ -110,9 +121,13 @@ function collectVocabCandidates(
     const sibSims = siblings.map((s) => cosineSimilarity(node.identity, s.identity));
     const minSiblingSim = Math.min(...sibSims);
     const siblingPaths = new Set([key, ...siblings.map((s) => s.key), parent.key]);
+    const borrowsTarget = isDirectoryNode(node) ? node.borrows?.target : undefined;
     const nodePulls: { path: string; sim: number }[] = [];
     for (const [otherKey, otherNode] of allDirs) {
       if (siblingPaths.has(otherKey) || otherNode.parentKey === key) {
+        continue;
+      }
+      if (borrowsTarget !== undefined && otherKey.endsWith(`/${borrowsTarget}`)) {
         continue;
       }
       const s = cosineSimilarity(node.identity, otherNode.identity);

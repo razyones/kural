@@ -1,8 +1,8 @@
 /**
- * The counselor. Defines the CLI argument schema and wires user input
- * to the reorganization analysis engine. It is the only module that
- * speaks the Gunshi command protocol for directory restructuring
- * advice — no other module defines its arguments or presents its output.
+ * The counselor. Defines the CLI argument schema for the advise command
+ * and wires parsed flags to the engine. It is the only module that
+ * speaks the Gunshi command protocol for this workflow — no other
+ * module defines these arguments or invokes this run handler.
  */
 
 import { printAdviseFooter, renderResults } from "./display.ts";
@@ -32,7 +32,7 @@ type AdviseArgs = {
  * Runs the advise pipeline in the appropriate mode and prints output.
  * @param values - Parsed CLI arguments from the advise command
  * @returns Resolves when command output has been printed to stdout
- * @kuralCauses orchestrates advise pipeline with database I/O and stdout
+ * @kuralCauses delegates to pipeline and prints output to stdout
  */
 async function runAdviseCommand(values: AdviseArgs): Promise<void> {
   const jsonMode = values.json === true;
@@ -75,7 +75,7 @@ async function runAdviseCommand(values: AdviseArgs): Promise<void> {
 
 export default define({
   name: "advise",
-  description: "Analyze directory structure and suggest reorganization",
+  description: "Analyze directory structure and suggest improvements",
   args: {
     path: {
       type: "positional" as const,

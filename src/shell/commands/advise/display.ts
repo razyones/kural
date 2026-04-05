@@ -1,8 +1,8 @@
 /**
- * The illustrator. Renders dendrograms, cut evaluations, and score
- * deltas for the advise command output. It is the only module that
- * owns the visual layout for reorganization recommendations — no
- * other module formats merge orders or cut comparisons.
+ * The illustrator. Renders tree diagrams, threshold comparisons, and
+ * metric deltas for the advise command's terminal output. It is the
+ * only module that owns this command's display layout — no other
+ * module formats these specific stdout sections.
  */
 
 import type {
@@ -72,10 +72,10 @@ function printGroup(group: ProposedGroup, index: number): void {
 }
 
 /**
- * Renders the current vs proposed score comparison for a cut.
- * @param cut - The cut evaluation containing proposed groups
- * @param result - The advise result with current baseline scores
- * @kuralCauses writes score delta table to stdout
+ * Prints the before-and-after metric table for one threshold section.
+ * @param cut - The threshold section containing member lists
+ * @param result - The engine result with current baseline metrics
+ * @kuralCauses writes metric delta table to stdout
  */
 function printScoreDeltas(cut: CutEvaluation, result: AdviseResult): void {
   if (cut.groups.length === NONE) {
@@ -110,12 +110,12 @@ function printScoreDeltas(cut: CutEvaluation, result: AdviseResult): void {
 }
 
 /**
- * Renders a single cut evaluation with groups and score deltas.
- * @param cut - The cut evaluation to display
- * @param cutIndex - The index of this cut in the cuts array
- * @param isBest - Whether this cut is the recommended best
- * @param result - The parent advise result for current score context
- * @kuralCauses writes cut details to stdout
+ * Prints a single threshold section with its member lists and metric table.
+ * @param cut - The threshold section to display
+ * @param cutIndex - The index of this section in the sections array
+ * @param isBest - Whether this section is the recommended best
+ * @param result - The parent engine result for current metric context
+ * @kuralCauses writes threshold section to stdout
  */
 function printSingleCut(
   cut: CutEvaluation,
@@ -156,9 +156,9 @@ function printSingleCut(
 }
 
 /**
- * Renders the merge order dendrogram for a single advise result.
- * @param result - The advise result containing merge distances
- * @kuralCauses writes dendrogram to stdout
+ * Prints the ordered similarity steps for a single engine result.
+ * @param result - The engine result containing step distances
+ * @kuralCauses writes step list to stdout
  */
 function printDendrogram(result: AdviseResult): void {
   logger.log(colors.bold(`  Merge order for ${result.targetName}:`));
@@ -199,9 +199,9 @@ function printCuts(result: AdviseResult): void {
 }
 
 /**
- * Renders all advise results to stdout with dendrograms and cuts.
- * @param results - Array of advise results to display
- * @kuralCauses writes analysis output to stdout
+ * Prints all engine results to stdout with step lists and threshold sections.
+ * @param results - Array of engine results to display
+ * @kuralCauses writes formatted output to stdout
  */
 function renderResults(results: AdviseResult[]): void {
   for (const result of results) {
@@ -229,7 +229,7 @@ function printAdviseFooter(): void {
       { term: "childrenScore", definition: "combined metric of fit and uniqueness" },
     ],
     [
-      { command: "kural advise <path>", description: "analyze a directory for reorganization" },
+      { command: "kural advise <path>", description: "analyze a directory for improvements" },
       { command: "kural advise <path> -d 2", description: "recurse into child directories" },
       {
         command: "kural advise <path> --leaf",

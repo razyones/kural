@@ -6,7 +6,7 @@
  * shapes the structural backbone from parsed units.
  */
 
-import type { BoundDirection, ResidualEntry } from "../ingestion/parse/types.ts";
+import type { BorrowsEntry, BoundDirection, ResidualEntry } from "../ingestion/parse/types.ts";
 import {
   directoryNode,
   fileNode,
@@ -68,6 +68,8 @@ type FileNode = BaseNode & {
 type DirectoryNode = BaseNode & {
   kind: "directory";
   childKeys: string[];
+  /** Cross-layer borrowing declaration from @kuralBorrows */
+  borrows?: BorrowsEntry;
 };
 
 /** A pattern group node — invisible folder materialised in memory. */

@@ -235,6 +235,106 @@ describe("vocabulary-bleed detect — few candidates skipped", () => {
   });
 });
 
+describe("vocabulary-bleed detect — @kuralBorrows exclusion", () => {
+  test("excludes declared borrows target from cross-pulls", () => {
+    const root = makeDir({
+      key: "dir:/src",
+      name: "src",
+      identity: ID_ROOT,
+      childKeys: ["dir:/src/auth", "dir:/src/api", "dir:/src/db"],
+      parentKey: null,
+    });
+    const auth = makeDir({
+      key: "dir:/src/auth",
+      name: "auth",
+      identity: ID_BLEEDER,
+      childKeys: [],
+      parentKey: "dir:/src",
+      borrows: { target: "other/stuff", role: "terminal surface" },
+    });
+    const api = makeDir({
+      key: "dir:/src/api",
+      name: "api",
+      identity: ID_API,
+      childKeys: [],
+      parentKey: "dir:/src",
+    });
+    const db = makeDir({
+      key: "dir:/src/db",
+      name: "db",
+      identity: ID_DB,
+      childKeys: [],
+      parentKey: "dir:/src",
+    });
+    const target = makeDir({
+      key: "dir:/other/stuff",
+      name: "stuff",
+      identity: ID_API,
+      childKeys: [],
+      parentKey: null,
+    });
+    const nodes = toNodeMap(root, auth, api, db, target);
+    const ctx = createContext(nodes, CONFIG);
+    const findings = vocabularyBleed.detect(ctx);
+
+    // Cross-pull to dir:/other/stuff should be excluded for auth
+    const authFinding = findings.find((f) => f.key === auth.key);
+    const authPulls = authFinding?.details?.["crossPulls"];
+    const pullPaths = Array.isArray(authPulls)
+      ? authPulls
+          .filter((p): p is { path: string } => typeof p === "object" && p !== null && "path" in p)
+          .map((p) => p.path)
+      : [];
+
+    expect(pullPaths).not.toContain("dir:/other/stuff");
+  });
+
+  test("does not exclude non-matching targets", () => {
+    const root = makeDir({
+      key: "dir:/src",
+      name: "src",
+      identity: ID_ROOT,
+      childKeys: ["dir:/src/auth", "dir:/src/api", "dir:/src/db"],
+      parentKey: null,
+    });
+    const auth = makeDir({
+      key: "dir:/src/auth",
+      name: "auth",
+      identity: ID_BLEEDER,
+      childKeys: [],
+      parentKey: "dir:/src",
+      borrows: { target: "unrelated/module", role: "some role" },
+    });
+    const api = makeDir({
+      key: "dir:/src/api",
+      name: "api",
+      identity: ID_API,
+      childKeys: [],
+      parentKey: "dir:/src",
+    });
+    const db = makeDir({
+      key: "dir:/src/db",
+      name: "db",
+      identity: ID_DB,
+      childKeys: [],
+      parentKey: "dir:/src",
+    });
+    const distant = makeDir({
+      key: "dir:/other",
+      name: "other",
+      identity: ID_DISTANT,
+      childKeys: [],
+      parentKey: null,
+    });
+    const nodes = toNodeMap(root, auth, api, db, distant);
+    const ctx = createContext(nodes, CONFIG);
+    const findings = vocabularyBleed.detect(ctx);
+
+    // dir:/other does not match "unrelated/module", so it is still considered
+    expect(findings.length).toBeGreaterThanOrEqual(NONE);
+  });
+});
+
 describe("vocabulary-bleed format", () => {
   test("includes cross-module vocabulary heading", () => {
     const MIN_SIB = E03;

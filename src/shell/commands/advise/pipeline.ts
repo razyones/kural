@@ -1,9 +1,8 @@
 /**
  * The compass needle. Opens a snapshot, rebuilds the code tree, and
- * runs the advise analysis engine against a target directory. It is the
- * only module that bridges stored snapshot state to the reorganization
- * engine — no other module orchestrates the read-analyze flow for
- * directory restructuring.
+ * delegates to the engine for the advise command. It is the only module
+ * that bridges stored state to the engine for this command — no other
+ * module orchestrates the snapshot-to-engine flow for directory advice.
  */
 
 import type { AdviseResult, NamedVector } from "../../../analysis/advise/analyze.ts";
@@ -145,7 +144,7 @@ function collectChildResults(
 
 /**
  * Opens the snapshot, builds the tree, finds the target directory,
- * and runs the advise analysis engine in snapshot mode.
+ * and delegates to the engine in snapshot mode.
  * @param root - Absolute path to the project root
  * @param targetPath - Relative or absolute path of the directory to analyze
  * @param useLeaf - Whether to use leaf vectors instead of identity
@@ -199,8 +198,8 @@ async function runAdvise(
 }
 
 /**
- * Reads a JSON file of named descriptions, embeds them, and runs the
- * advise analysis in description mode (no snapshot required).
+ * Reads a JSON file of named descriptions, embeds them, and delegates
+ * to the engine in description mode (no snapshot required).
  * @param filePath - Absolute path to the JSON description file
  * @param provider - Embedding provider name (e.g. "openai", "openrouter")
  * @param model - Optional model ID override
