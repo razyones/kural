@@ -1,4 +1,4 @@
-# Kural
+# Kural (A Necessity for Agentic Coding)
 
 ```
     {\_/}  │
@@ -9,6 +9,8 @@
 ```
 
 Structural scoring system for TypeScript codebases — answers **"where should this code live?"**
+
+> **Early stage project** — Kural is under active development and evolving rapidly. Check out [Projects](../../projects) for the roadmap ahead. We welcome feedback, ideas, and contributions — reach out at **hello@razyones.com** to collaborate or share your thoughts.
 
 Kural embeds every type, function, file, and directory into vector space, measures how well the codebase is distributed in that space, and surfaces specific, actionable structural issues.
 
@@ -21,6 +23,22 @@ Kural embeds every type, function, file, and directory into vector space, measur
         │        EMBED        │  Foundation: everything rests on this
         └─────────────────────┘
 ```
+
+## Why this matters
+
+AI coding agents write code. They add functions, create files, move things around. But they have no idea whether the code they just wrote landed in the right place. They can't see that the function they added to `utils/` is semantically identical to one in `core/`, or that the file they created in `commands/` drifts toward the analysis engine's vocabulary.
+
+Kural gives your codebase a structural map. **Kural skills give your AI assistant the ability to read that map.**
+
+Without skills, the agent generates code blind to structure. With skills, it knows the four-phase resolution pipeline, understands why descriptions carry 50% weight in the identity vector, and can work through audit findings methodically — fixing docs before restructuring, restructuring before suppressing.
+
+This is the difference between an agent that writes code and an agent that writes code **in the right place**.
+
+<Callout type="warn">
+  An AI agent without structural awareness will accumulate architectural debt faster than a human
+  developer — it produces more code per hour but has zero intuition about where that code belongs.
+  Kural skills are the structural intuition layer.
+</Callout>
 
 ## Install
 
@@ -36,7 +54,7 @@ npm install -g kural
 export AI_GATEWAY_API_KEY=your-api-key
 ```
 
-Supported providers: **Vercel** (default), **OpenAI**, **OpenRouter**, **Ollama** (local, no key required).
+Supported providers: **Vercel** (default), **OpenAI**, **OpenRouter**, **Ollama** (local, no key required). Even local models like Qwen3 Embedding 4B via Ollama perform very well. **Gemini Embedding 2** is the recommended model.
 
 ### 2. Prepare your codebase
 
@@ -210,12 +228,12 @@ Every node gets a score card:
 
 ## Tech stack
 
-| Layer             | Tool                                                   |
-| ----------------- | ------------------------------------------------------ |
-| CLI framework     | [Gunshi](https://github.com/poppinss/gunshi)           |
-| AI                | [Vercel AI SDK](https://sdk.vercel.ai/) via AI Gateway |
-| Local persistence | [TanStack DB](https://tanstack.com/db) + SQLite        |
-| Runtime           | Node.js, ESM                                           |
+| Layer             | Tool                                                    |
+| ----------------- | ------------------------------------------------------- |
+| CLI framework     | [Gunshi](https://github.com/poppinss/gunshi)            |
+| AI                | Multiple providers (Vercel, OpenAI, OpenRouter, Ollama) |
+| Local persistence | [TanStack DB](https://tanstack.com/db) + SQLite         |
+| Runtime           | Node.js, ESM                                            |
 
 ## Typical workflow
 
@@ -249,7 +267,7 @@ Kural is built on the shoulders of these open-source projects:
 **Core**
 
 - [Gunshi](https://github.com/kazupon/gunshi) — CLI framework
-- [Vercel AI SDK](https://github.com/vercel/ai) — embedding provider gateway
+- [AI SDK](https://github.com/vercel/ai) — embedding provider gateway
 - [TanStack DB](https://github.com/TanStack/db) — reactive persistence layer
 - [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) — SQLite driver
 - [Zod](https://github.com/colinhacks/zod) — schema validation

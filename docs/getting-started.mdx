@@ -26,7 +26,7 @@ kural --version
 
 ## Configure an embedding provider
 
-Kural needs an embedding provider to generate vectors. Set the `AI_GATEWAY_API_KEY` environment variable, or pass `--api-key` on each command.
+Kural needs an embedding provider to generate vectors. Set the `AI_GATEWAY_API_KEY` environment variable, or pass `--api-key` on each command. The recommended model is **Gemini Embedding 2**. Even local models like Qwen3 Embedding 4B via Ollama perform very well.
 
 <Tabs items={["Vercel (default)", "OpenAI", "OpenRouter", "Ollama (local)"]}>
   <Tab value="Vercel (default)">
