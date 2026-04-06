@@ -6,7 +6,7 @@
  */
 
 import { dirname, resolve } from "node:path";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import type { Editor } from "./editors.ts";
 import { fileURLToPath } from "node:url";
 
@@ -22,6 +22,22 @@ type WriteResult = {
 };
 
 /**
+ * Reads a skill source file with a clear error if missing.
+ * @param name - filename within the skill directory
+ * @returns the file content as a string
+ * @kuralCauses reads a file from the skill directory bundled with the package
+ */
+function readSkillFile(name: string): string {
+  const filePath = resolve(SKILL_DIR, name);
+  if (!existsSync(filePath)) {
+    throw new Error(
+      `Skill file not found: ${filePath}. The kural package may be corrupted — try reinstalling.`,
+    );
+  }
+  return readFileSync(filePath, "utf-8");
+}
+
+/**
  * Reads the shared skill sources and writes editor-specific files.
  * @param root - absolute path to the user's project root
  * @param selected - editors chosen by the user
@@ -29,8 +45,8 @@ type WriteResult = {
  * @kuralCauses reads skill source files and writes editor-specific skill files to disk
  */
 function writeSkills(root: string, selected: Editor[]): WriteResult[] {
-  const skill = readFileSync(resolve(SKILL_DIR, "SKILL.md"), "utf-8");
-  const reference = readFileSync(resolve(SKILL_DIR, "reference.md"), "utf-8");
+  const skill = readSkillFile("SKILL.md");
+  const reference = readSkillFile("reference.md");
 
   const results: WriteResult[] = [];
   const written = new Set<string>();

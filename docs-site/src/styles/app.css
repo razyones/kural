@@ -92,6 +92,11 @@ samp {
   border-top: 1px solid var(--color-fd-border);
 }
 
+/* ── Collapse paragraph margin inside Steps ── */
+.fd-step > p {
+  margin: 0;
+}
+
 /* ── Spacing fix ── */
 #nd-page > div:last-child {
   margin-top: 10rem;
