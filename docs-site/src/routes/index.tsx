@@ -3,6 +3,7 @@ import { HomeLayout } from "fumadocs-ui/layouts/home";
 import { BlinkingOwl, NavLogo } from "@/components/nav-logo";
 import { EmbeddingSpace } from "@/components/embedding-space";
 import { AnimatedBg } from "@/components/animated-bg";
+import { Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -20,6 +21,28 @@ function Home() {
 
         {/* Right: Hero content */}
         <div className="flex-1 flex flex-col justify-center px-8 md:px-16 lg:px-24">
+          <Link
+            to="/docs/$"
+            params={{ _splat: "ai-editors" }}
+            className="group inline-flex items-center gap-3 w-fit mb-6 px-1.5 py-1.5 pr-4 rounded-full border border-fd-border/60 bg-fd-muted/40 backdrop-blur-sm hover:border-fd-primary/40 transition-all duration-300"
+          >
+            <span className="px-2.5 py-1 rounded-full bg-fd-primary/15 text-fd-primary text-[10px] uppercase tracking-[0.08em] font-semibold">
+              New
+            </span>
+            <span className="text-[13px] text-fd-foreground font-semibold group-hover:text-fd-foreground transition-colors duration-300 inline-flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-fd-primary inline" />
+              <span className="text-fd-primary">A Necessity</span> for Agentic Coding
+            </span>
+            <svg
+              className="w-3.5 h-3.5 text-fd-muted-foreground group-hover:text-fd-primary group-hover:translate-x-0.5 transition-all duration-300"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
           <p className="text-[11px] uppercase tracking-[0.08em] mb-3 text-[hsl(187,50%,35%)] dark:text-[hsl(187,40%,55%)]">
             Structural scoring for TypeScript
           </p>

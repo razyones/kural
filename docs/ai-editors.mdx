@@ -1,0 +1,84 @@
+---
+title: AI Code Editors
+description: A must-have tool for agentic coding — give your AI assistant structural awareness
+icon: Bot
+---
+
+## Why this matters
+
+AI coding agents write code. They add functions, create files, move things around. But they have no idea whether the code they just wrote landed in the right place. They can't see that the function they added to `utils/` is semantically identical to one in `core/`, or that the file they created in `commands/` drifts toward the analysis engine's vocabulary.
+
+Kural gives your codebase a structural map. **Kural skills give your AI assistant the ability to read that map.**
+
+Without skills, the agent generates code blind to structure. With skills, it knows the four-phase resolution pipeline, understands why descriptions carry 50% weight in the identity vector, and can work through audit findings methodically — fixing docs before restructuring, restructuring before suppressing.
+
+This is the difference between an agent that writes code and an agent that writes code **in the right place**.
+
+<Callout type="warn">
+  An AI agent without structural awareness will accumulate architectural debt faster than a human
+  developer — it produces more code per hour but has zero intuition about where that code belongs.
+  Kural skills are the structural intuition layer.
+</Callout>
+
+## Supported editors
+
+| Editor         | Skills directory    |
+| :------------- | :------------------ |
+| Claude Code    | `.claude/skills/`   |
+| Cursor         | `.agents/skills/`   |
+| Windsurf       | `.windsurf/skills/` |
+| Codex          | `.agents/skills/`   |
+| Gemini CLI     | `.agents/skills/`   |
+| GitHub Copilot | `.agents/skills/`   |
+| Cline          | `.cline/skills/`    |
+| Amp            | `.agents/skills/`   |
+| Roo Code       | `.roo/skills/`      |
+| Kilo Code      | `.kilocode/skills/` |
+| Continue       | `.continue/skills/` |
+| Goose          | `.goose/skills/`    |
+| OpenCode       | `.agents/skills/`   |
+| Trae           | `.trae/skills/`     |
+| Junie          | `.junie/skills/`    |
+| Kiro CLI       | `.kiro/skills/`     |
+| Zencoder       | `.zencoder/skills/` |
+| Qwen Code      | `.qwen/skills/`     |
+
+## Install skills
+
+Run the interactive command and select your editors:
+
+```bash
+kural skill
+```
+
+The command reads the shared skill source from `.claude/skills/resolve-audit/` and writes editor-native versions to each selected editor's skills directory. Editors that share the same directory (e.g., Cursor, Codex, Gemini CLI, GitHub Copilot, Amp, and OpenCode all use `.agents/skills/`) are deduplicated automatically.
+
+## What the skill teaches
+
+The **resolve-audit** skill gives your AI assistant the full context it needs to work through audit findings:
+
+- **The four-phase pipeline** — fix incomplete docs first, then documentation quality, then structural issues, and only suppress with `@kuralResidual` as a last resort
+- **Per-audit resolution guidance** — what each of the 15 audits detects and how to fix it
+- **Description principles** — the five rules for writing descriptions that produce accurate embeddings
+- **Kural params** — when and how to use `@kuralHelper`, `@kuralUtil`, `@kuralPatterns`, `@kuralCompanion`, `@kuralBound`, `@kuralBorrows`, `@kuralPure`, `@kuralCauses`, and `@kuralResidual`
+
+## Claude Code usage
+
+In Claude Code, the skill is invoked as a slash command:
+
+```
+/resolve-audit
+/resolve-audit outliers
+/resolve-audit src/analysis
+```
+
+For other editors, the skill content is loaded as context when your assistant detects audit-related work.
+
+## Keeping skills in sync
+
+Skill source lives in `.claude/skills/resolve-audit/`. If you update the source files, re-run `kural skill` to propagate changes to all editor targets.
+
+<Callout type="info">
+  Add editor-specific skill directories to `.gitignore` if you don't want them committed. The
+  canonical source is always `.claude/skills/resolve-audit/`.
+</Callout>

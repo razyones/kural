@@ -1,8 +1,11 @@
 {
   "pages": [
     "index",
+    "---Guides---",
     "getting-started",
     "configuration",
+    "ai-editors",
+    "---Concepts---",
     "architecture",
     "foundation",
     "pillars",

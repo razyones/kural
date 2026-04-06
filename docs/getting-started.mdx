@@ -255,7 +255,7 @@ kural score -c <snapshot-id>
 kural audit
 ```
 
-Kural runs 14 statistical audits that surface specific, actionable structural issues -- outliers, duplicates, containment problems, and more.
+Kural runs 15 statistical audits that surface specific, actionable structural issues -- outliers, duplicates, containment problems, and more.
 
 ```bash
 # Filter by audit category
@@ -322,6 +322,18 @@ Create a `kural.config.json` in your project root to persist settings:
 
 See [Configuration](/docs/configuration) for detailed guidance on tuning these settings after your first results.
 
+## Equip your AI code editor
+
+If you use an AI coding agent, give it structural awareness with the built-in resolve-audit skill:
+
+```bash
+kural skill
+```
+
+This interactive command lets you pick your editor(s) and writes skill files that teach your assistant the four-phase audit resolution pipeline, description principles, and kural params. Supports 18 editors including Claude Code, Cursor, Windsurf, GitHub Copilot, and more.
+
+See [AI Code Editors](/docs/ai-editors) for the full list and details.
+
 ## Typical workflow
 
 <Steps>
@@ -330,6 +342,6 @@ See [Configuration](/docs/configuration) for detailed guidance on tuning these s
   <Step>**Generate** a snapshot: `kural snapshot generate src`</Step>
   <Step>**Score** the overall structure: `kural score`</Step>
   <Step>**Audit** for specific issues: `kural audit`</Step>
-  <Step>**Fix** the flagged issues, then regenerate to verify improvement</Step>
+  <Step>**Fix** the flagged issues — or run `kural skill` to equip your AI agent to fix them for you</Step>
   <Step>**Compare** before and after: `kural score -c <old-snapshot-id>`</Step>
 </Steps>

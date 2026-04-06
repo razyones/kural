@@ -153,6 +153,7 @@ The role text follows the same description principles as KURAL.md:
 - `node dist/cli.mjs` — run the built CLI
 - `vp check` — format, lint, type check
 - `vp test` — run tests (vitest, import from `vite-plus/test`)
+- `vp run docs:dev` — run docs site dev server (extracts embeddings, builds search index, starts Vite)
 
 ## Conventions
 

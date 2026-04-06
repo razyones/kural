@@ -33,7 +33,8 @@ function docsDataPlugin(): Plugin {
 
       type TreeNode =
         | { type: "page"; name: string; url: string; icon?: string; $ref: { file: string } }
-        | { type: "folder"; name: string; icon?: string; children: TreeNode[] };
+        | { type: "folder"; name: string; icon?: string; children: TreeNode[] }
+        | { type: "separator"; name: string };
 
       // Resolve Lucide icon names to SVG strings at build time
       const { icons } = await import("lucide-react");
@@ -130,7 +131,13 @@ function docsDataPlugin(): Plugin {
         }
 
         // Add ordered entries first, then remaining files
+        const separatorRe = /^---(?:\[(?<icon>[^\]]+)])?(?<label>.+)---$/;
         for (const name of order) {
+          const sep = separatorRe.exec(name);
+          if (sep?.groups?.label) {
+            nodes.push({ type: "separator", name: sep.groups.label });
+            continue;
+          }
           addEntry(name);
         }
         for (const entry of readdirSync(dir)) {

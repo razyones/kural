@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.41",
+    "@clack/prompts": "^1.2.0",
     "@poppinss/cliui": "^6.7.0",
     "@saehrimnir/druidjs": "^0.8.0",
     "@tanstack/db": "^0.6.1",
