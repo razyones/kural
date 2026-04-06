@@ -18,6 +18,7 @@ import { useDocsSearch } from "fumadocs-core/search/client";
 import { Loader2, Sparkles } from "lucide-react";
 import type { EmbedderStatus } from "@/lib/search";
 import { AnimatedBg } from "@/components/animated-bg";
+import { NotFound } from "@/components/not-found";
 import appCss from "@/styles/app.css?url";
 import config from "../../docs.config";
 
@@ -57,6 +58,7 @@ function StableSearchItem(props: ComponentProps<typeof SearchDialogListItem>) {
 
 export const Route = createRootRoute({
   component: RootComponent,
+  notFoundComponent: NotFound,
   head: () => ({
     meta: [
       { charSet: "utf-8" },

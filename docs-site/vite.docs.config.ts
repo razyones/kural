@@ -272,6 +272,7 @@ export default defineConfig({
           crawlLinks: true,
         },
       },
+      pages: [{ path: "/docs" }, { path: "/llms.txt" }, { path: "/llms-full.txt" }],
     }),
     react(),
     nitro(),

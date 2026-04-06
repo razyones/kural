@@ -62,9 +62,8 @@ jobs:
         env:
           BASE_PATH: ${{ steps.base.outputs.path }}
 
-      - name: Generate SPA fallback pages
+      - name: Generate SPA fallback 404
         run: |
-          cp docs-site/.output/public/_shell.html docs-site/.output/public/index.html
           cp docs-site/.output/public/_shell.html docs-site/.output/public/404.html
 
       - name: Upload build output
