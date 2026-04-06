@@ -1,6 +1,6 @@
 ---
 title: Audits
-description: 14 statistical checks that surface specific structural issues
+description: 15 statistical checks that surface specific structural issues
 icon: SearchCheck
 ---
 
@@ -44,7 +44,7 @@ The `sensitivity` parameter (default 2.0) controls how many deviations from cent
 
 ---
 
-## 2. The 14 Audits
+## 2. The 15 Audits
 
 ### Bloating & Size
 
@@ -83,6 +83,8 @@ The `sensitivity` parameter (default 2.0) controls how many deviations from cent
 **incoherent-utils** — Same logic for util containers, scored within their own population.
 
 **identity-language** — Detects directories whose KURAL.md description leans toward "is" (static identity) instead of "does" (dynamic purpose). Measured against the is-does axis — 60 multilingual anchor sentences from `src/config/axis-anchors.ts`. Flags directories whose axis score falls below a robust lower fence.
+
+**weak-identity** — Detects containers where more than half the children fit a sibling module better than their own parent. Uses the drift ratio — the fraction of children whose uncle fit exceeds parent fit — and flags containers where this ratio is a Z-score upper outlier. Reports the strongest competing uncle and the parent-vs-uncle fit comparison. Requires at least 4 eligible children for the statistical test.
 
 **incomplete-docs** — Detects units missing required documentation. Functions need description, `@param`, `@returns`, and `@kuralPure` or `@kuralCauses`. Types need description. Files need file-level JSDoc. Directories need KURAL.md with a description.
 

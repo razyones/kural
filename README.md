@@ -107,7 +107,7 @@ kural score
 kural audit
 ```
 
-14 statistical audits surface outliers, duplicates, containment problems, and more.
+15 statistical audits surface outliers, duplicates, containment problems, and more.
 
 ## Commands
 
