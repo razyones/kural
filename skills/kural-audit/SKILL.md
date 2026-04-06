@@ -18,9 +18,18 @@ Help the user study and resolve kural audit findings. Kural detects structural i
 
 ### Workflow
 
-#### 1. Run the Audit
+#### 1. Establish Baseline and Run the Audit
 
-Run the audit with JSON output to get structured findings:
+First, check the current score and pin it as a baseline before making any changes:
+
+```
+node dist/cli.mjs score
+node dist/cli.mjs snapshot pin <snapshot-id> <milestone-name>
+```
+
+Pin at meaningful milestones — release versions (`0.1.0`), before major refactors (`pre-refactor`), or before audit resolution sessions (`pre-audit-fix`). This creates a named checkpoint to compare against throughout the fix cycle.
+
+Then run the audit with JSON output to get structured findings:
 
 ```
 node dist/cli.mjs audit --json --expand
@@ -60,7 +69,7 @@ Always first. Descriptions carry 50% weight in the identity vector. Missing docs
 - Add missing file-level JSDoc
 - Add missing KURAL.md descriptions for directories
 
-After fixing: re-snapshot, re-audit. Proceed to Phase 2 only with the new findings.
+After fixing: re-snapshot, compare scores (`-c <baseline>`), then re-audit. Proceed to Phase 2 only if scores held or improved and with the new findings.
 
 **Phase 2: Fix documentation quality**
 Descriptions exist now, but may use wrong voice, borrow sibling vocabulary, or mismatch content. Fixing these is cheaper than structural changes and still cascades through the embedding space.
@@ -69,7 +78,7 @@ Descriptions exist now, but may use wrong voice, borrow sibling vocabulary, or m
 - `vocabulary-bleed` — Rewrite KURAL.md using vocabulary exclusive to this module's domain. Never borrow sibling or cousin vocabulary. Use `@kuralBorrows` only if cross-module vocabulary is intentional
 - `incoherent` / `incoherent-utils` — Rename the unit or rewrite its description to match actual content
 
-After fixing: re-snapshot, re-audit. Proceed to Phase 3 only with the new findings.
+After fixing: re-snapshot, compare scores (`-c <baseline>`), then re-audit. Proceed to Phase 3 only if scores held or improved and with the new findings.
 
 **Phase 3: Fix structural issues**
 Only now can you trust what the audits report. Persistent findings reflect genuine structural problems, not documentation gaps.
@@ -83,7 +92,7 @@ Only now can you trust what the audits report. Persistent findings reflect genui
 - `focal-drift` — Move `@kuralBound outward` to the actual dominant child, or refactor to restore the original focal
 - `weak-identity` — Restructure directory children or rewrite KURAL.md to establish clearer ownership
 
-After fixing: re-snapshot, re-audit. Proceed to Phase 4 only with the new findings.
+After fixing: re-snapshot, compare scores (`-c <baseline>`), then re-audit. Proceed to Phase 4 only if scores held or improved and with the new findings.
 
 **Phase 4: Suppress with @kuralResidual**
 Last resort. Suppression acknowledges a finding without resolving the underlying issue. Only valid after reading the code and confirming the finding is architecturally intentional — a deliberate design choice that should not change.
@@ -92,6 +101,40 @@ Last resort. Suppression acknowledges a finding without resolving the underlying
 - Use the `hash` field from the finding — ties suppression to current code, breaks when code changes
 
 See [reference.md](reference.md) for detailed per-audit resolution guidance.
+
+### Scoring — The Ground Truth
+
+Scores are the ultimate measure of structural quality. Audits are named paths to improve scores — each finding identifies a pattern that, when fixed, should push the score higher. Always validate fixes with scores.
+
+**Score dimensions (each -1…1):**
+
+- **Self (fit)** — how well a node belongs under its parent
+- **Children** — how coherent a container's direct children are
+- **Subtree** — recursive health of everything below
+- **Overall** — harmonic mean of Self and Subtree
+
+**The feedback loop:**
+
+1. **Baseline** — check current score before fixing: `node dist/cli.mjs score`
+2. **Fix** — apply the four-phase pipeline
+3. **Re-snapshot** — `node dist/cli.mjs snapshot generate <path>`
+4. **Compare** — `node dist/cli.mjs score -c <baseline-id-or-pin>` — did the score go up?
+
+If the score improves, the fix helped. If it drops, the fix introduced a new problem — check what new audit finding appeared. Chain fixes until scores improve and audits clear.
+
+**Pinned snapshots as baselines:**
+Pin a snapshot to create a named baseline: `node dist/cli.mjs snapshot pin <id> <name>`. Then compare against it by name: `node dist/cli.mjs score -c <name>`. Each release or milestone should pin a baseline.
+
+**Score commands:**
+
+- `node dist/cli.mjs score` — overall score
+- `node dist/cli.mjs score -e` — detailed breakdown table (default 20 rows)
+- `node dist/cli.mjs score -e -l 0` — show all rows
+- `node dist/cli.mjs score -p <path>` — filter to a specific subtree
+- `node dist/cli.mjs score -c <id-or-pin>` — compare against a previous snapshot with deltas
+- `node dist/cli.mjs score -e -p <path> -c <id-or-pin>` — detailed subtree comparison
+
+**Reading deltas:** After comparison, each score shows a delta (e.g., `0.92 ▸ +0.03`). Positive deltas mean improvement. Negative deltas mean regression — investigate what changed.
 
 ### Description Principles
 
@@ -149,8 +192,12 @@ The consultant's desk. Parses directory targets and display flags...
 
 2. **Follow the four phases in order.** Do not jump to structural changes before fixing docs. Do not suppress before attempting structural fixes.
 
-3. **Re-snapshot and re-audit between phases.** Earlier fixes change embeddings. Findings that persist through doc fixes are real; findings that vanish were false positives from incomplete information.
+3. **Re-snapshot, compare scores, and re-audit between phases.** Earlier fixes change embeddings. Compare scores against the pinned baseline (`-c <pin-name>`) to confirm improvement. Findings that persist through doc fixes are real; findings that vanish were false positives from incomplete information.
 
-4. **Include the hash when suppressing.** Format: `@kuralResidual <audit-name> [<hash>]` — take the hash from the finding's `hash` field.
+4. **Scores are the ground truth, audits are the roadmap.** A fix that clears an audit finding but drops the score introduced a new problem. A fix that improves the score is correct even if new audit findings appear — chain the fixes.
 
-5. **Run `vp check` after code changes** to validate formatting, linting, and types.
+5. **Include the hash when suppressing.** Format: `@kuralResidual <audit-name> [<hash>]` — take the hash from the finding's `hash` field.
+
+6. **Unpin temporary baselines when done.** Pinned snapshots are never auto-evicted. After a resolution session, unpin working baselines (`node dist/cli.mjs snapshot unpin <name>`) to avoid accumulating stale snapshots. Keep only release milestones pinned.
+
+7. **Run `vp check` after code changes** to validate formatting, linting, and types.
