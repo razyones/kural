@@ -15,6 +15,7 @@ const NONE = 0;
 
 /**
  * Runs the interactive skill flow.
+ * @returns a promise that resolves when skill files have been written
  * @kuralCauses prompts user for editor selection and writes skill files to disk
  */
 async function handleAddSkill(): Promise<void> {

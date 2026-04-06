@@ -3,7 +3,6 @@
  * editor-specific versions to disk. It is the only module that
  * performs file I/O for the skill command — no other module
  * reads skill sources or writes editor output.
- * @kuralBound outward
  */
 
 import { dirname, resolve } from "node:path";

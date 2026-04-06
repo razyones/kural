@@ -4,14 +4,18 @@
  * the only module that knows where each editor stores its instruction
  * files and how to transform shared skill content into editor-native
  * format.
- * @kuralBound outward
  */
 
 const FIRST = 0;
 const SKILL_DIR = "kural-audit";
 const SKILL_FILE = "SKILL.md";
 
-/** @kuralPure */
+/**
+ * Removes YAML frontmatter delimited by triple dashes from markdown content.
+ * @param content - raw markdown string potentially starting with frontmatter
+ * @returns the content without the leading frontmatter block
+ * @kuralPure
+ */
 function stripYamlFrontmatter(content: string): string {
   const match = /^---\n[\s\S]*?\n---\n/.exec(content);
   if (match === null) {
