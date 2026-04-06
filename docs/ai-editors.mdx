@@ -51,11 +51,11 @@ Run the interactive command and select your editors:
 kural skill
 ```
 
-The command reads the shared skill source from `.claude/skills/resolve-audit/` and writes editor-native versions to each selected editor's skills directory. Editors that share the same directory (e.g., Cursor, Codex, Gemini CLI, GitHub Copilot, Amp, and OpenCode all use `.agents/skills/`) are deduplicated automatically.
+The command reads the skill source bundled with the kural package and writes editor-native versions to each selected editor's skills directory. Editors that share the same directory (e.g., Cursor, Codex, Gemini CLI, GitHub Copilot, Amp, and OpenCode all use `.agents/skills/`) are deduplicated automatically.
 
 ## What the skill teaches
 
-The **resolve-audit** skill gives your AI assistant the full context it needs to work through audit findings:
+The **kural-audit** skill gives your AI assistant the full context it needs to work through audit findings:
 
 - **The four-phase pipeline** — fix incomplete docs first, then documentation quality, then structural issues, and only suppress with `@kuralResidual` as a last resort
 - **Per-audit resolution guidance** — what each of the 15 audits detects and how to fix it
@@ -67,18 +67,13 @@ The **resolve-audit** skill gives your AI assistant the full context it needs to
 In Claude Code, the skill is invoked as a slash command:
 
 ```
-/resolve-audit
-/resolve-audit outliers
-/resolve-audit src/analysis
+/kural-audit
+/kural-audit outliers
+/kural-audit src/analysis
 ```
 
 For other editors, the skill content is loaded as context when your assistant detects audit-related work.
 
 ## Keeping skills in sync
 
-Skill source lives in `.claude/skills/resolve-audit/`. If you update the source files, re-run `kural skill` to propagate changes to all editor targets.
-
-<Callout type="info">
-  Add editor-specific skill directories to `.gitignore` if you don't want them committed. The
-  canonical source is always `.claude/skills/resolve-audit/`.
-</Callout>
+Skill source is bundled with the kural package. When a new version of kural ships updated skills, re-run `kural skill` to propagate changes to your editor targets.

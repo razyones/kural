@@ -9,9 +9,10 @@
 import { dirname, resolve } from "node:path";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import type { Editor } from "./editors.ts";
+import { fileURLToPath } from "node:url";
 
-const SKILL_SOURCE = ".claude/skills/resolve-audit/SKILL.md";
-const REFERENCE_SOURCE = ".claude/skills/resolve-audit/reference.md";
+const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const SKILL_DIR = resolve(PKG_ROOT, "skills", "kural-audit");
 
 /** Result of writing a single editor skill file. */
 type WriteResult = {
@@ -23,17 +24,14 @@ type WriteResult = {
 
 /**
  * Reads the shared skill sources and writes editor-specific files.
- * @param root - absolute path to the project root
+ * @param root - absolute path to the user's project root
  * @param selected - editors chosen by the user
  * @returns an array of write results, one per editor
  * @kuralCauses reads skill source files and writes editor-specific skill files to disk
  */
 function writeSkills(root: string, selected: Editor[]): WriteResult[] {
-  const skillPath = resolve(root, SKILL_SOURCE);
-  const referencePath = resolve(root, REFERENCE_SOURCE);
-
-  const skill = readFileSync(skillPath, "utf-8");
-  const reference = readFileSync(referencePath, "utf-8");
+  const skill = readFileSync(resolve(SKILL_DIR, "SKILL.md"), "utf-8");
+  const reference = readFileSync(resolve(SKILL_DIR, "reference.md"), "utf-8");
 
   const results: WriteResult[] = [];
   const written = new Set<string>();

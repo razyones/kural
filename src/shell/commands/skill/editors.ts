@@ -8,7 +8,7 @@
  */
 
 const FIRST = 0;
-const SKILL_DIR = "resolve-audit";
+const SKILL_DIR = "kural-audit";
 const SKILL_FILE = "SKILL.md";
 
 /** @kuralPure */

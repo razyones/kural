@@ -6,7 +6,7 @@
  * its interactive flow.
  */
 
-import { confirm, intro, isCancel, multiselect, outro } from "@clack/prompts";
+import { confirm, intro, isCancel, log, multiselect, outro } from "@clack/prompts";
 import { define } from "gunshi";
 import { editors } from "./editors.ts";
 import { writeSkills } from "./pipeline.ts";
@@ -36,7 +36,7 @@ async function handleAddSkill(): Promise<void> {
   const chosen = editors.filter((e) => selected.includes(e.value));
 
   const proceed = await confirm({
-    message: `Write resolve-audit skill to ${String(chosen.length)} editor(s)?`,
+    message: `Write kural-audit skill to ${String(chosen.length)} editor(s)?`,
   });
 
   if (isCancel(proceed) || !proceed) {
@@ -49,16 +49,12 @@ async function handleAddSkill(): Promise<void> {
   const ok = results.filter((r) => r.ok);
   const failed = results.filter((r) => !r.ok);
 
-  if (ok.length > NONE) {
-    for (const r of ok) {
-      console.log(`  \u001B[32m✓\u001B[0m ${r.editor} → ${r.path}`);
-    }
+  for (const r of ok) {
+    log.success(`${r.editor} → ${r.path}`);
   }
 
-  if (failed.length > NONE) {
-    for (const r of failed) {
-      console.log(`  \u001B[31m✗\u001B[0m ${r.editor} → ${r.error}`);
-    }
+  for (const r of failed) {
+    log.error(`${r.editor} → ${r.error}`);
   }
 
   outro(
