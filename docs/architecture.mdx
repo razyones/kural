@@ -25,13 +25,13 @@ The system is split into two tiers:
 
 ## Tech Stack
 
-| Layer             | Tool                                  | Role                                   |
-| ----------------- | ------------------------------------- | -------------------------------------- |
-| CLI framework     | Gunshi                                | Command routing, plugin system         |
-| AI                | Vercel AI SDK via AI Gateway          | Embeddings, advise                     |
-| Local persistence | TanStack DB + node-sqlite-persistence | Snapshot storage                       |
-| Cloud backend     | Turso (database-per-project)          | `active.db` + `history.db` per project |
-| Dashboard         | TanStack DB (React)                   | Reactive UI over collections           |
+| Layer             | Tool                                                    | Role                                   |
+| ----------------- | ------------------------------------------------------- | -------------------------------------- |
+| CLI framework     | Gunshi                                                  | Command routing, plugin system         |
+| AI                | Multiple providers (Vercel, OpenAI, OpenRouter, Ollama) | Embeddings, advise                     |
+| Local persistence | TanStack DB + node-sqlite-persistence                   | Snapshot storage                       |
+| Cloud backend     | Turso (database-per-project)                            | `active.db` + `history.db` per project |
+| Dashboard         | TanStack DB (React)                                     | Reactive UI over collections           |
 
 ## Data Model
 
