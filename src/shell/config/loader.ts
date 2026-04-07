@@ -4,10 +4,10 @@
  * touches the filesystem for configuration.
  */
 
-import { clampOrWarn, validateConfig } from "./validate.ts";
 import { existsSync, readFileSync } from "node:fs";
 import type { KuralConfig } from "./schema.ts";
 import { join } from "node:path";
+import { validateConfig } from "./validate.ts";
 
 const CONFIG_FILENAME = "kural.config.json";
 
@@ -38,4 +38,4 @@ function loadProjectConfig(root: string = process.cwd()): Partial<KuralConfig> {
   }
 }
 
-export { clampOrWarn, loadProjectConfig };
+export { loadProjectConfig };

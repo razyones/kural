@@ -57,7 +57,9 @@ function validateAudits(audits: Bag, warnings: string[]): void {
     );
     delete audits.minGroup;
   }
-  if ("disable" in audits && !Array.isArray(audits.disable)) {
+  if ("disable" in audits && Array.isArray(audits.disable)) {
+    audits.disable = audits.disable.filter((v): v is string => typeof v === "string");
+  } else if ("disable" in audits) {
     warnings.push("audits.disable must be an array of strings — ignoring");
     delete audits.disable;
   }
@@ -101,21 +103,4 @@ function validateConfig(raw: unknown): { config: Bag; warnings: string[] } {
   return { config, warnings };
 }
 
-/**
- * Warns and falls back to a default when a resolved value fails its constraint.
- * @param name - Config field name for the warning message
- * @param value - The resolved numeric value to check
- * @param valid - Whether the value passes its semantic constraint
- * @param fallback - Default to return when invalid
- * @returns The value if valid, otherwise the fallback
- * @kuralHelper
- */
-function clampOrWarn(name: string, value: number, valid: boolean, fallback: number): number {
-  if (valid) {
-    return value;
-  }
-  console.error(`Warning: ${name} is invalid (got ${String(value)}) — using default`);
-  return fallback;
-}
-
-export { clampOrWarn, validateConfig };
+export { validateConfig };

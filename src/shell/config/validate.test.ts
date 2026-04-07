@@ -3,7 +3,7 @@ import { validateConfig } from "./validate.ts";
 
 const ZERO = 0;
 const ONE = 1;
-const DUMMY = 1;
+const NON_OBJECT_VALUE = 1;
 
 /** Reads a field from the sanitized audits sub-object without type assertion. */
 function auditField(config: Record<string, unknown>, key: string): unknown {
@@ -124,6 +124,11 @@ describe("validateConfig — audits.disable", () => {
     const { warnings } = validateConfig({ audits: { disable: ["outliers"] } });
     expect(warnings).toHaveLength(ZERO);
   });
+
+  it("filters non-string items from disable array", () => {
+    const { config } = validateConfig({ audits: { disable: ["valid", NON_OBJECT_VALUE, null] } });
+    expect(auditField(config, "disable")).toEqual(["valid"]);
+  });
 });
 
 describe("validateConfig — domainKeywords", () => {
@@ -142,7 +147,7 @@ describe("validateConfig — domainKeywords", () => {
 
 describe("validateConfig — dictionary", () => {
   it("strips non-object dictionary", () => {
-    const { config, warnings } = validateConfig({ dictionary: [DUMMY] });
+    const { config, warnings } = validateConfig({ dictionary: [NON_OBJECT_VALUE] });
     expect(warnings[ZERO]).toContain("dictionary must be an object");
     expect(config.dictionary).toBeUndefined();
   });
