@@ -125,8 +125,7 @@ async function createActive(root: string, branch: string): Promise<OpenSnapshot>
       { cause: err },
     );
   }
-  const path = activePath(root, branch);
-  const snapshot = await openSnapshot(path);
+  const snapshot = await openSnapshot(activePath(root, branch));
   return snapshot;
 }
 
@@ -183,8 +182,9 @@ async function rotateActive(root: string, branch: string): Promise<void> {
     if (oldest) {
       try {
         rmSync(oldest.path);
-      } catch {
-        // eviction is best-effort — skip files that can't be removed
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.error(`Warning: eviction failed for ${oldest.snapshotId}: ${msg}`);
       }
     }
   }
@@ -203,20 +203,18 @@ function getHistorySnapshots(root: string, branch: string): SnapshotInfo[] {
   if (!existsSync(dir)) {
     return [];
   }
-
   const entries = readdirSync(dir);
   const snapshots: SnapshotInfo[] = [];
 
   for (const entry of entries) {
     const match = SNAPSHOT_ID_PATTERN.exec(entry);
     if (match) {
-      const snapshotId = entry.replace(HISTORY_SUFFIX, "");
-      const fullPath = join(dir, entry);
+      const path = join(dir, entry);
       snapshots.push({
-        path: fullPath,
-        snapshotId,
+        path,
+        snapshotId: entry.replace(HISTORY_SUFFIX, ""),
         timestamp: Number(match[MATCH_TIMESTAMP]),
-        pinName: readPinName(fullPath),
+        pinName: readPinName(path),
       });
     }
   }
@@ -237,9 +235,15 @@ function cloneActiveToAdvise(root: string, branch: string): string {
   if (!existsSync(active)) {
     throw new Error("No active database to clone — run generate first");
   }
-
   const advise = advisePath(root, branch);
-  copyFileSync(active, advise);
+  try {
+    copyFileSync(active, advise);
+  } catch (err) {
+    throw new Error(
+      `Failed to clone active database to ${advise}: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
+  }
   return advise;
 }
 
@@ -251,8 +255,13 @@ function cloneActiveToAdvise(root: string, branch: string): string {
  */
 function deleteAdvise(root: string, branch: string): void {
   const advise = advisePath(root, branch);
-  if (existsSync(advise)) {
-    rmSync(advise);
+  try {
+    if (existsSync(advise)) {
+      rmSync(advise);
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Warning: advise cleanup failed: ${msg}`);
   }
 }
 
