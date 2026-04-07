@@ -5,13 +5,13 @@
  * diagnostic CLI arguments.
  */
 
+import { clampOrWarn, loadProjectConfig } from "../../config/loader.ts";
 import { countListItems, printListSections } from "../../ui/list.ts";
 import { logBanner, logger } from "../../ui/log.ts";
 import type { AuditReport } from "../../../analysis/audits/detect.ts";
 import type { AuditsConfig } from "../../config/audits.ts";
 import { define } from "gunshi";
 import { formatReport } from "./report.ts";
-import { loadProjectConfig } from "../../config/loader.ts";
 import { relative } from "node:path";
 import { renderFooter } from "../../ui/footer.ts";
 import { runAudits } from "./pipeline.ts";
@@ -22,9 +22,10 @@ const DEFAULT_SENSITIVITY = 2.0;
 const DEFAULT_CONTAINMENT_FLOOR = 0.9;
 const DEFAULT_MIN_GROUP = 4;
 const RADIX = 10;
+const ONE = 1;
 
 /**
- * Resolves the final audit sensitivity by layering CLI overrides on top of the project's persisted tuning parameters.
+ * Resolves the final audit config by layering CLI overrides on top of the project's persisted tuning parameters.
  * @param values - Raw string values from CLI argument parsing
  * @param projectAudits - Partial audit config loaded from the project config file
  * @returns A fully resolved AuditsConfig with defaults applied
@@ -34,14 +35,21 @@ function resolveConfig(
   values: { sensitivity?: string; containmentFloor?: string; minGroup?: string },
   projectAudits: Partial<AuditsConfig>,
 ): AuditsConfig {
+  const s =
+    parseFloat(values.sensitivity ?? "") || (projectAudits.sensitivity ?? DEFAULT_SENSITIVITY);
+  const f =
+    parseFloat(values.containmentFloor ?? "") ||
+    (projectAudits.containmentFloor ?? DEFAULT_CONTAINMENT_FLOOR);
+  const g = parseInt(values.minGroup ?? "", RADIX) || (projectAudits.minGroup ?? DEFAULT_MIN_GROUP);
   return {
-    sensitivity:
-      parseFloat(values.sensitivity ?? "") || (projectAudits.sensitivity ?? DEFAULT_SENSITIVITY),
-    containmentFloor:
-      parseFloat(values.containmentFloor ?? "") ||
-      (projectAudits.containmentFloor ?? DEFAULT_CONTAINMENT_FLOOR),
-    minGroup:
-      parseInt(values.minGroup ?? "", RADIX) || (projectAudits.minGroup ?? DEFAULT_MIN_GROUP),
+    sensitivity: clampOrWarn("sensitivity", s, s > NONE, DEFAULT_SENSITIVITY),
+    containmentFloor: clampOrWarn(
+      "containmentFloor",
+      f,
+      f >= NONE && f <= ONE,
+      DEFAULT_CONTAINMENT_FLOOR,
+    ),
+    minGroup: clampOrWarn("minGroup", g, Number.isInteger(g) && g >= ONE, DEFAULT_MIN_GROUP),
     disable: projectAudits.disable,
   };
 }

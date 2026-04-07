@@ -4,6 +4,7 @@
  * touches the filesystem for configuration.
  */
 
+import { clampOrWarn, validateConfig } from "./validate.ts";
 import { existsSync, readFileSync } from "node:fs";
 import type { KuralConfig } from "./schema.ts";
 import { join } from "node:path";
@@ -24,11 +25,11 @@ function loadProjectConfig(root: string = process.cwd()): Partial<KuralConfig> {
   }
   try {
     const parsed: unknown = JSON.parse(readFileSync(configPath, "utf-8"));
-    if (typeof parsed === "object" && parsed !== null) {
-      return parsed as Partial<KuralConfig>;
+    const { config, warnings } = validateConfig(parsed);
+    for (const warning of warnings) {
+      console.error(`Warning: ${CONFIG_FILENAME}: ${warning}`);
     }
-    console.error(`Warning: ${CONFIG_FILENAME} does not contain a JSON object — using defaults`);
-    return {};
+    return config as Partial<KuralConfig>;
   } catch (err) {
     console.error(
       `Warning: failed to parse ${CONFIG_FILENAME}: ${err instanceof Error ? err.message : String(err)} — using defaults`,
@@ -37,4 +38,4 @@ function loadProjectConfig(root: string = process.cwd()): Partial<KuralConfig> {
   }
 }
 
-export { loadProjectConfig };
+export { clampOrWarn, loadProjectConfig };
