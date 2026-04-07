@@ -4,9 +4,11 @@ import { docs } from "collections/server";
 import { icons } from "lucide-react";
 import { createElement } from "react";
 
+const base = (process.env.BASE_PATH ?? "/").replace(/\/$/, "");
+
 export const source = loader({
   source: docs.toFumadocsSource(),
-  baseUrl: "/docs",
+  baseUrl: `${base}/docs`,
   icon: (name) => {
     if (!name || !(name in icons)) {
       return;
