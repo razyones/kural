@@ -247,10 +247,17 @@ function docsDataPlugin(): Plugin {
         };
       });
 
+      const pageMeta: Record<string, { title: string; description: string }> = {};
+      for (const entry of searchEntries) {
+        const key = entry.url === "/docs" ? "" : entry.url.replace("/docs/", "");
+        pageMeta[key] = { title: entry.title, description: entry.description };
+      }
+
       return [
         `export const pathMap = ${JSON.stringify(pathMap)};`,
         `export const pageTree = ${JSON.stringify(pageTree)};`,
         `export const searchEntries = ${JSON.stringify(searchEntries)};`,
+        `export const pageMeta = ${JSON.stringify(pageMeta)};`,
       ].join("\n");
     },
   };
@@ -272,7 +279,11 @@ export default defineConfig({
           crawlLinks: true,
         },
       },
-      pages: [{ path: "/docs" }, { path: "/llms.txt" }, { path: "/llms-full.txt" }],
+      pages: [{ path: "/" }, { path: "/docs" }, { path: "/llms.txt" }, { path: "/llms-full.txt" }],
+      sitemap: {
+        enabled: true,
+        host: "https://razyones.github.io/kural",
+      },
     }),
     react(),
     nitro(),
