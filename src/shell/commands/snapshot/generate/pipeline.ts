@@ -7,6 +7,7 @@
 
 import type { EmbedOptions, Embedder } from "../../../../analysis/ingestion/embed/pipeline.ts";
 import {
+  activePath,
   buildSnapshotId,
   closeSnapshot,
   createActive,
@@ -85,7 +86,7 @@ async function persistSnapshot(
 ): Promise<{ dbPath: string; snapshotId: string }> {
   await rotateActive(root, branch);
   const snapshot = await createActive(root, branch);
-  const dbPath = `${root}/.kural-db/${branch}/active.db`;
+  const dbPath = activePath(root, branch);
 
   const createdAt = Date.now();
   const commitHash = currentCommitHash();
