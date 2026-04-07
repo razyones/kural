@@ -6,6 +6,90 @@ import mdx from "fumadocs-mdx/vite";
 import { nitro } from "nitro/vite";
 import type { Plugin } from "vite";
 
+const SITE_ORIGIN = "https://razyones.github.io";
+const basePath = (process.env.BASE_PATH ?? "/kural/").replace(/\/$/, "");
+const siteHost = `${SITE_ORIGIN}${basePath}`;
+
+/**
+ * Generates `sitemap.xml` from docs source pages and known static routes.
+ * Replaces TanStack Start's built-in sitemap which double-prefixes crawled
+ * paths when a non-root base path is used.
+ */
+function sitemapPlugin(): Plugin {
+  return {
+    name: "sitemap",
+    apply: "build",
+    closeBundle: {
+      sequential: true,
+      async handler() {
+        const { readdirSync, existsSync, statSync, writeFileSync } = await import("node:fs");
+        const { join, relative } = await import("node:path");
+        const docsDir = join(import.meta.dirname, "../docs");
+        const outDir = join(import.meta.dirname, ".output/public");
+        const today = new Date().toISOString().slice(0, 10);
+
+        // Collect doc page paths from source
+        const paths: string[] = ["/", "/docs"];
+        function walkDocs(dir: string): void {
+          for (const entry of readdirSync(dir)) {
+            if (entry === "meta.json") continue;
+            const full = join(dir, entry);
+            if (statSync(full).isDirectory()) {
+              walkDocs(full);
+            } else if (/\.mdx?$/.test(entry)) {
+              const rel = relative(docsDir, full);
+              const slug = rel.replace(/\.mdx?$/, "").replace(/\/index$/, "");
+              if (slug !== "index") {
+                paths.push(`/docs/${slug}`);
+              }
+            }
+          }
+        }
+        walkDocs(docsDir);
+
+        // Add non-doc static routes that are prerendered
+        if (existsSync(join(outDir, "llms.txt"))) paths.push("/llms.txt");
+        if (existsSync(join(outDir, "llms-full.txt"))) paths.push("/llms-full.txt");
+
+        paths.sort();
+
+        const urls = paths
+          .map(
+            (p) =>
+              `  <url>\n    <loc>${siteHost}${p}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`,
+          )
+          .join("\n");
+        const xml = [
+          '<?xml version="1.0" encoding="UTF-8"?>',
+          '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">',
+          urls,
+          "</urlset>",
+          "",
+        ].join("\n");
+
+        writeFileSync(join(outDir, "sitemap.xml"), xml);
+      },
+    },
+  };
+}
+
+/** Generates `robots.txt` with the correct sitemap URL for this deployment. */
+function robotsTxtPlugin(): Plugin {
+  return {
+    name: "robots-txt",
+    apply: "build",
+    closeBundle: {
+      sequential: true,
+      async handler() {
+        const { writeFileSync } = await import("node:fs");
+        const { resolve } = await import("node:path");
+        const out = resolve(import.meta.dirname, ".output/public/robots.txt");
+        writeFileSync(out, `User-agent: *\nAllow: /\n\nSitemap: ${siteHost}/sitemap.xml\n`);
+      },
+    },
+  };
+}
+
 /**
  * Generates a virtual module `virtual:docs-data` that embeds the
  * slug-to-path mapping at build time. This lets the SPA resolve
@@ -280,14 +364,12 @@ export default defineConfig({
         },
       },
       pages: [{ path: "/" }, { path: "/docs" }, { path: "/llms.txt" }, { path: "/llms-full.txt" }],
-      sitemap: {
-        enabled: true,
-        host: "https://razyones.github.io/kural",
-      },
     }),
     react(),
     nitro(),
     docsDataPlugin(),
+    sitemapPlugin(),
+    robotsTxtPlugin(),
   ],
   resolve: {
     tsconfigPaths: true,
