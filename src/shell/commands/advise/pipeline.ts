@@ -82,7 +82,15 @@ function validateDescriptionEntries(data: unknown): DescriptionEntry[] | null {
  * @kuralPure
  */
 function readDescriptionFile(filePath: string): DescriptionEntry[] {
-  const raw = readFileSync(filePath, "utf-8");
+  let raw: string;
+  try {
+    raw = readFileSync(filePath, "utf-8");
+  } catch (err) {
+    throw new Error(
+      `Failed to read description file ${filePath}: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
+  }
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);

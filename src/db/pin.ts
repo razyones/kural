@@ -102,7 +102,14 @@ function deleteSnapshot(root: string, branch: string, idOrName: string): void {
   if (target === null) {
     throw new Error(`Snapshot not found: ${idOrName}`);
   }
-  rmSync(target.path);
+  try {
+    rmSync(target.path);
+  } catch (err) {
+    throw new Error(
+      `Failed to delete snapshot ${idOrName}: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
+  }
 }
 
 export { deleteSnapshot, pinSnapshot, unpinSnapshot };

@@ -92,8 +92,9 @@ async function loadEmbeddingCache(
     } finally {
       await closeSnapshot(snapshot);
     }
-  } catch {
-    // cache load failure is non-fatal — embeddings will be recomputed
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(`Warning: cache load failed — embeddings will be recomputed: ${msg}`);
     return undefined;
   }
 }

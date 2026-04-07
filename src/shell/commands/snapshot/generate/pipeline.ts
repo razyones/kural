@@ -19,7 +19,31 @@ import { embed } from "../../../../analysis/ingestion/embed/pipeline.ts";
 import { loadEmbeddingCache } from "../../../../db/cache.ts";
 import { parse } from "../../../../analysis/ingestion/parse/pipeline.ts";
 import { pinSnapshot } from "../../../../db/pin.ts";
+import { rmSync } from "node:fs";
 import { score } from "../../../../analysis/scoring/score.ts";
+
+/**
+ * Cleans up after a failed snapshot write by closing the database handle
+ * and removing the incomplete file, logging warnings for any cleanup failures.
+ * @param close - Async function to close the open snapshot
+ * @param dbPath - Path to the incomplete database file to remove
+ * @kuralCauses closes snapshot and removes database file
+ * @kuralHelper
+ */
+async function recoverFailedWrite(close: () => Promise<void>, dbPath: string): Promise<void> {
+  try {
+    await close();
+  } catch (closeErr) {
+    const msg = closeErr instanceof Error ? closeErr.message : String(closeErr);
+    console.error(`Warning: failed to close snapshot during recovery: ${msg}`);
+  }
+  try {
+    rmSync(dbPath);
+  } catch (rmErr) {
+    const msg = rmErr instanceof Error ? rmErr.message : String(rmErr);
+    console.error(`Warning: could not remove incomplete database ${dbPath}: ${msg}`);
+  }
+}
 
 /** Progress callbacks for each pipeline stage. */
 type GenerateCallbacks = {
@@ -71,9 +95,16 @@ async function persistSnapshot(
     await writeMetadata(snapshot.collections, modelId, createdAt, commitHash);
     await writeUnits(snapshot.collections, result);
     await writeScoreCards(snapshot.collections, cards);
-  } finally {
-    await closeSnapshot(snapshot);
+  } catch (err) {
+    await recoverFailedWrite(async () => {
+      await closeSnapshot(snapshot);
+    }, dbPath);
+    throw new Error(
+      `Failed to write snapshot data — re-run generate to retry: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
+    );
   }
+  await closeSnapshot(snapshot);
 
   if (pinName !== undefined) {
     try {
