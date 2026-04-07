@@ -56,6 +56,8 @@ function StableSearchItem(props: ComponentProps<typeof SearchDialogListItem>) {
   );
 }
 
+const base = import.meta.env.BASE_URL ?? "/";
+
 export const Route = createRootRoute({
   component: RootComponent,
   notFoundComponent: NotFound,
@@ -65,11 +67,11 @@ export const Route = createRootRoute({
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: config.name },
       { name: "description", content: config.description },
-      { property: "og:image", content: "/social-preview.png" },
+      { property: "og:image", content: `${base}social-preview.png` },
       { property: "og:image:width", content: "1280" },
       { property: "og:image:height", content: "640" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "/social-preview.png" },
+      { name: "twitter:image", content: `${base}social-preview.png` },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -91,9 +93,9 @@ export const Route = createRootRoute({
         href: "https://fonts.googleapis.com/css2?family=Lexend+Peta:wght@600&text=KURAL&display=swap",
       },
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", sizes: "32x32" },
-      { rel: "icon", href: "/owl.svg", type: "image/svg+xml" },
-      { rel: "apple-touch-icon", href: "/owl-180.png" },
+      { rel: "icon", href: `${base}favicon.ico`, sizes: "32x32" },
+      { rel: "icon", href: `${base}owl.svg`, type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: `${base}owl-180.png` },
     ],
   }),
 });
