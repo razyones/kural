@@ -125,9 +125,12 @@ describe("validateConfig — audits.disable", () => {
     expect(warnings).toHaveLength(ZERO);
   });
 
-  it("filters non-string items from disable array", () => {
-    const { config } = validateConfig({ audits: { disable: ["valid", NON_OBJECT_VALUE, null] } });
+  it("filters non-string items and warns", () => {
+    const { config, warnings } = validateConfig({
+      audits: { disable: ["valid", NON_OBJECT_VALUE, null] },
+    });
     expect(auditField(config, "disable")).toEqual(["valid"]);
+    expect(warnings[ZERO]).toContain("non-string items");
   });
 });
 

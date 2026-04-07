@@ -30,7 +30,16 @@ function parseOr(input: string | undefined, fallback: number, radix?: number): n
   return Number.isNaN(parsed) ? fallback : parsed;
 }
 
-/** Warns and falls back to a default when a resolved value fails its constraint. @kuralHelper */
+/**
+ * Warns and falls back to a default when a resolved value fails its constraint.
+ * @param name - Config field name for the warning message
+ * @param value - The resolved numeric value to check
+ * @param valid - Whether the value passes its semantic constraint
+ * @param fallback - Default to return when invalid
+ * @returns The value if valid, otherwise the fallback
+ * @kuralPure
+ * @kuralHelper
+ */
 function clampOrWarn(name: string, value: number, valid: boolean, fallback: number): number {
   if (valid) {
     return value;
@@ -91,4 +100,4 @@ function resolveAuditConfig(values: {
   return { config, disabledAudits: new Set([...cliDisabled, ...configDisabled]) };
 }
 
-export { resolveAuditConfig };
+export { clampOrWarn, parseOr, resolveAuditConfig, resolveConfig };

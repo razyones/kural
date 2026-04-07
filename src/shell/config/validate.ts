@@ -30,6 +30,7 @@ function isRecord(value: unknown): value is Bag {
  * Strips fields that violate constraints so downstream defaults apply.
  * @param audits - Mutable audit config bag
  * @param warnings - Accumulator for human-readable warnings
+ * @kuralPure
  * @kuralHelper
  */
 function validateAudits(audits: Bag, warnings: string[]): void {
@@ -58,7 +59,11 @@ function validateAudits(audits: Bag, warnings: string[]): void {
     delete audits.minGroup;
   }
   if ("disable" in audits && Array.isArray(audits.disable)) {
-    audits.disable = audits.disable.filter((v): v is string => typeof v === "string");
+    const strings = audits.disable.filter((v): v is string => typeof v === "string");
+    if (strings.length !== audits.disable.length) {
+      warnings.push("audits.disable contains non-string items — they will be ignored");
+    }
+    audits.disable = strings;
   } else if ("disable" in audits) {
     warnings.push("audits.disable must be an array of strings — ignoring");
     delete audits.disable;
