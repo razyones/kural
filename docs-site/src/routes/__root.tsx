@@ -65,6 +65,7 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "robots", content: "index, follow" },
       { title: config.name },
       { name: "description", content: config.description },
       { property: "og:title", content: config.name },
