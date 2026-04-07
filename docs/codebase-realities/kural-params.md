@@ -128,6 +128,8 @@ See [Bound Nodes](/docs/codebase-realities/bound-nodes) for the full specificati
 
 **Solution:** `@kuralPure` marks functions with no side effects — 194 functions in the Kural codebase carry this tag. `@kuralCauses` describes what a function does beyond its type signature: _"writes hero display to stdout"_, _"reads a KURAL.md file from disk"_, _"calls the embedding API via embedder"_. The causes description is embedded and blended into the signature facet at 0.3 or 0.25 weight.
 
+**Diagnostic warnings do not break purity.** A function that calls `console.error` or `console.warn` to surface validation diagnostics remains `@kuralPure`. Purity in kural's model is about the function's **role in the system** — whether its purpose involves I/O that changes system state or produces meaningful output. Incidental diagnostic logging (e.g. warning on an invalid config value before returning a default) is a side channel, not a system cause. Tagging such a function as `@kuralCauses` would misrepresent its identity — it would embed as an I/O function rather than a transformer.
+
 | Pillar    | Impact                                                                                |
 | :-------- | :------------------------------------------------------------------------------------ |
 | **Embed** | Causes description blended into signature facet. Pure functions use the raw signature |
