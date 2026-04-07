@@ -28,6 +28,7 @@ import { score } from "../../../../analysis/scoring/score.ts";
  * and removing the incomplete file, logging warnings for any cleanup failures.
  * @param close - Async function to close the open snapshot
  * @param dbPath - Path to the incomplete database file to remove
+ * @returns Resolves when recovery cleanup completes
  * @kuralCauses closes snapshot and removes database file
  * @kuralHelper
  */
