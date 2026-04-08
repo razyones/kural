@@ -120,7 +120,42 @@ See [Bound Nodes](/docs/codebase-realities/bound-nodes) for the full specificati
 
 ---
 
-## 7. @kuralPure / @kuralCauses
+## 7. @kuralBorrows
+
+**Codebase reality:** Some modules intentionally share vocabulary with a non-sibling. A shell command that presents an analysis engine's output will naturally use the engine's terms — "findings", "outliers", "probability trails". The overlap is by design, not a flaw.
+
+**Problem in vector space:** The directory's name and description embed close to the analysis module it presents, because they share vocabulary. The `vocabulary-bleed` audit flags this as a cross-pull finding — but the bleed is intentional.
+
+**Solution:** `@kuralBorrows target "role"` is a KURAL.md directive with two parameters:
+
+- **Target path** (optional): e.g. `analysis/audits` — tells the vocabulary bleed audit to skip this module when computing cross-pulls, since the overlap is intentional.
+- **Quoted role** (required): natural-language description of the borrower's role — prepended to both the directory's name and description before embedding, so shared vocabulary encodes differently through the attention mechanism. For example, `"audit"` in a `"terminal surface that formats engine output"` context produces a different vector than `"audit"` in a `"detection engine"` context.
+
+**Scope:** `@kuralBorrows` only affects the **directory container's** identity embedding. It does not cascade to files, functions, or types within the directory. File-level misplacement findings require file-level description fixes, not directory-level `@kuralBorrows`.
+
+**Format:**
+
+```markdown
+The inspector's office. Wires diagnostic CLI arguments to the issue display pipeline...
+@kuralBorrows analysis/audits "terminal surface that formats and renders engine output as categorized finding reports"
+```
+
+**Principles for writing the role text:**
+
+1. **Describe the borrower's role, not the target's domain.** _"terminal surface that formats engine output as diagrams"_ describes what the shell module does. _"presentation layer for the analysis engine"_ names the target's domain, which increases cross-pull instead of reducing it.
+2. **Describe the role in this system, not a generic job.** _"formats and renders engine output as categorized finding reports"_ is specific. _"renders output"_ is generic and provides weak separation.
+3. **Never use the target module's vocabulary.** Borrowed terms in the role text increase cross-pull instead of reducing it.
+
+| Pillar    | Impact                                                                     |
+| :-------- | :------------------------------------------------------------------------- |
+| **Embed** | Role text prepended to directory name and description before vectorization |
+| **Score** | No direct change — scoring operates on the resulting vectors               |
+| **Audit** | Target path excluded from vocabulary bleed cross-pull detection            |
+| **Place** | Better directory vectors lead to more accurate directory-level placement   |
+
+---
+
+## 8. @kuralPure / @kuralCauses
 
 **Codebase reality:** A function's type signature hides whether it reads from disk, writes to stdout, or calls an external API. `computeFit` in `src/sost/metrics.ts` is pure computation. `renderHero` in `src/ui/hero.ts` writes to stdout. Both could return `void`.
 
@@ -139,16 +174,17 @@ See [Bound Nodes](/docs/codebase-realities/bound-nodes) for the full specificati
 
 ---
 
-## 8. Impact Matrix
+## 9. Impact Matrix
 
-| Param                 | Embed                 | Score                      | Audit                               | Place           |
-| :-------------------- | :-------------------- | :------------------------- | :---------------------------------- | :-------------- |
-| `@kuralUtil`          | —                     | Separate tree, fit = null  | Own population                      | Util tree       |
-| `@kuralHelper`        | —                     | Normal                     | Excluded from outlier, pairs, bloat | Not relocatable |
-| `@kuralPatterns`      | Centroid in file leaf | Pattern containers         | Excluded from duplicates, merges    | One probability |
-| `@kuralCompanion`     | Centroid in file leaf | Deduplicated in uniqueness | Excluded from duplicates, merges    | One probability |
-| `@kuralBound inward`  | Leaf from siblings    | Fit = representativeness   | Suppresses outlier, pairs           | Fixed           |
-| `@kuralBound outward` | 2x parent weight      | Excluded from CV           | Suppresses containment              | Fixed           |
-| `@kuralResidual`      | —                     | —                          | Suppresses named audit              | —               |
-| `@kuralPure`          | Raw signature         | —                          | `incomplete-docs`                   | —               |
-| `@kuralCauses`        | Causes signal         | —                          | `incomplete-docs`                   | Better vectors  |
+| Param                 | Embed                 | Score                      | Audit                               | Place              |
+| :-------------------- | :-------------------- | :------------------------- | :---------------------------------- | :----------------- |
+| `@kuralUtil`          | —                     | Separate tree, fit = null  | Own population                      | Util tree          |
+| `@kuralHelper`        | —                     | Normal                     | Excluded from outlier, pairs, bloat | Not relocatable    |
+| `@kuralPatterns`      | Centroid in file leaf | Pattern containers         | Excluded from duplicates, merges    | One probability    |
+| `@kuralCompanion`     | Centroid in file leaf | Deduplicated in uniqueness | Excluded from duplicates, merges    | One probability    |
+| `@kuralBound inward`  | Leaf from siblings    | Fit = representativeness   | Suppresses outlier, pairs           | Fixed              |
+| `@kuralBound outward` | 2x parent weight      | Excluded from CV           | Suppresses containment              | Fixed              |
+| `@kuralBorrows`       | Role prefix on dir    | —                          | Excludes target from vocab bleed    | Better dir vectors |
+| `@kuralResidual`      | —                     | —                          | Suppresses named audit              | —                  |
+| `@kuralPure`          | Raw signature         | —                          | `incomplete-docs`                   | —                  |
+| `@kuralCauses`        | Causes signal         | —                          | `incomplete-docs`                   | Better vectors     |

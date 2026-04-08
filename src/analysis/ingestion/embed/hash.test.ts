@@ -268,6 +268,165 @@ describe("container cache key — file vs dir prefix", () => {
   });
 });
 
+describe("leaf facet hash includes all facets", () => {
+  function baselineLeaf(): { unit: KuralUnit; leaves: LeafData } {
+    const unit = makeUnit("fn", "/src/a.ts");
+    const leaves: LeafData = {
+      names: ["fn"],
+      descs: ["desc"],
+      parentDescs: ["parent-desc"],
+      paths: ["/src/a.ts"],
+      sigs: ["sig"],
+      causes: ["causes"],
+      calls: ["calls"],
+      units: [unit],
+      fileChildIndices: new Map<string, number[]>(),
+      patternIds: [undefined],
+      boundIds: [undefined],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    return { unit, leaves };
+  }
+
+  it("changes hash when name changes", () => {
+    const { unit: original } = baselineLeaf();
+    const unit = makeUnit("fn2", "/src/a.ts");
+    const leaves: LeafData = {
+      ...baselineLeaf().leaves,
+      names: ["fn2"],
+      units: [unit],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when description changes", () => {
+    const { unit: original } = baselineLeaf();
+    const unit = makeUnit("fn", "/src/a.ts");
+    const leaves: LeafData = {
+      ...baselineLeaf().leaves,
+      descs: ["new-desc"],
+      units: [unit],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when parent description changes", () => {
+    const { unit: original } = baselineLeaf();
+    const unit = makeUnit("fn", "/src/a.ts");
+    const leaves: LeafData = {
+      ...baselineLeaf().leaves,
+      parentDescs: ["new-parent-desc"],
+      units: [unit],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when path changes", () => {
+    const { unit: original } = baselineLeaf();
+    const unit = makeUnit("fn", "/src/b.ts");
+    const leaves: LeafData = {
+      ...baselineLeaf().leaves,
+      paths: ["/src/b.ts"],
+      units: [unit],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when signature changes", () => {
+    const { unit: original } = baselineLeaf();
+    const unit = makeUnit("fn", "/src/a.ts");
+    const leaves: LeafData = {
+      ...baselineLeaf().leaves,
+      sigs: ["new-sig"],
+      units: [unit],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when causes changes", () => {
+    const { unit: original } = baselineLeaf();
+    const unit = makeUnit("fn", "/src/a.ts");
+    const leaves: LeafData = {
+      ...baselineLeaf().leaves,
+      causes: ["new-causes"],
+      units: [unit],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when calls changes", () => {
+    const { unit: original } = baselineLeaf();
+    const unit = makeUnit("fn", "/src/a.ts");
+    const leaves: LeafData = {
+      ...baselineLeaf().leaves,
+      calls: ["new-calls"],
+      units: [unit],
+    };
+    resolveCache(leaves, makeContainerData([], [], ZERO));
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+});
+
+describe("container facet hash includes all facets", () => {
+  function baselineContainer(): { unit: KuralUnit; containers: ContainerData } {
+    const unit = makeUnit("file.ts", "/src/file.ts");
+    const containers: ContainerData = {
+      names: ["file.ts"],
+      descs: ["desc"],
+      paths: ["/src/file.ts"],
+      units: [unit],
+      unitPaths: ["/src/file.ts"],
+      fileCount: ONE,
+      dirs: [],
+      fileBounds: [undefined],
+    };
+    resolveCache(EMPTY_LEAVES, containers);
+    return { unit, containers };
+  }
+
+  it("changes hash when name changes", () => {
+    const { unit: original } = baselineContainer();
+    const unit = makeUnit("other.ts", "/src/file.ts");
+    const containers: ContainerData = {
+      ...baselineContainer().containers,
+      names: ["other.ts"],
+      units: [unit],
+    };
+    resolveCache(EMPTY_LEAVES, containers);
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when description changes", () => {
+    const { unit: original } = baselineContainer();
+    const unit = makeUnit("file.ts", "/src/file.ts");
+    const containers: ContainerData = {
+      ...baselineContainer().containers,
+      descs: ["new-desc"],
+      units: [unit],
+    };
+    resolveCache(EMPTY_LEAVES, containers);
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+
+  it("changes hash when path changes", () => {
+    const { unit: original } = baselineContainer();
+    const unit = makeUnit("file.ts", "/src/other/file.ts");
+    const containers: ContainerData = {
+      ...baselineContainer().containers,
+      paths: ["/src/other/file.ts"],
+      units: [unit],
+    };
+    resolveCache(EMPTY_LEAVES, containers);
+    expect(unit.facetHash).not.toBe(original.facetHash);
+  });
+});
+
 describe("resolveCache mixed cached and uncached", () => {
   it("partitions cached and uncached leaves correctly", () => {
     const cached = makeUnit("Cached", "/src/a.ts");

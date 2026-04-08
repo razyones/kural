@@ -1,11 +1,11 @@
 /**
- * The negotiator. Layers CLI overrides on top of project config, parses
- * strings to numbers, and clamps invalid values to safe defaults. It is
- * the only module that resolves raw audit parameters into a validated
- * AuditsConfig — no other module mediates between CLI input and the
- * detection engine's tuning knobs.
+ * The negotiator. Parses raw CLI dial strings into numbers and layers
+ * them over project defaults — delegating constraint enforcement to the
+ * validation module. It is the only module that translates command-line
+ * audit arguments into resolved detection parameters.
  */
 
+import { isValidFloor, isValidMinGroup, isValidSensitivity } from "../../config/validate.ts";
 import type { AuditsConfig } from "../../config/audits.ts";
 import { loadProjectConfig } from "../../config/loader.ts";
 
@@ -14,7 +14,6 @@ const DEFAULT_SENSITIVITY = 2.0;
 const DEFAULT_CONTAINMENT_FLOOR = 0.9;
 const DEFAULT_MIN_GROUP = 4;
 const RADIX = 10;
-const ONE = 1;
 
 /**
  * Parses a CLI string to a number, returning the fallback when the input is absent or not a number.
@@ -66,14 +65,14 @@ function resolveConfig(
   );
   const g = parseOr(values.minGroup, projectAudits.minGroup ?? DEFAULT_MIN_GROUP, RADIX);
   return {
-    sensitivity: clampOrWarn("sensitivity", s, s > NONE, DEFAULT_SENSITIVITY),
+    sensitivity: clampOrWarn("sensitivity", s, isValidSensitivity(s), DEFAULT_SENSITIVITY),
     containmentFloor: clampOrWarn(
       "containmentFloor",
       f,
-      f >= NONE && f <= ONE,
+      isValidFloor(f),
       DEFAULT_CONTAINMENT_FLOOR,
     ),
-    minGroup: clampOrWarn("minGroup", g, Number.isInteger(g) && g >= ONE, DEFAULT_MIN_GROUP),
+    minGroup: clampOrWarn("minGroup", g, isValidMinGroup(g), DEFAULT_MIN_GROUP),
     disable: projectAudits.disable,
   };
 }
