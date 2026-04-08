@@ -104,4 +104,18 @@ describe("parseAuditFlags", () => {
     const { disabledAudits } = parseAuditFlags({}, {});
     expect(disabledAudits.size).toBe(ZERO);
   });
+
+  it("includes baselines.disable in disabledAudits", () => {
+    const { disabledAudits } = parseAuditFlags({}, { disable: ["from-config"] });
+    expect(disabledAudits.has("from-config")).toBe(true);
+  });
+
+  it("merges baselines.disable with CLI disable", () => {
+    const { disabledAudits } = parseAuditFlags(
+      { disable: "outliers" },
+      { disable: ["from-config"] },
+    );
+    expect(disabledAudits.has("outliers")).toBe(true);
+    expect(disabledAudits.has("from-config")).toBe(true);
+  });
 });

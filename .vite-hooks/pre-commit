@@ -1,4 +1,4 @@
-set -e
+set -eo pipefail
 vp staged
 vp check 2>&1 | tee /tmp/vp-check-output
 if grep -q "warnings found" /tmp/vp-check-output; then

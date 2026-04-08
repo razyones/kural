@@ -41,6 +41,9 @@ function unitHash(
   if (unit.facetHash !== undefined) {
     return unit.facetHash.slice(NONE, HASH_LENGTH);
   }
+  // Fallback: embedded units always have facetHash set by resolveCache.
+  // This path only covers units skipped during embedding (e.g. tests or
+  // dry-run mode) where param-type coverage is not required for correctness.
   return sha256([unit.name, unit.path, ...fallbackParts].join("\0")).slice(NONE, HASH_LENGTH);
 }
 
