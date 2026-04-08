@@ -12,9 +12,9 @@ import { clampAudits } from "../../config/validate.ts";
 import { define } from "gunshi";
 import { formatReport } from "./report.ts";
 import { loadProjectConfig } from "../../config/loader.ts";
+import { parseAuditFlags } from "./parse-flags.ts";
 import { relative } from "node:path";
 import { renderFooter } from "../../ui/footer.ts";
-import { parseAuditFlags } from "./parse-flags.ts";
 import { runAudits } from "./pipeline.ts";
 
 const NONE = 0;

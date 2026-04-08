@@ -1,5 +1,5 @@
-import { parseAuditFlags, parseFlags, parseOr } from "./parse-flags.ts";
 import { describe, expect, it } from "vite-plus/test";
+import { parseAuditFlags, parseFlags, parseOr } from "./parse-flags.ts";
 
 const ZERO = 0;
 const ONE = 1;
