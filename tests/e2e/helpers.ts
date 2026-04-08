@@ -49,7 +49,10 @@ function createTmpRoot(): string {
   // Retry git init under parallel load (resource contention in CI/parallel tests)
   for (let attempt = NONE; attempt < MAX_RETRIES; attempt++) {
     try {
-      execSync("git init -b main && git commit --allow-empty -m init", gitOpts);
+      execSync(
+        "git init -b main && git config commit.gpgsign false && git commit --allow-empty -m init",
+        gitOpts,
+      );
       return root;
     } catch {
       if (attempt === MAX_RETRIES - RETRY_OFFSET) {
