@@ -1,5 +1,9 @@
 set -e
 vp staged
-vp check
+vp check 2>&1 | tee /tmp/vp-check-output
+if grep -q "warnings found" /tmp/vp-check-output; then
+  echo "ERROR: Lint warnings found — fix all warnings before committing."
+  exit 1
+fi
 vp test --coverage --exclude 'tests/e2e/**'
 vp test tests/e2e/
