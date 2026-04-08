@@ -12,7 +12,7 @@ import { analyzeFromDescriptions, analyzeFromTree } from "../../../analysis/advi
 import { buildTree, getChildren } from "../../../analysis/tree/tree.ts";
 import { existsSync, readFileSync } from "node:fs";
 import { createEmbeddingModel } from "../../../analysis/ingestion/embed/model.ts";
-import { rebuildParseResult } from "../audit/pipeline.ts";
+import { rebuildParseResult } from "../../../db/rebuild.ts";
 import { resolve } from "node:path";
 
 const NONE = 0;

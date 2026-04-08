@@ -11,7 +11,7 @@ import { buildTree } from "../../../analysis/tree/tree.ts";
 import { createEmbeddingModel } from "../../../analysis/ingestion/embed/model.ts";
 import { existsSync } from "node:fs";
 import { place } from "../../../analysis/place/engine.ts";
-import { rebuildParseResult } from "../audit/pipeline.ts";
+import { rebuildParseResult } from "../../../db/rebuild.ts";
 
 /**
  * Runs the placement pipeline: open snapshot → build tree → embed → place.

@@ -26,13 +26,25 @@ const HASH_LENGTH = 8;
 const NONE = 0;
 
 /**
- * Computes a short SHA-256 hash for change detection.
- * @param parts - Strings to hash together
+ * Returns the truncated facet hash set during embedding, falling back to
+ * a name+path hash for units that were never embedded.
+ * @param unit - The unit to read the hash from
+ * @param fallbackParts - Fallback strings when facetHash is absent
  * @returns 8-character hex digest
  * @kuralPure
+ * @kuralHelper
  */
-function computeHash(...parts: string[]): string {
-  return sha256(parts.join("\0")).slice(NONE, HASH_LENGTH);
+function unitHash(
+  unit: { facetHash?: string; name: string; path: string },
+  ...fallbackParts: string[]
+): string {
+  if (unit.facetHash !== undefined) {
+    return unit.facetHash.slice(NONE, HASH_LENGTH);
+  }
+  // Fallback: embedded units always have facetHash set by resolveCache.
+  // This path only covers units skipped during embedding (e.g. tests or
+  // dry-run mode) where param-type coverage is not required for correctness.
+  return sha256([unit.name, unit.path, ...fallbackParts].join("\0")).slice(NONE, HASH_LENGTH);
 }
 
 /**
@@ -56,7 +68,7 @@ function functionNode(fn: KuralFunction, filePath: string): FunctionNode {
     util: fn.util,
     helper: fn.helper,
     residuals: fn.residuals,
-    hash: computeHash(fn.name, fn.path, ...fn.params),
+    hash: unitHash(fn),
     exported: fn.exported,
     description: fn.description,
     bound: fn.bound ?? null,
@@ -92,7 +104,7 @@ function typeNode(type: KuralType, filePath: string): TypeNode {
     util: type.util,
     helper: type.helper,
     residuals: type.residuals,
-    hash: computeHash(type.name, type.path, ...Object.keys(type.fields)),
+    hash: unitHash(type),
     exported: type.exported,
     description: type.description,
     bound: type.bound ?? null,
@@ -121,7 +133,7 @@ function fileNode(file: KuralFile, filePath: string, childKeys: string[]): FileN
     util: false,
     helper: false,
     residuals: file.residuals,
-    hash: computeHash(file.name, filePath),
+    hash: unitHash(file),
     exported: false,
     description: file.description,
     bound: file.bound ?? null,
@@ -150,7 +162,7 @@ function directoryNode(dir: KuralDirectory, dirPath: string, childKeys: string[]
     util: false,
     helper: false,
     residuals: dir.residuals,
-    hash: computeHash(dir.name, dirPath),
+    hash: unitHash(dir),
     exported: false,
     description: dir.description,
     bound: null,
@@ -192,7 +204,7 @@ function patternNode(
     util: false,
     helper: false,
     residuals: [],
-    hash: computeHash("pattern", patternId, ...memberKeys),
+    hash: sha256(["pattern", patternId, ...memberKeys].join("\0")).slice(NONE, HASH_LENGTH),
     exported: false,
     description: undefined,
     bound: null,

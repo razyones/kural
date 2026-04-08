@@ -6,11 +6,16 @@
  * valid tuning parameter.
  */
 
+import type { AuditsConfig } from "./audits.ts";
+
 const MIN_SENSITIVITY = 0;
 const MIN_FLOOR = 0;
 const MAX_FLOOR = 1;
 const MIN_GROUP = 1;
 const NONE = 0;
+const DEFAULT_SENSITIVITY = 2.0;
+const DEFAULT_CONTAINMENT_FLOOR = 0.9;
+const DEFAULT_MIN_GROUP = 4;
 
 type Bag = Record<string, unknown>;
 
@@ -26,6 +31,67 @@ function isRecord(value: unknown): value is Bag {
 }
 
 /**
+ * Checks whether a sensitivity value is positive.
+ * @param value - Sensitivity to check
+ * @returns True when above the minimum threshold
+ * @kuralPure
+ * @kuralHelper
+ */
+function isValidSensitivity(value: number): boolean {
+  return value > MIN_SENSITIVITY;
+}
+
+/**
+ * Checks whether a containment floor falls within the zero-to-one range.
+ * @param value - Floor ratio to check
+ * @returns True when within bounds
+ * @kuralPure
+ * @kuralHelper
+ */
+function isValidFloor(value: number): boolean {
+  return value >= MIN_FLOOR && value <= MAX_FLOOR;
+}
+
+/**
+ * Checks whether a minimum group size is a positive integer.
+ * @param value - Group size to check
+ * @returns True when a valid positive integer
+ * @kuralPure
+ * @kuralHelper
+ */
+function isValidMinGroup(value: number): boolean {
+  return Number.isInteger(value) && value >= MIN_GROUP;
+}
+
+/**
+ * Clamps resolved audit parameters to safe defaults when they violate
+ * constraints. Returns warnings for each clamped field.
+ * @param config - Resolved audit config with potentially invalid values
+ * @returns Clamped config and human-readable warnings
+ * @kuralPure
+ * @kuralHelper
+ */
+function clampAudits(config: AuditsConfig): { config: AuditsConfig; warnings: string[] } {
+  const warnings: string[] = [];
+  let { sensitivity, containmentFloor, minGroup } = config;
+  if (!isValidSensitivity(sensitivity)) {
+    warnings.push(`sensitivity must be positive (got ${String(sensitivity)}) — using default`);
+    sensitivity = DEFAULT_SENSITIVITY;
+  }
+  if (!isValidFloor(containmentFloor)) {
+    warnings.push(
+      `containmentFloor must be between 0 and 1 (got ${String(containmentFloor)}) — using default`,
+    );
+    containmentFloor = DEFAULT_CONTAINMENT_FLOOR;
+  }
+  if (!isValidMinGroup(minGroup)) {
+    warnings.push(`minGroup must be a positive integer (got ${String(minGroup)}) — using default`);
+    minGroup = DEFAULT_MIN_GROUP;
+  }
+  return { config: { ...config, sensitivity, containmentFloor, minGroup }, warnings };
+}
+
+/**
  * Validates audit tuning parameters for semantic correctness.
  * Strips fields that violate constraints so downstream defaults apply.
  * @param audits - Mutable audit config bag
@@ -34,25 +100,19 @@ function isRecord(value: unknown): value is Bag {
  * @kuralHelper
  */
 function validateAudits(audits: Bag, warnings: string[]): void {
-  if (typeof audits.sensitivity === "number" && audits.sensitivity <= MIN_SENSITIVITY) {
+  if (typeof audits.sensitivity === "number" && !isValidSensitivity(audits.sensitivity)) {
     warnings.push(
       `audits.sensitivity must be positive (got ${String(audits.sensitivity)}) — using default`,
     );
     delete audits.sensitivity;
   }
-  if (
-    typeof audits.containmentFloor === "number" &&
-    (audits.containmentFloor < MIN_FLOOR || audits.containmentFloor > MAX_FLOOR)
-  ) {
+  if (typeof audits.containmentFloor === "number" && !isValidFloor(audits.containmentFloor)) {
     warnings.push(
       `audits.containmentFloor must be between 0 and 1 (got ${String(audits.containmentFloor)}) — using default`,
     );
     delete audits.containmentFloor;
   }
-  if (
-    typeof audits.minGroup === "number" &&
-    (!Number.isInteger(audits.minGroup) || audits.minGroup < MIN_GROUP)
-  ) {
+  if (typeof audits.minGroup === "number" && !isValidMinGroup(audits.minGroup)) {
     warnings.push(
       `audits.minGroup must be a positive integer (got ${String(audits.minGroup)}) — using default`,
     );
@@ -108,4 +168,4 @@ function validateConfig(raw: unknown): { config: Bag; warnings: string[] } {
   return { config, warnings };
 }
 
-export { validateConfig };
+export { clampAudits, validateConfig };
