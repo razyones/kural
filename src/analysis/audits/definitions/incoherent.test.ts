@@ -1,5 +1,4 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E005,
   E01,
@@ -23,7 +22,6 @@ import {
   E09,
   E095,
   E1,
-  MIN_GROUP,
   NONE,
   SENSITIVITY,
 } from "../../../../tests/constants/audits.ts";
@@ -40,8 +38,6 @@ import type { CodeNode } from "../../tree/tree.ts";
 import { createContext } from "../context.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Identity and leaf embeddings for incoherence testing. */

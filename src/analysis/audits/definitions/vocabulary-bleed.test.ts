@@ -1,5 +1,4 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E005,
   E03,
@@ -8,7 +7,6 @@ import {
   E08,
   E095,
   E1,
-  MIN_GROUP,
   NONE,
   SENSITIVITY,
 } from "../../../../tests/constants/audits.ts";
@@ -18,8 +16,6 @@ import { createContext } from "../context.ts";
 import vocabularyBleed from "./vocabulary-bleed.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Identity vectors for vocabulary bleed tests. */

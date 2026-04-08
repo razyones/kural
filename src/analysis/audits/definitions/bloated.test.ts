@@ -1,8 +1,8 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E01,
   E012,
+  E013,
   E015,
   E018,
   E02,
@@ -14,9 +14,9 @@ import {
   E08,
   E082,
   E085,
+  E087,
   E088,
   E09,
-  MIN_GROUP,
   NONE,
   ONE,
   SENSITIVITY,
@@ -35,8 +35,6 @@ import {
 import { createContext } from "../context.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /**
@@ -47,9 +45,11 @@ const CONFIG = {
 const CLUSTER_A1 = [E09, E01, E0, E0, E0, E0, E0, E0];
 const CLUSTER_A2 = [E085, E015, E0, E0, E0, E0, E0, E0];
 const CLUSTER_A3 = [E088, E012, E0, E0, E0, E0, E0, E0];
+const CLUSTER_A4 = [E087, E013, E0, E0, E0, E0, E0, E0];
 const CLUSTER_B1 = [E0, E0, E0, E0, E0, E09, E01, E0];
 const CLUSTER_B2 = [E0, E0, E0, E0, E0, E085, E015, E0];
 const CLUSTER_B3 = [E0, E0, E0, E0, E0, E088, E012, E0];
+const CLUSTER_B4 = [E0, E0, E0, E0, E0, E087, E013, E0];
 const UNIFORM_A = [E08, E02, E0, E0, E0, E0, E0, E0];
 const UNIFORM_B = [E078, E022, E0, E0, E0, E0, E0, E0];
 const UNIFORM_C = [E082, E018, E0, E0, E0, E0, E0, E0];
@@ -86,17 +86,19 @@ describe("bloated-directories detect — clustered children", () => {
     const f1 = makeFile({ key: "file:/src/a.ts", name: "a.ts", leaf: CLUSTER_A1 });
     const f2 = makeFile({ key: "file:/src/b.ts", name: "b.ts", leaf: CLUSTER_A2 });
     const f3 = makeFile({ key: "file:/src/c.ts", name: "c.ts", leaf: CLUSTER_A3 });
-    const f4 = makeFile({ key: "file:/src/d.ts", name: "d.ts", leaf: CLUSTER_B1 });
-    const f5 = makeFile({ key: "file:/src/e.ts", name: "e.ts", leaf: CLUSTER_B2 });
-    const f6 = makeFile({ key: "file:/src/f.ts", name: "f.ts", leaf: CLUSTER_B3 });
+    const f4 = makeFile({ key: "file:/src/d.ts", name: "d.ts", leaf: CLUSTER_A4 });
+    const f5 = makeFile({ key: "file:/src/e.ts", name: "e.ts", leaf: CLUSTER_B1 });
+    const f6 = makeFile({ key: "file:/src/f.ts", name: "f.ts", leaf: CLUSTER_B2 });
+    const f7 = makeFile({ key: "file:/src/g.ts", name: "g.ts", leaf: CLUSTER_B3 });
+    const f8 = makeFile({ key: "file:/src/h.ts", name: "h.ts", leaf: CLUSTER_B4 });
     const dir = makeDir({
       key: "dir:/src",
-      childKeys: [f1.key, f2.key, f3.key, f4.key, f5.key, f6.key],
+      childKeys: [f1.key, f2.key, f3.key, f4.key, f5.key, f6.key, f7.key, f8.key],
     });
-    for (const f of [f1, f2, f3, f4, f5, f6]) {
+    for (const f of [f1, f2, f3, f4, f5, f6, f7, f8]) {
       f.parentKey = dir.key;
     }
-    const nodes = toNodeMap(dir, f1, f2, f3, f4, f5, f6);
+    const nodes = toNodeMap(dir, f1, f2, f3, f4, f5, f6, f7, f8);
     const ctx = createContext(nodes, CONFIG);
     const findings = bloatedDirectories.detect(ctx);
 
@@ -200,17 +202,19 @@ describe("bloated-files detect — clustered functions", () => {
     const fn1 = makeFunction({ key: "func:/src/a.ts:a", name: "a", leaf: CLUSTER_A1 });
     const fn2 = makeFunction({ key: "func:/src/a.ts:b", name: "b", leaf: CLUSTER_A2 });
     const fn3 = makeFunction({ key: "func:/src/a.ts:c", name: "c", leaf: CLUSTER_A3 });
-    const fn4 = makeFunction({ key: "func:/src/a.ts:d", name: "d", leaf: CLUSTER_B1 });
-    const fn5 = makeFunction({ key: "func:/src/a.ts:e", name: "e", leaf: CLUSTER_B2 });
-    const fn6 = makeFunction({ key: "func:/src/a.ts:f", name: "f", leaf: CLUSTER_B3 });
+    const fn4 = makeFunction({ key: "func:/src/a.ts:d", name: "d", leaf: CLUSTER_A4 });
+    const fn5 = makeFunction({ key: "func:/src/a.ts:e", name: "e", leaf: CLUSTER_B1 });
+    const fn6 = makeFunction({ key: "func:/src/a.ts:f", name: "f", leaf: CLUSTER_B2 });
+    const fn7 = makeFunction({ key: "func:/src/a.ts:g", name: "g", leaf: CLUSTER_B3 });
+    const fn8 = makeFunction({ key: "func:/src/a.ts:h", name: "h", leaf: CLUSTER_B4 });
     const file = makeFile({
       key: "file:/src/a.ts",
-      childKeys: [fn1.key, fn2.key, fn3.key, fn4.key, fn5.key, fn6.key],
+      childKeys: [fn1.key, fn2.key, fn3.key, fn4.key, fn5.key, fn6.key, fn7.key, fn8.key],
     });
-    for (const fn of [fn1, fn2, fn3, fn4, fn5, fn6]) {
+    for (const fn of [fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8]) {
       fn.parentKey = file.key;
     }
-    const nodes = toNodeMap(file, fn1, fn2, fn3, fn4, fn5, fn6);
+    const nodes = toNodeMap(file, fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8);
     const ctx = createContext(nodes, CONFIG);
     const findings = bloatedFiles.detect(ctx);
 

@@ -6,9 +6,9 @@
  */
 
 import type { CodeNode, NodeMap } from "../tree/tree.ts";
-import { HALF_BLEND, NONE, PERCENT_SCALE, TEMPERATURE, TOP_PATHS, vecOf } from "./helpers.ts";
+import { HALF_BLEND, NONE, PERCENT_SCALE, TOP_PATHS, vecOf } from "./helpers.ts";
 import type { RankedPath, TrailEntry } from "./types.ts";
-import { cosineSimilarity } from "../../utils/vectors.ts";
+import { avg, cosineSimilarity } from "../../utils/vectors.ts";
 import { isLeaf } from "../tree/tree.ts";
 import { localProject } from "./lcpn.ts";
 
@@ -44,6 +44,20 @@ function blendedScores(q: number[], childVecs: number[][]): number[] {
   });
 }
 
+const MIN_TEMPERATURE = 0.01;
+
+/**
+ * Computes routing temperature from branching factor: more children means
+ * more decisive routing to avoid probability dilution. For 5 children T≈0.2,
+ * for 10 children T≈0.1, matching empirically effective ranges.
+ * @param numChildren - Number of child directories at this routing step
+ * @returns Temperature value scaled to branching factor
+ * @kuralPure
+ */
+function adaptiveTemperature(numChildren: number): number {
+  return Math.max(NEXT / Math.max(numChildren, NEXT), MIN_TEMPERATURE);
+}
+
 /**
  * Converts scores to softmax probabilities with a create-new virtual child.
  * @param scores - Raw blended similarity scores for existing children.
@@ -51,13 +65,14 @@ function blendedScores(q: number[], childVecs: number[][]): number[] {
  * @kuralPure
  */
 function softmaxWithCreateNew(scores: number[]): number[] {
-  const scoreMean = scores.reduce((s, v) => s + v, NONE) / scores.length;
+  const temperature = adaptiveTemperature(scores.length);
+  const scoreMean = avg(scores);
   const scoreStd = Math.sqrt(
     scores.reduce((s, v) => s + (v - scoreMean) ** HALF, NONE) / scores.length,
   );
   const allScores = [...scores, scoreMean + scoreStd];
   const maxScore = Math.max(...allScores);
-  const exps = allScores.map((s) => Math.exp((s - maxScore) / TEMPERATURE));
+  const exps = allScores.map((s) => Math.exp((s - maxScore) / temperature));
   const sumExp = exps.reduce((a, b) => a + b, NONE);
   return exps.map((e) => e / sumExp);
 }

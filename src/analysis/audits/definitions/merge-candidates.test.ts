@@ -1,5 +1,4 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E005,
   E006,
@@ -7,7 +6,6 @@ import {
   E094,
   E095,
   E1,
-  MIN_GROUP,
   NONE,
   ONE,
   SENSITIVITY,
@@ -24,8 +22,6 @@ import { createContext } from "../context.ts";
 import mergeCandidates from "./merge-candidates.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 const EMB_NEAR_A = [E095, E005, E0, E0, E0, E0];

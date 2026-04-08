@@ -11,6 +11,9 @@ import { collectSiblingPairs } from "./siblings.ts";
 import { findRootNode } from "./types.ts";
 import { upperFence } from "./fence.ts";
 
+/** Minimum group size for statistical tests and cluster detection. */
+const MIN_GROUP = 3;
+
 /** Sibling-pair similarities partitioned by level. */
 type PartitionedSims = { leaf: number[]; file: number[] };
 
@@ -90,8 +93,6 @@ function createContext(
   return {
     nodes,
     sensitivity: config.sensitivity,
-    containmentFloor: config.containmentFloor,
-    minGroup: config.minGroup,
     rootKey: findRootNode(nodes)?.key ?? null,
     axisScores,
     outlierKeys: new Set<string>(),
@@ -132,4 +133,4 @@ function isSuppressed(node: CodeNode, auditName: string): boolean {
   return false;
 }
 
-export { createContext, isSuppressed };
+export { MIN_GROUP, createContext, isSuppressed };

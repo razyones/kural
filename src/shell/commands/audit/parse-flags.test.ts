@@ -59,28 +59,13 @@ describe("parseFlags", () => {
 
   it("falls back to defaults when both are absent", () => {
     const DEFAULT_SENSITIVITY = 2.0;
-    const DEFAULT_FLOOR = 0.9;
-    const DEFAULT_GROUP = 4;
     const result = parseFlags({}, {});
     expect(result.sensitivity).toBe(DEFAULT_SENSITIVITY);
-    expect(result.containmentFloor).toBe(DEFAULT_FLOOR);
-    expect(result.minGroup).toBe(DEFAULT_GROUP);
   });
 
   it("passes through negative sensitivity without clamping", () => {
     const result = parseFlags({ sensitivity: "-1" }, {});
     expect(result.sensitivity).toBe(-ONE);
-  });
-
-  it("accepts containmentFloor of 0", () => {
-    const result = parseFlags({ containmentFloor: "0" }, {});
-    expect(result.containmentFloor).toBe(ZERO);
-  });
-
-  it("truncates fractional minGroup via parseInt", () => {
-    const TRUNCATED = 2;
-    const result = parseFlags({ minGroup: "2.5" }, {});
-    expect(result.minGroup).toBe(TRUNCATED);
   });
 
   it("passes through disable from project config", () => {

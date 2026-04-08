@@ -5,20 +5,25 @@
  * baselines or computes alien fences.
  */
 
+import type { AxisResult, RankedPath } from "./types.ts";
 import type { CodeNode, NodeMap } from "../tree/tree.ts";
-import { NONE, SENSITIVITY } from "./helpers.ts";
+import { DEFAULT_SENSITIVITY, NONE } from "./helpers.ts";
 import { getChildren, isLeaf } from "../tree/tree.ts";
-import type { AxisResult } from "./types.ts";
+import { median, robustLowerFence } from "../audits/fence.ts";
 import type { PlacementEmbedder } from "./helpers.ts";
+import { chainSearch } from "./chain.ts";
 import { cosineSimilarity } from "../../utils/vectors.ts";
-import { robustLowerFence } from "../audits/fence.ts";
 
 const NEXT = 1;
 const MIN_PROBES = 2;
+const SENSITIVITY_INCREMENT = 1;
 
-/** Calibration result with the computed alien fence. */
+/** Calibration result with all self-calibrated placement thresholds. */
 type CalibrationResult = {
   alienFence: number;
+  hardAlienFence: number;
+  safetyGate: number;
+  bridgeThreshold: number;
   probeCount: number;
 };
 
@@ -56,44 +61,84 @@ function selectProbes(
 }
 
 /**
- * Embeds probe descriptions and computes the alien fence from the
- * query-space distribution.
+ * Scores each probe by finding its best leaf match and chain-search confidence.
+ * @param probeVecs - Embedded probe vectors
+ * @param nodes - The full node map
+ * @param rootKey - Key of the root directory
+ * @param root - The root directory node
+ * @returns Parallel arrays of best-match similarities and chain-search confidences
+ * @kuralPure
+ */
+function scoreProbes(
+  probeVecs: number[][],
+  nodes: NodeMap,
+  rootKey: string,
+  root: CodeNode,
+): { probeSims: number[]; probeConfidences: number[] } {
+  const probeSims: number[] = [];
+  const probeConfidences: number[] = [];
+  for (let i = NONE; i < probeVecs.length; i++) {
+    probeSims.push(bestLeafMatch(probeVecs[i], nodes).similarity);
+    const paths: RankedPath[] = chainSearch(probeVecs[i], rootKey, root, nodes);
+    if (paths.length > NONE) {
+      probeConfidences.push(paths[NONE].confidence);
+    }
+  }
+  return { probeSims, probeConfidences };
+}
+
+/**
+ * Computes self-calibrated confidence thresholds from probe distributions.
+ * @param probeSims - Best-match similarities from probes
+ * @param probeConfidences - Chain-search confidences from probes
+ * @returns Alien fences, safety gate, and bridge threshold
+ * @kuralPure
+ */
+function computeThresholds(
+  probeSims: number[],
+  probeConfidences: number[],
+): Omit<CalibrationResult, "probeCount"> {
+  const sensitivity = DEFAULT_SENSITIVITY;
+  const alienFence = robustLowerFence(probeSims, sensitivity);
+  const hardAlienFence = robustLowerFence(probeSims, sensitivity + SENSITIVITY_INCREMENT);
+  const hasConfidence = probeConfidences.length >= MIN_PROBES;
+  const safetyGate = hasConfidence ? robustLowerFence(probeConfidences, sensitivity) : NONE;
+  const confMed = hasConfidence ? median(probeConfidences) : NONE;
+  const confDeviations = probeConfidences.map((v) => Math.abs(v - confMed));
+  const confSpread = hasConfidence ? median(confDeviations) : NONE;
+  const bridgeThreshold = safetyGate - confSpread;
+  return { alienFence, hardAlienFence, safetyGate, bridgeThreshold };
+}
+
+/**
+ * Embeds probe descriptions and computes all self-calibrated placement
+ * thresholds from the codebase's own distributions.
  * @param embedder - Function that embeds text strings into vectors
  * @param nodes - The full node map
+ * @param rootKey - Key of the root directory node
  * @param root - The root directory node
- * @returns Alien fence threshold and probe count
+ * @returns Self-calibrated thresholds for alien, bridge, and safety gating
  * @kuralCauses calls the embedding API via embedder
  */
-async function calibrateAlienFence(
+async function calibrate(
   embedder: PlacementEmbedder,
   nodes: NodeMap,
+  rootKey: string,
   root: CodeNode,
 ): Promise<CalibrationResult> {
   const probes = selectProbes(nodes, root);
   if (probes.length < MIN_PROBES) {
-    return { alienFence: NONE, probeCount: NONE };
+    return {
+      alienFence: NONE,
+      hardAlienFence: NONE,
+      safetyGate: NONE,
+      bridgeThreshold: NONE,
+      probeCount: NONE,
+    };
   }
-
   const probeVecs = await embedder(probes.map((p) => p.description));
-  const probeSims: number[] = [];
-  for (let i = NONE; i < probes.length; i++) {
-    let bestSim = NONE;
-    for (const [, node] of nodes) {
-      if (!isLeaf(node) || node.identity.length === NONE) {
-        continue;
-      }
-      const sim = cosineSimilarity(probeVecs[i], node.identity);
-      if (sim > bestSim) {
-        bestSim = sim;
-      }
-    }
-    probeSims.push(bestSim);
-  }
-
-  return {
-    alienFence: robustLowerFence(probeSims, SENSITIVITY),
-    probeCount: probes.length,
-  };
+  const { probeSims, probeConfidences } = scoreProbes(probeVecs, nodes, rootKey, root);
+  return { ...computeThresholds(probeSims, probeConfidences), probeCount: probes.length };
 }
 
 /**
@@ -144,5 +189,5 @@ function classifyAxis(q: number[], rootNode: CodeNode, nodes: NodeMap): AxisResu
   };
 }
 
-export { bestLeafMatch, calibrateAlienFence, classifyAxis };
+export { bestLeafMatch, calibrate, classifyAxis };
 export type { CalibrationResult };

@@ -39,7 +39,7 @@ const ONE_PARAM = 1;
 /**
  * Builds a minimal but structurally valid project for the audit pipeline.
  * Two files under one directory, each with one function and sharing a type.
- * Small enough that most audits won't trigger (under minGroup=4),
+ * Small enough that most audits won't trigger (under minGroup=3),
  * letting us test the wiring without engineering specific findings.
  */
 function makeProjectData(root: string): SeedData {

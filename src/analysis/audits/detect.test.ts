@@ -5,12 +5,8 @@ import { detect } from "./detect.ts";
 
 const NONE = 0;
 const DEFAULT_SENSITIVITY = 2.0;
-const DEFAULT_CONTAINMENT_FLOOR = 0.9;
-const DEFAULT_MIN_GROUP = 4;
 const DEFAULT_CONFIG: AuditsConfig = {
   sensitivity: DEFAULT_SENSITIVITY,
-  containmentFloor: DEFAULT_CONTAINMENT_FLOOR,
-  minGroup: DEFAULT_MIN_GROUP,
 };
 
 function makeDir(key: string, name: string, childKeys: string[]): [string, CodeNode] {

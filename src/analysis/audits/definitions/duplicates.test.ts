@@ -1,5 +1,4 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E005,
   E006,
@@ -7,7 +6,6 @@ import {
   E094,
   E095,
   E1,
-  MIN_GROUP,
   NONE,
   ONE,
   SENSITIVITY,
@@ -25,8 +23,6 @@ import { createContext } from "../context.ts";
 import duplicates from "./duplicates.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Embeddings for cross-file duplicate detection. */

@@ -1,12 +1,10 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E001,
   E01,
   E09,
   E099,
   E1,
-  MIN_GROUP,
   NONE,
   ONE,
   SENSITIVITY,
@@ -23,8 +21,6 @@ import focalDrift from "./focal-drift.ts";
 
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 const PARENT_EMB = [E1, E0, E0];

@@ -1,5 +1,4 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E01,
   E015,
@@ -9,7 +8,6 @@ import {
   E08,
   E085,
   E09,
-  MIN_GROUP,
   NONE,
   SENSITIVITY,
 } from "../../../../tests/constants/audits.ts";
@@ -25,8 +23,6 @@ import { createContext } from "../context.ts";
 import identityLanguage from "./identity-language.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Identity embeddings for axis score tests. */

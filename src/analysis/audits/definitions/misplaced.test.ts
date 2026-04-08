@@ -1,5 +1,5 @@
+import type { CodeNode, NodeMap } from "../../tree/tree.ts";
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E005,
   E03,
@@ -10,11 +10,9 @@ import {
   E085,
   E095,
   E1,
-  MIN_GROUP,
   NONE,
   SENSITIVITY,
 } from "../../../../tests/constants/audits.ts";
-import type { CodeNode, NodeMap } from "../../tree/tree.ts";
 import { describe, expect, test } from "vite-plus/test";
 import {
   makeDir,
@@ -27,8 +25,6 @@ import { createContext } from "../context.ts";
 import misplaced from "./misplaced.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Embedding vectors for misplacement tests. */

@@ -1,12 +1,10 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E005,
   E006,
   E094,
   E095,
   E1,
-  MIN_GROUP,
   NONE,
   ONE,
   SENSITIVITY,
@@ -17,8 +15,6 @@ import { createContext } from "../context.ts";
 import { utilDuplicates as duplicateUtils } from "./duplicates.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Embeddings for util duplicate detection. */

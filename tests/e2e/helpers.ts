@@ -11,7 +11,7 @@ import type {
 } from "../../src/db/schemas.ts";
 import { closeSnapshot, createActive, openSnapshot } from "../../src/db/snapshot.ts";
 import { execFileSync, execSync } from "node:child_process";
-import { existsSync, mkdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, realpathSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
@@ -36,11 +36,9 @@ type CliResult = {
  * Returns the absolute path. Caller must clean up via `cleanupTmpRoot`.
  */
 function createTmpRoot(): string {
-  const root = join(
-    tmpdir(),
-    `kural-e2e-${String(Date.now())}-${String(Math.random()).slice(TWO)}`,
-  );
-  mkdirSync(root, { recursive: true });
+  const raw = join(tmpdir(), `kural-e2e-${String(Date.now())}-${String(Math.random()).slice(TWO)}`);
+  mkdirSync(raw, { recursive: true });
+  const root = realpathSync(raw);
   // Strip git env vars leaked by pre-commit hooks (GIT_DIR, GIT_INDEX_FILE, etc.)
   const cleanEnv = Object.fromEntries(
     Object.entries(process.env).filter(([k]) => !k.startsWith("GIT_")),

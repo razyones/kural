@@ -10,7 +10,15 @@ import { avg } from "../../utils/vectors.ts";
 const NONE = 0;
 const MIN_SAMPLE = 2;
 const BESSEL = 1;
-const MIN_MAD = 0.015;
+
+/**
+ * Half the noise floor of cosine similarity for d-dimensional unit vectors.
+ * Random cosine similarity has σ ≈ 1/√d. Below half that, apparent variation
+ * is noise, not signal. Default assumes 1536-dim (text-embedding-3-small).
+ */
+const DEFAULT_EMBEDDING_DIM = 1536;
+const NOISE_FRACTION = 0.5;
+const MIN_MAD = NOISE_FRACTION / Math.sqrt(DEFAULT_EMBEDDING_DIM);
 
 /** 1/Φ⁻¹(¾) — makes MAD consistent with σ for normal data. */
 const MAD_SCALE = 1.4826;

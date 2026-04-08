@@ -1,5 +1,5 @@
+import type { CodeNode, NodeMap } from "../../tree/tree.ts";
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E001,
   E01,
@@ -11,11 +11,9 @@ import {
   E095,
   E099,
   E1,
-  MIN_GROUP,
   NONE,
   SENSITIVITY,
 } from "../../../../tests/constants/audits.ts";
-import type { CodeNode, NodeMap } from "../../tree/tree.ts";
 import { describe, expect, test } from "vite-plus/test";
 import {
   makeFile,
@@ -29,8 +27,6 @@ import { createContext } from "../context.ts";
 
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Embeddings: dominant child nearly identical to parent, others distant. */

@@ -1,0 +1,203 @@
+---
+title: Tuning
+description: How every threshold in the system resolves to one parameter, data, or design intent
+icon: SlidersHorizontal
+---
+
+Kural has one tuning parameter: `sensitivity` (`k`). Every other numeric constant in the system either derives from `k`, self-calibrates from the codebase's own distributions, follows from a mathematical formula, or represents a deliberate design choice with documented rationale. This page catalogs all 33 named constants and explains how each one resolves. See [Audits](/docs/pillars/audits) for the full audit reference.
+
+---
+
+## 1. The Single Dial: Sensitivity (`k`)
+
+Every audit, every fence, every detection boundary flows through `k`. The statistical machinery adapts to the codebase's shape automatically — `k` is the only judgment call: how strict should "abnormal" be?
+
+```
+upperFence = mean + k × σ
+lowerFence = mean − k × σ
+robustUpperFence = median + k × 1.4826 × MAD
+robustLowerFence = median − k × 1.4826 × MAD
+dendrogramGap = maxGap > medianGap × (1 + k)
+```
+
+At **2.0** (default), findings are moderate. At **3.0**, only strong deviations surface. Below **1.5**, expect many findings. See [Configuration](/configuration) for how to set it.
+
+---
+
+## 2. Embedding Weights — Design Intent (11 constants)
+
+These weights control how text facets blend into identity and leaf vectors. They are **deliberate design choices** reflecting the relative importance of each signal. They are not arbitrary — they follow a consistent pattern documented below.
+
+### `src/analysis/ingestion/embed/blend.ts`
+
+| Constant               | Value | Role                                             |
+| :--------------------- | :---- | :----------------------------------------------- |
+| `NAME_WEIGHT`          | 0.7   | Name vector in identity computation              |
+| `PATH_WEIGHT`          | 0.3   | Path signal in identity computation              |
+| `IDENTITY_WEIGHT`      | 0.5   | Name+path facet fused with description           |
+| `DESC_WEIGHT`          | 0.7   | Leaf's own description in leaf blending          |
+| `PARENT_SIGNAL_WEIGHT` | 0.3   | Parent file's description signal on a leaf       |
+| `SIG_ONLY_WEIGHT`      | 0.7   | Signature when one auxiliary signal is present   |
+| `SINGLE_SIGNAL_WEIGHT` | 0.3   | The single auxiliary signal (causes or calls)    |
+| `SIG_BOTH_WEIGHT`      | 0.6   | Signature when both causes and calls are present |
+| `CAUSES_BOTH_WEIGHT`   | 0.25  | Causes signal when both auxiliaries are present  |
+| `CALLS_BOTH_WEIGHT`    | 0.15  | Calls signal when both auxiliaries are present   |
+
+### `src/analysis/ingestion/embed/containers.ts`
+
+| Constant          | Value | Role                                            |
+| :---------------- | :---- | :---------------------------------------------- |
+| `IDENTITY_WEIGHT` | 0.5   | Container's own identity vs aggregated children |
+
+### Design pattern
+
+1. **Primary signal dominates at 0.7** — name over path, description over parent, signature over auxiliary.
+2. **Secondary signals complement at 0.3** — enough to shift the vector, not enough to hijack it.
+3. **When two secondaries compete, the split is 0.25 / 0.15** — prioritized by semantic richness (causes describe side effects, calls are weak structural hints).
+4. **Container identity is 50/50** — a directory is half what it says it is (KURAL.md), half what it contains.
+
+### Placement blend weights
+
+`STRUCT_WEIGHT` (0.75) and `VOCAB_WEIGHT` (0.25) in `src/analysis/place/helpers.ts` follow the same logic: structural content is more discriminating than declared identity for routing decisions. `HALF_BLEND` (0.5) is the uninformative prior — equal weight hedges between LCPN-projected and raw cosine similarity when there is no reason to prefer one.
+
+---
+
+## 3. Mathematical Constants (5 constants)
+
+These are derived from formulas. They are not tuning parameters.
+
+| Constant           | Value  | File       | Derivation                                                                        |
+| :----------------- | :----- | :--------- | :-------------------------------------------------------------------------------- |
+| `MAD_SCALE`        | 1.4826 | `fence.ts` | 1/&Phi;&macr;&sup1;(&frac34;) — makes MAD consistent with &sigma; for normal data |
+| `EIGEN_FLOOR`      | 1e-6   | `lcpn.ts`  | Standard numerical precision floor for eigenvalue significance                    |
+| `JACOBI_TOLERANCE` | 1e-10  | `lcpn.ts`  | IEEE double-precision convergence criterion for iterative eigendecomposition      |
+| `QUARTER_TURN`     | &pi;/4 | `lcpn.ts`  | Fallback rotation angle in Jacobi eigenmethod when diagonal elements are equal    |
+| `HALF_MULTIPLIER`  | 0.5    | `lcpn.ts`  | Standard coefficient in Givens rotation formula: 0.5 &times; atan2(...)           |
+
+---
+
+## 4. Definitional Constants (3 constants)
+
+These follow from the definitions of the concepts they implement.
+
+| Constant                   | Value | File               | Why this value                                                                                                                                                                                                                                      |
+| :------------------------- | :---- | :----------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MIN_SUBSTANTIAL_CLUSTERS` | 2     | `bloated.ts`       | You cannot "split" into fewer than 2 groups. This is the definition of a split.                                                                                                                                                                     |
+| `HALF_RATIO`               | 0.5   | `weak-identity.ts` | "Majority" means more than half. A directory with weak identity is one where >50% of children fit an uncle better. This is a safety floor on top of the statistical fence — even if the fence is permissive, a majority must drift before flagging. |
+| `MIN_PROBES`               | 2     | `calibrate.ts`     | `robustLowerFence` returns &minus;&infin; for fewer than 2 values. Fewer than 2 probes means no calibration is statistically possible.                                                                                                              |
+
+---
+
+## 5. Self-Calibrating Thresholds (8 constants)
+
+These values derive from the codebase's own distributions at runtime. None are user-configurable — they adapt automatically, controlled by `k`. See [Audits](/docs/pillars/audits) for each audit's detection logic.
+
+### Placement confidence cascade
+
+The placement engine uses a four-tier decision chain: chain search, alien detection, bridge classification, and safety gating. The `calibrate` function embeds probe descriptions from the codebase, runs them through chain search, and computes all thresholds from those probe distributions.
+
+#### `alienFence` and `hardAlienFence`
+
+```
+alienFence     = robustLowerFence(probeSims, k)
+hardAlienFence = robustLowerFence(probeSims, k + 1)
+```
+
+A query whose best-match similarity falls below `alienFence` is a soft alien. Below `hardAlienFence` (one additional unit of evidence) is a hard alien — so foreign that even soft classification won't help. Both flow through `k`.
+
+#### `safetyGate`
+
+```
+safetyGate = robustLowerFence(probeConfidences, k)
+```
+
+Below what known-good placements achieve at this sensitivity, the engine doesn't have enough confidence to act alone — it escalates to the user.
+
+#### `bridgeThreshold`
+
+```
+bridgeThreshold = safetyGate − MAD(probeConfidences)
+```
+
+If the top path's confidence falls below this, trigger bridge type classification. The gap between `bridgeThreshold` and `safetyGate` is exactly one MAD — the codebase's own natural confidence spread defines the bridge-classification band.
+
+#### Bridge type confidence
+
+```
+confident = top.sim > mean(typeSims) + stddev(typeSims)
+decisive  = gap > stddev(typeSims)
+```
+
+The bridge classifier computes similarities against all 7 reference types. The top type must stand out from alternatives by at least one standard deviation, and the gap between first and second must exceed the natural spread.
+
+### Audit safeguards
+
+#### Incoherent cap
+
+```
+cap = median(allLabelFits)
+fence = min(lowerFence(fits, k), cap)
+```
+
+Caps the incoherence lower fence at the codebase's own median label-fit. For uniformly healthy codebases, the median is high and the cap is tight. For diverse codebases, it's lower and more permissive.
+
+#### Containment floor
+
+```
+containmentFloor = robustLowerFence(dominantSims, k)
+```
+
+Computed from the codebase's own parent-child dominance similarities. This eliminated the `--containmentFloor` CLI flag — one less config field, one less thing to explain.
+
+### Embedding noise floor
+
+#### `MIN_MAD`
+
+```
+MIN_MAD = 0.5 / √d
+```
+
+Floor for Median Absolute Deviation to prevent fence collapse when all values are identical. For d-dimensional unit vectors, random cosine similarity has &sigma; &approx; 1/&radic;d. Half that noise floor means "below this, apparent variation is noise, not signal." For 1536-dim (text-embedding-3-small): 0.0128. For 3072-dim: 0.0090.
+
+---
+
+## 6. Adaptive Temperature (1 constant)
+
+#### Routing temperature
+
+```
+T = 1 / numChildren
+```
+
+Softmax temperature in chain search adapts to the branching factor at each routing step. More children means more decisive routing to avoid probability dilution. For 5 children T=0.2, for 10 children T=0.1. This matches empirically effective ranges without imposing a fixed constant.
+
+---
+
+## 7. Display Preferences (2 constants)
+
+#### `GOOD_THRESHOLD` — currently 0.7
+
+**What:** Score at or above this is displayed in green with "Strong structural fit."
+
+#### `MODERATE_THRESHOLD` — currently 0.4
+
+**What:** Score at or above this is displayed in yellow with "Moderate structural fit." Below is red with "Weak structural fit."
+
+**Why they're here:** These don't affect analysis — they only control terminal colors and verdict text. They're presentation preferences, not algorithmic thresholds.
+
+**How they resolve:** Move to `kural.config.json` as user-configurable display settings. They stop being "unjustified constants in the algorithm" and become "UI defaults the user can change."
+
+---
+
+## Summary
+
+| Category                          |  Count | Resolution                                             |
+| :-------------------------------- | -----: | :----------------------------------------------------- |
+| Single tuning parameter (`k`)     |      1 | User-controlled, governs all fences                    |
+| Embedding weights (design intent) |     13 | Documented rationale, consistent pattern               |
+| Mathematical constants            |      5 | Derived from formulas                                  |
+| Definitional constants            |      3 | Follow from definitions                                |
+| Self-calibrating from data        |      8 | Fence or distribution stat computed at runtime via `k` |
+| Adaptive                          |      1 | Computed per routing step from branching factor        |
+| Display preferences               |      2 | Move to user config                                    |
+| **Total**                         | **33** | **1 tuning parameter, 0 unjustified constants**        |

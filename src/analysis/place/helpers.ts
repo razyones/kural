@@ -10,11 +10,7 @@ import { getChildren } from "../tree/tree.ts";
 const NONE = 0;
 const STRUCT_WEIGHT = 0.75;
 const VOCAB_WEIGHT = 0.25;
-const SENSITIVITY = 2.0;
-const TEMPERATURE = 0.1;
-const BRIDGE_THRESHOLD = 0.55;
-const SAFETY_GATE = 0.6;
-const HARD_ALIEN_RATIO = 0.88;
+const DEFAULT_SENSITIVITY = 2.0;
 const TOP_K_RELATED = 10;
 const TOP_PATHS = 5;
 const DISPLAY_PATHS = 3;
@@ -68,16 +64,12 @@ function findCapabilityRoot(root: { key: string; node: CodeNode }, nodes: NodeMa
 }
 
 export {
-  BRIDGE_THRESHOLD,
   DECIMAL_PLACES,
+  DEFAULT_SENSITIVITY,
   DISPLAY_PATHS,
   HALF_BLEND,
-  HARD_ALIEN_RATIO,
   NONE,
   PERCENT_SCALE,
-  SAFETY_GATE,
-  SENSITIVITY,
-  TEMPERATURE,
   TOP_K_RELATED,
   TOP_PATHS,
   findCapabilityRoot,

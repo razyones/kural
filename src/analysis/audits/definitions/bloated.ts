@@ -5,17 +5,16 @@
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
+import { MIN_GROUP, isSuppressed } from "../context.ts";
 import { buildDendrogram, hasSignificantGap } from "../cluster.ts";
 import type { CodeNode } from "../../tree/tree.ts";
 import { defineAudit } from "../types.ts";
 import { getChildrenWithKeys } from "../children.ts";
-import { isSuppressed } from "../context.ts";
 import { num } from "../../../utils/record.ts";
 
 const NONE = 0;
 const NEXT = 1;
 const MIN_SUBSTANTIAL_CLUSTERS = 2;
-const MIN_CLUSTER_SIZE = 3;
 
 /**
  * Renders cluster composition details showing which children should split into separate containers.
@@ -62,7 +61,7 @@ function detectBloated(
   kind: "directory" | "file",
   auditName: string,
 ): Finding[] {
-  const { nodes, sensitivity, minGroup } = ctx;
+  const { nodes, sensitivity } = ctx;
   const findings: Finding[] = [];
   const entries = [...nodes.entries()].filter(
     ([, n]) => n.kind === kind && !n.util && !isSuppressed(n, auditName),
@@ -71,14 +70,14 @@ function detectBloated(
   for (const [key, node] of entries) {
     const cwk = getChildrenWithKeys(node, nodes).filter(({ node: c }) => !c.util && !c.helper);
     const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
-    if (valid.length < minGroup) {
+    if (valid.length < MIN_GROUP) {
       continue;
     }
     const result = buildDendrogram(valid.map(({ node: c }) => c.leaf));
     if (!result || !hasSignificantGap(result.merges, sensitivity)) {
       continue;
     }
-    const substantialClusters = result.clusters.filter((c) => c.length >= MIN_CLUSTER_SIZE);
+    const substantialClusters = result.clusters.filter((c) => c.length >= MIN_GROUP);
     if (substantialClusters.length < MIN_SUBSTANTIAL_CLUSTERS) {
       continue;
     }
