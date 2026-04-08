@@ -6,11 +6,16 @@
  * valid tuning parameter.
  */
 
+import type { AuditsConfig } from "./audits.ts";
+
 const MIN_SENSITIVITY = 0;
 const MIN_FLOOR = 0;
 const MAX_FLOOR = 1;
 const MIN_GROUP = 1;
 const NONE = 0;
+const DEFAULT_SENSITIVITY = 2.0;
+const DEFAULT_CONTAINMENT_FLOOR = 0.9;
+const DEFAULT_MIN_GROUP = 4;
 
 type Bag = Record<string, unknown>;
 
@@ -56,6 +61,34 @@ function isValidFloor(value: number): boolean {
  */
 function isValidMinGroup(value: number): boolean {
   return Number.isInteger(value) && value >= MIN_GROUP;
+}
+
+/**
+ * Clamps resolved audit parameters to safe defaults when they violate
+ * constraints. Returns warnings for each clamped field.
+ * @param config - Resolved audit config with potentially invalid values
+ * @returns Clamped config and human-readable warnings
+ * @kuralPure
+ * @kuralHelper
+ */
+function clampAudits(config: AuditsConfig): { config: AuditsConfig; warnings: string[] } {
+  const warnings: string[] = [];
+  let { sensitivity, containmentFloor, minGroup } = config;
+  if (!isValidSensitivity(sensitivity)) {
+    warnings.push(`sensitivity must be positive (got ${String(sensitivity)}) — using default`);
+    sensitivity = DEFAULT_SENSITIVITY;
+  }
+  if (!isValidFloor(containmentFloor)) {
+    warnings.push(
+      `containmentFloor must be between 0 and 1 (got ${String(containmentFloor)}) — using default`,
+    );
+    containmentFloor = DEFAULT_CONTAINMENT_FLOOR;
+  }
+  if (!isValidMinGroup(minGroup)) {
+    warnings.push(`minGroup must be a positive integer (got ${String(minGroup)}) — using default`);
+    minGroup = DEFAULT_MIN_GROUP;
+  }
+  return { config: { ...config, sensitivity, containmentFloor, minGroup }, warnings };
 }
 
 /**
@@ -135,4 +168,4 @@ function validateConfig(raw: unknown): { config: Bag; warnings: string[] } {
   return { config, warnings };
 }
 
-export { isValidFloor, isValidMinGroup, isValidSensitivity, validateConfig };
+export { clampAudits, validateConfig };

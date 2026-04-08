@@ -8,11 +8,13 @@
 import { countListItems, printListSections } from "../../ui/list.ts";
 import { logBanner, logger } from "../../ui/log.ts";
 import type { AuditReport } from "../../../analysis/audits/detect.ts";
+import { clampAudits } from "../../config/validate.ts";
 import { define } from "gunshi";
 import { formatReport } from "./report.ts";
+import { loadProjectConfig } from "../../config/loader.ts";
 import { relative } from "node:path";
 import { renderFooter } from "../../ui/footer.ts";
-import { resolveAuditConfig } from "./resolve.ts";
+import { parseAuditFlags } from "./parse-flags.ts";
 import { runAudits } from "./pipeline.ts";
 
 const NONE = 0;
@@ -176,7 +178,12 @@ async function runAuditCommand(values: {
   expand?: boolean;
   json?: boolean;
 }): Promise<void> {
-  const { config, disabledAudits } = resolveAuditConfig(values);
+  const projectConfig = loadProjectConfig();
+  const { config: rawConfig, disabledAudits } = parseAuditFlags(values, projectConfig.audits ?? {});
+  const { config, warnings } = clampAudits(rawConfig);
+  for (const w of warnings) {
+    console.error(`Warning: ${w}`);
+  }
   const jsonMode = values.json === true;
 
   const root = process.cwd();
