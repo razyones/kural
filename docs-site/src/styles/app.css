@@ -101,3 +101,40 @@ samp {
 #nd-page > div:last-child {
   margin-top: 10rem;
 }
+
+/* ── Shining multi-color text ── */
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(280, 60%, 65%),
+    hsl(330, 70%, 60%),
+    hsl(30, 80%, 60%),
+    hsl(187, 60%, 50%),
+    hsl(230, 60%, 65%),
+    hsl(280, 60%, 65%)
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Agent marquee ── */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}

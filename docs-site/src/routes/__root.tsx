@@ -57,6 +57,7 @@ function StableSearchItem(props: ComponentProps<typeof SearchDialogListItem>) {
 }
 
 const base = import.meta.env.BASE_URL ?? "/";
+const siteUrl = new URL(base, config.url).href.replace(/\/$/, "");
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -71,17 +72,17 @@ export const Route = createRootRoute({
       { property: "og:title", content: config.name },
       { property: "og:description", content: config.description },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: config.url },
-      { property: "og:image", content: `${config.url}/social-preview.png` },
+      { property: "og:url", content: siteUrl },
+      { property: "og:image", content: `${siteUrl}/social-preview.png` },
       { property: "og:image:width", content: "1280" },
       { property: "og:image:height", content: "640" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: config.name },
       { name: "twitter:description", content: config.description },
-      { name: "twitter:image", content: `${config.url}/social-preview.png` },
+      { name: "twitter:image", content: `${siteUrl}/social-preview.png` },
     ],
     links: [
-      { rel: "canonical", href: config.url },
+      { rel: "canonical", href: siteUrl },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       {
         rel: "preconnect",
