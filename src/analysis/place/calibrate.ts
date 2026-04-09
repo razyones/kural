@@ -104,8 +104,9 @@ function computeThresholds(
   const hasConfidence = probeConfidences.length >= MIN_PROBES;
   const safetyGate = hasConfidence ? robustLowerFence(probeConfidences, sensitivity) : NONE;
   const confMed = hasConfidence ? median(probeConfidences) : NONE;
-  const confDeviations = probeConfidences.map((v) => Math.abs(v - confMed));
-  const confSpread = hasConfidence ? median(confDeviations) : NONE;
+  const confSpread = hasConfidence
+    ? median(probeConfidences.map((v) => Math.abs(v - confMed)))
+    : NONE;
   const bridgeThreshold = Math.max(NONE, safetyGate - confSpread);
   return { alienFence, hardAlienFence, safetyGate, bridgeThreshold };
 }

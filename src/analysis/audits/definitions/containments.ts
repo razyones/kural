@@ -110,7 +110,8 @@ export default defineAudit({
     const fence = upperFence(gaps, sensitivity);
 
     const dominantSims = entries.map((e) => e.dominantSim);
-    const containmentFloor = robustLowerFence(dominantSims, sensitivity);
+    const computedFloor = robustLowerFence(dominantSims, sensitivity);
+    const containmentFloor = Number.isFinite(computedFloor) ? computedFloor : NONE;
 
     const findings: Finding[] = [];
     for (const e of entries) {
