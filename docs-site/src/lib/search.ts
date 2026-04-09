@@ -2,7 +2,14 @@ import { createElement } from "react";
 import { create, load, search } from "@orama/orama";
 import { createContentHighlighter } from "fumadocs-core/search";
 import { Sparkles } from "lucide-react";
-import searchIndex from "@/data/search-index.json";
+import searchIndexRaw from "@/data/search-index.json?raw";
+
+// Parse at runtime to bypass rolldown's JSON plugin recursion limit
+// on the deeply nested Orama serialized database.
+const searchIndex = JSON.parse(searchIndexRaw) as {
+  pageMeta: Record<string, unknown>;
+  rawData: unknown;
+};
 
 const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
 const EMBEDDING_DIM = 384;
