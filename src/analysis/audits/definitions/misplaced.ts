@@ -103,6 +103,8 @@ export default defineAudit({
     const raw = collectMisplacedCandidates(nodes);
     const deltas = raw.map((m) => m.delta);
     const fence = upperFence(deltas, sensitivity);
+    // Halved sensitivity → proper fence at the distribution's own center, not halving
+    // the full fence (which would shift both mean and spread terms asymmetrically).
     const outlierFence = upperFence(deltas, sensitivity / OUTLIER_SENSITIVITY_DIVISOR);
     const findings: Finding[] = [];
 

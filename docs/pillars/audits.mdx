@@ -30,7 +30,7 @@ robustUpperFence = median + sensitivity × 1.4826 × MAD
 robustLowerFence = median - sensitivity × 1.4826 × MAD
 ```
 
-MAD (Median Absolute Deviation) resists outliers better than standard deviation. The constant 1.4826 makes MAD consistent with σ for normal data. A minimum MAD of `0.5 / √d` (half the noise floor of cosine similarity for d-dimensional vectors) prevents collapse on uniform distributions. Used for outlier detection, vocabulary bleed, and identity language.
+MAD (Median Absolute Deviation) resists outliers better than standard deviation. The constant 1.4826 makes MAD consistent with σ for normal data. When more than half the values are identical, MAD collapses to zero — the fence falls back to IQR/2 (the MAD-equivalent under normality, since IQR ≈ 2·MAD). When both MAD and IQR are zero (all values identical), there is no variation and the fence returns its sentinel — no outliers exist. Used for outlier detection, vocabulary bleed, and identity language.
 
 ### Dendrogram gap
 

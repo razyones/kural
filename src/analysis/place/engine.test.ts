@@ -221,6 +221,7 @@ describe("place — bridge tier", () => {
 
     expect(result.detection.globalAlien).toBe(false);
     expect(result.suggestion.method).toBeDefined();
+    expect(result.topPaths.length).toBeGreaterThan(NONE);
   });
 });
 

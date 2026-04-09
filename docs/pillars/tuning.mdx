@@ -76,7 +76,7 @@ These are derived from formulas. They are not tuning parameters.
 
 ---
 
-## 4. Definitional Constants (3 constants)
+## 4. Definitional Constants (4 constants)
 
 These follow from the definitions of the concepts they implement.
 
@@ -85,10 +85,11 @@ These follow from the definitions of the concepts they implement.
 | `MIN_SUBSTANTIAL_CLUSTERS` | 2     | `bloated.ts`       | You cannot "split" into fewer than 2 groups. This is the definition of a split.                                                                                                                                                                     |
 | `HALF_RATIO`               | 0.5   | `weak-identity.ts` | "Majority" means more than half. A directory with weak identity is one where >50% of children fit an uncle better. This is a safety floor on top of the statistical fence — even if the fence is permissive, a majority must drift before flagging. |
 | `MIN_PROBES`               | 2     | `calibrate.ts`     | `robustLowerFence` returns &minus;&infin; for fewer than 2 values. Fewer than 2 probes means no calibration is statistically possible.                                                                                                              |
+| `IQR_TO_MAD`               | 2     | `fence.ts`         | IQR &asymp; 2&middot;MAD for normal data. Converts IQR to MAD-equivalent scale as a fallback when MAD collapses to zero.                                                                                                                            |
 
 ---
 
-## 5. Self-Calibrating Thresholds (8 constants)
+## 5. Self-Calibrating Thresholds (7 constants)
 
 These values derive from the codebase's own distributions at runtime. None are user-configurable — they adapt automatically, controlled by `k`. See [Audits](/docs/pillars/audits) for each audit's detection logic.
 
@@ -149,15 +150,9 @@ containmentFloor = robustLowerFence(dominantSims, k)
 
 Computed from the codebase's own parent-child dominance similarities. This eliminated the `--containmentFloor` CLI flag — one less config field, one less thing to explain.
 
-### Embedding noise floor
+### MAD-zero fallback
 
-#### `MIN_MAD`
-
-```
-MIN_MAD = 0.5 / √d
-```
-
-Floor for Median Absolute Deviation to prevent fence collapse when all values are identical. For d-dimensional unit vectors, random cosine similarity has &sigma; &approx; 1/&radic;d. Half that noise floor means "below this, apparent variation is noise, not signal." For 1536-dim (text-embedding-3-small): 0.0128. For 3072-dim: 0.0090.
+When MAD collapses to zero (>50% of values identical), the robust fence falls back to `IQR / 2` — the MAD-equivalent under normality (standard practice in robust statistics). When both MAD and IQR are zero (no variation at all), the fence returns its sentinel value (-Infinity for lower, Infinity for upper), meaning no outliers exist. No magic numbers — the fallback derives from the data itself using the mathematical relationship `IQR ≈ 2 · MAD`.
 
 ---
 
@@ -196,8 +191,8 @@ Softmax temperature in chain search adapts to the branching factor at each routi
 | Single tuning parameter (`k`)     |      1 | User-controlled, governs all fences                    |
 | Embedding weights (design intent) |     13 | Documented rationale, consistent pattern               |
 | Mathematical constants            |      5 | Derived from formulas                                  |
-| Definitional constants            |      3 | Follow from definitions                                |
-| Self-calibrating from data        |      8 | Fence or distribution stat computed at runtime via `k` |
+| Definitional constants            |      4 | Follow from definitions                                |
+| Self-calibrating from data        |      7 | Fence or distribution stat computed at runtime via `k` |
 | Adaptive                          |      1 | Computed per routing step from branching factor        |
 | Display preferences               |      2 | Move to user config                                    |
 | **Total**                         | **33** | **1 tuning parameter, 0 unjustified constants**        |

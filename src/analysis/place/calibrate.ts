@@ -66,7 +66,7 @@ function selectProbes(
  * @param nodes - The full node map
  * @param rootKey - Key of the root directory
  * @param root - The root directory node
- * @returns Parallel arrays of best-match similarities and chain-search confidences
+ * @returns Best-match similarities (one per probe) and chain-search confidences (only for probes where chain search returned paths)
  * @kuralPure
  */
 function scoreProbes(
@@ -106,7 +106,7 @@ function computeThresholds(
   const confMed = hasConfidence ? median(probeConfidences) : NONE;
   const confDeviations = probeConfidences.map((v) => Math.abs(v - confMed));
   const confSpread = hasConfidence ? median(confDeviations) : NONE;
-  const bridgeThreshold = safetyGate - confSpread;
+  const bridgeThreshold = Math.max(NONE, safetyGate - confSpread);
   return { alienFence, hardAlienFence, safetyGate, bridgeThreshold };
 }
 
