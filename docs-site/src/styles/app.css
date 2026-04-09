@@ -145,6 +145,21 @@ samp {
   }
 }
 
+/* ── Search results: clear breadcrumbs past the left border line ── */
+[role="dialog"] .overflow-y-auto button > div:first-child {
+  padding-inline-start: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+/* ── Search result content: clamp long text entries ── */
+[role="dialog"] .overflow-y-auto button p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.55;
+}
+
 /* ── Agent marquee ── */
 @keyframes marquee {
   0% {
