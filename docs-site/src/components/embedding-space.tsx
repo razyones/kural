@@ -156,6 +156,7 @@ export function EmbeddingSpace() {
 
   const dragRef = useRef<{ startX: number; startRot: number } | null>(null);
   const sliderDragRef = useRef(false);
+  const [sliderUsed, setSliderUsed] = useState(false);
 
   const currentNode = useMemo(() => findNode(breadcrumbs), [breadcrumbs]);
   const children = currentNode.children ?? [];
@@ -216,6 +217,7 @@ export function EmbeddingSpace() {
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {
       dragRef.current = { startX: e.clientX, startRot: rotation };
+      setSliderUsed(true);
       (e.target as Element).setPointerCapture(e.pointerId);
     },
     [rotation],
@@ -237,6 +239,7 @@ export function EmbeddingSpace() {
   const onSliderPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
     e.stopPropagation();
     sliderDragRef.current = true;
+    setSliderUsed(true);
     e.currentTarget.setPointerCapture(e.pointerId);
     const rect = e.currentTarget.getBoundingClientRect();
     const pct = Math.max(0, Math.min(1, (e.clientY - rect.top) / rect.height));
@@ -620,13 +623,29 @@ export function EmbeddingSpace() {
             onPointerUp={onSliderPointerUp}
           >
             <div
-              className="absolute left-1/2 w-2.5 h-2.5 rounded-full shadow-sm pointer-events-none"
+              className="absolute left-1/2 w-2.5 h-2.5 pointer-events-none"
               style={{
                 top: `${(normalizedRotation / 360) * 100}%`,
                 transform: "translate(-50%, -50%)",
-                backgroundColor: "var(--kural-accent)",
               }}
-            />
+            >
+              {!sliderUsed && (
+                <div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full opacity-20 animate-[slider-ping_3s_ease-out_infinite]"
+                  style={{ backgroundColor: "var(--kural-accent)" }}
+                />
+              )}
+              {!sliderUsed && (
+                <div
+                  className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4 rounded-full opacity-15 animate-[slider-ping_3s_ease-out_1s_infinite]"
+                  style={{ backgroundColor: "var(--kural-accent)" }}
+                />
+              )}
+              <div
+                className="w-full h-full rounded-full shadow-sm"
+                style={{ backgroundColor: "var(--kural-accent)" }}
+              />
+            </div>
           </div>
         </div>
 
