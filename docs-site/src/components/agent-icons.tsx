@@ -4,7 +4,7 @@
  */
 export function AgentSprite() {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" className="hidden">
+    <svg xmlns="http://www.w3.org/2000/svg" className="hidden" aria-hidden="true">
       <symbol id="agent-amp" viewBox="20 20 60 60">
         <clipPath id="clip-amp">
           <path d="m30 29.375h40v40h-40z" />

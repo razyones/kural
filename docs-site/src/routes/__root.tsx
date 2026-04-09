@@ -135,7 +135,6 @@ const STATUS_LABEL: Record<EmbedderStatus, string> = {
 };
 
 function KuralSearchDialog(props: SharedProps) {
-  const base = import.meta.env.BASE_URL ?? "/";
   const lastQuery = useRef("");
   const { search, setSearch, query } = useDocsSearch({
     client: {
