@@ -25,15 +25,35 @@ const DESCRIPTION_SLICE = 500;
 // ── Markdown helpers ──
 
 function stripMarkdown(text) {
-  return text
-    .replaceAll(/^import\s+.*$/gm, "")
-    .replaceAll(/<[^>]+>/g, " ")
-    .replaceAll(/```[\s\S]*?```/g, " ")
-    .replaceAll(/\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replaceAll(/\*{1,2}([^*]*)\*{1,2}/g, "$1")
-    .replaceAll(/`([^`]*)`/g, "$1")
-    .replaceAll(/\s+/g, " ")
-    .trim();
+  return (
+    text
+      .replaceAll(/^import\s+.*$/gm, "")
+      .replaceAll(/<[^>]+>/g, " ")
+      .replaceAll(/```[\s\S]*?```/g, " ")
+      // Tables: remove separator rows, convert content rows to readable text
+      .replaceAll(/^\s*\|[\s:|-]+\|\s*$/gm, "")
+      .replaceAll(
+        /^\s*\|(.+)\|\s*$/gm,
+        (_, cells) =>
+          cells
+            .split("|")
+            .map((c) => c.trim())
+            .filter(Boolean)
+            .join(", ") + ". ",
+      )
+      // Block-level syntax
+      .replaceAll(/^#{1,6}\s+/gm, "")
+      .replaceAll(/^>\s?/gm, "")
+      .replaceAll(/^-{3,}\s*$/gm, "")
+      .replaceAll(/^(\s*)[-*]\s+/gm, "$1")
+      .replaceAll(/^(\s*)\d+\.\s+/gm, "$1")
+      // Inline syntax
+      .replaceAll(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replaceAll(/\*{1,2}([^*]*)\*{1,2}/g, "$1")
+      .replaceAll(/`([^`]*)`/g, "$1")
+      .replaceAll(/\s+/g, " ")
+      .trim()
+  );
 }
 
 function slugify(text) {

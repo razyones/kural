@@ -101,3 +101,71 @@ samp {
 #nd-page > div:last-child {
   margin-top: 10rem;
 }
+
+/* ── Shining multi-color text ── */
+@keyframes shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+.text-shimmer {
+  background: linear-gradient(
+    90deg,
+    hsl(280, 60%, 65%),
+    hsl(330, 70%, 60%),
+    hsl(30, 80%, 60%),
+    hsl(187, 60%, 50%),
+    hsl(230, 60%, 65%),
+    hsl(280, 60%, 65%)
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Slider focus ring ── */
+@keyframes slider-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.25;
+  }
+  70% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.8);
+    opacity: 0;
+  }
+}
+
+/* ── Search results: clear breadcrumbs past the left border line ── */
+[role="dialog"] .overflow-y-auto button > div:first-child {
+  padding-inline-start: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+/* ── Search result content: clamp long text entries ── */
+[role="dialog"] .overflow-y-auto button p {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.55;
+}
+
+/* ── Agent marquee ── */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
