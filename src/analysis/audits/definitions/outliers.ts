@@ -5,12 +5,12 @@
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
+import { MIN_GROUP, isSuppressed } from "../context.ts";
 import { avg, cosineSimilarity } from "../../../utils/vectors.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../../utils/format.ts";
 import { getChildrenWithKeys } from "../children.ts";
 import { isLeaf } from "../../tree/tree.ts";
-import { isSuppressed } from "../context.ts";
 import { robustLowerFence } from "../fence.ts";
 
 const NONE = 0;
@@ -60,7 +60,7 @@ export default defineAudit({
   title: "Outliers",
   format: formatOutlier,
   detect: (ctx: AuditContext): Finding[] => {
-    const { nodes, sensitivity, minGroup } = ctx;
+    const { nodes, sensitivity } = ctx;
     const findings: Finding[] = [];
 
     for (const [parentKey, parentNode] of nodes) {
@@ -71,7 +71,7 @@ export default defineAudit({
         ({ node: c }) => !c.util && !c.helper && c.bound === null,
       );
       const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
-      if (valid.length < minGroup) {
+      if (valid.length < MIN_GROUP) {
         continue;
       }
 

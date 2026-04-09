@@ -5,6 +5,7 @@
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import { num, str } from "../../../utils/record.ts";
+import { robustLowerFence, upperFence } from "../fence.ts";
 import type { CodeNode } from "../../tree/tree.ts";
 import { cosineSimilarity } from "../../../utils/vectors.ts";
 import { defineAudit } from "../types.ts";
@@ -13,7 +14,6 @@ import { getChildrenWithKeys } from "../children.ts";
 import { isLeaf } from "../../tree/tree.ts";
 import { isSuppressed } from "../context.ts";
 import { isTypeProducerPair } from "../siblings.ts";
-import { upperFence } from "../fence.ts";
 
 const NONE = 0;
 const NEXT = 1;
@@ -104,10 +104,14 @@ export default defineAudit({
   title: "Containments",
   format: formatContainment,
   detect: (ctx: AuditContext): Finding[] => {
-    const { nodes, sensitivity, containmentFloor } = ctx;
+    const { nodes, sensitivity } = ctx;
     const entries = collectDominanceGaps(nodes);
     const gaps = entries.map((e) => e.gap);
     const fence = upperFence(gaps, sensitivity);
+
+    const dominantSims = entries.map((e) => e.dominantSim);
+    const computedFloor = robustLowerFence(dominantSims, sensitivity);
+    const containmentFloor = Number.isFinite(computedFloor) ? computedFloor : NONE;
 
     const findings: Finding[] = [];
     for (const e of entries) {

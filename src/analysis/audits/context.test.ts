@@ -6,8 +6,6 @@ import type { AuditsConfig } from "../../shell/config/audits.ts";
 const NONE = 0;
 const ONE = 1;
 const SENSITIVITY = 2.0;
-const CONTAINMENT_FLOOR = 0.9;
-const MIN_GROUP = 4;
 
 const EMB_A1 = 0.9;
 const EMB_A2 = 0.1;
@@ -19,8 +17,6 @@ const EMB_B3 = 0.0;
 function makeConfig(overrides: Partial<AuditsConfig> = {}): AuditsConfig {
   return {
     sensitivity: SENSITIVITY,
-    containmentFloor: CONTAINMENT_FLOOR,
-    minGroup: MIN_GROUP,
     ...overrides,
   };
 }
@@ -31,20 +27,6 @@ describe("createContext — basic properties", () => {
     const ctx = createContext(nodes, makeConfig());
 
     expect(ctx.sensitivity).toBe(SENSITIVITY);
-  });
-
-  test("exposes containmentFloor from config", () => {
-    const nodes = toNodeMap();
-    const ctx = createContext(nodes, makeConfig());
-
-    expect(ctx.containmentFloor).toBe(CONTAINMENT_FLOOR);
-  });
-
-  test("exposes minGroup from config", () => {
-    const nodes = toNodeMap();
-    const ctx = createContext(nodes, makeConfig());
-
-    expect(ctx.minGroup).toBe(MIN_GROUP);
   });
 
   test("initializes outlierKeys as empty set", () => {

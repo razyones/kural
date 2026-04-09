@@ -14,7 +14,7 @@ import { num } from "../../../utils/record.ts";
 import { upperFence } from "../fence.ts";
 
 const NONE = 0;
-const MISPLACED_HALVE = 2;
+const OUTLIER_SENSITIVITY_DIVISOR = 2;
 
 /**
  * Renders the uncle-fit comparison showing where a node would be better placed in the tree.
@@ -103,6 +103,9 @@ export default defineAudit({
     const raw = collectMisplacedCandidates(nodes);
     const deltas = raw.map((m) => m.delta);
     const fence = upperFence(deltas, sensitivity);
+    // Halved sensitivity → proper fence at the distribution's own center, not halving
+    // the full fence (which would shift both mean and spread terms asymmetrically).
+    const outlierFence = upperFence(deltas, sensitivity / OUTLIER_SENSITIVITY_DIVISOR);
     const findings: Finding[] = [];
 
     for (const m of raw) {
@@ -110,7 +113,7 @@ export default defineAudit({
       if (!node) {
         continue;
       }
-      const effectiveFence = outlierKeys.has(m.nodeKey) ? fence / MISPLACED_HALVE : fence;
+      const effectiveFence = outlierKeys.has(m.nodeKey) ? outlierFence : fence;
       if (m.delta >= effectiveFence && !isSuppressed(node, "misplaced")) {
         findings.push({
           audit: "misplaced",

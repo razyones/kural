@@ -42,8 +42,6 @@ const SHOW_ALL = 0;
  */
 async function runAuditCommand(values: {
   sensitivity?: string;
-  containmentFloor?: string;
-  minGroup?: string;
   filter?: string;
   disable?: string;
   expand?: boolean;
@@ -94,14 +92,6 @@ export default define({
       type: "string" as const,
       short: "k",
       description: "Standard deviations from mean to flag (default: 2.0)",
-    },
-    containmentFloor: {
-      type: "string" as const,
-      description: "Absolute floor for containment detection (default: 0.9)",
-    },
-    minGroup: {
-      type: "string" as const,
-      description: "Minimum group size for statistical tests (default: 4)",
     },
     filter: {
       type: "string" as const,

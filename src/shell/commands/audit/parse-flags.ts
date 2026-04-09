@@ -11,9 +11,6 @@ import type { AuditsConfig } from "../../config/audits.ts";
 
 const NONE = 0;
 const DEFAULT_SENSITIVITY = 2.0;
-const DEFAULT_CONTAINMENT_FLOOR = 0.9;
-const DEFAULT_MIN_GROUP = 4;
-const RADIX = 10;
 
 /**
  * Parses a CLI string to a number, returning the fallback when the input is absent or not a number.
@@ -38,16 +35,11 @@ function parseOr(input: string | undefined, fallback: number, radix?: number): n
  * @kuralPure
  */
 function parseFlags(
-  values: { sensitivity?: string; containmentFloor?: string; minGroup?: string },
+  values: { sensitivity?: string },
   baselines: Partial<AuditsConfig>,
 ): AuditsConfig {
   return {
     sensitivity: parseOr(values.sensitivity, baselines.sensitivity ?? DEFAULT_SENSITIVITY),
-    containmentFloor: parseOr(
-      values.containmentFloor,
-      baselines.containmentFloor ?? DEFAULT_CONTAINMENT_FLOOR,
-    ),
-    minGroup: parseOr(values.minGroup, baselines.minGroup ?? DEFAULT_MIN_GROUP, RADIX),
     disable: baselines.disable,
   };
 }
@@ -62,8 +54,6 @@ function parseFlags(
 function parseAuditFlags(
   values: {
     sensitivity?: string;
-    containmentFloor?: string;
-    minGroup?: string;
     disable?: string;
   },
   baselines: Partial<AuditsConfig>,

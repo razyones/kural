@@ -1,12 +1,4 @@
-import {
-  CONTAINMENT_FLOOR,
-  MIN_GROUP,
-  NONE,
-  ONE,
-  SENSITIVITY,
-  THREE,
-  TWO,
-} from "../../../../tests/constants/audits.ts";
+import { NONE, ONE, SENSITIVITY, THREE, TWO } from "../../../../tests/constants/audits.ts";
 import { describe, expect, test } from "vite-plus/test";
 import {
   makeDir,
@@ -21,8 +13,6 @@ import { createContext } from "../context.ts";
 import incompleteDocs from "./incomplete-docs.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 describe("incomplete-docs detect — function nodes", () => {

@@ -32,8 +32,6 @@ type Finding = {
 type AuditContext = {
   readonly nodes: NodeMap;
   readonly sensitivity: number;
-  readonly containmentFloor: number;
-  readonly minGroup: number;
   readonly rootKey: string | null;
   readonly siblingPairs: SiblingPair[];
   readonly leafMergeFence: number;

@@ -44,8 +44,6 @@ const E1 = 1.0;
 
 /** Common test config values. */
 const SENSITIVITY = 2.0;
-const CONTAINMENT_FLOOR = 0.9;
-const MIN_GROUP = 4;
 
 /** Counting constants. */
 const NONE = 0;
@@ -54,7 +52,6 @@ const TWO = 2;
 const THREE = 3;
 
 export {
-  CONTAINMENT_FLOOR,
   E0,
   E001,
   E005,
@@ -92,7 +89,6 @@ export {
   E095,
   E099,
   E1,
-  MIN_GROUP,
   NONE,
   ONE,
   SENSITIVITY,

@@ -8,10 +8,6 @@
 type AuditsConfig = {
   /** Standard deviations from the mean to flag (higher = stricter). Default: 2.0 */
   sensitivity: number;
-  /** Absolute floor: containment requires dominant child above this. Default: 0.9 */
-  containmentFloor: number;
-  /** Minimum group size for per-group statistical tests. Default: 4 */
-  minGroup: number;
   /** Audit names to skip (e.g. ["incomplete-docs", "identity-language"]) */
   disable?: string[];
 };

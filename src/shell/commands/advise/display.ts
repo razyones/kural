@@ -11,6 +11,7 @@ import type {
   ProposedGroup,
 } from "../../../analysis/advise/analyze.ts";
 import { colors, logger } from "../../ui/log.ts";
+import { avg } from "../../../utils/vectors.ts";
 import { renderFooter } from "../../ui/footer.ts";
 
 const NONE = 0;
@@ -46,21 +47,6 @@ function formatDelta(delta: number): string {
 }
 
 /**
- * Computes the arithmetic mean of a number array.
- * @param values - Array of numbers to average
- * @returns The mean value, or zero if the array is empty
- * @kuralPure
- * @kuralHelper
- */
-function average(values: number[]): number {
-  if (values.length === NONE) {
-    return NONE;
-  }
-  const sum = values.reduce((acc, v) => acc + v, NONE);
-  return sum / values.length;
-}
-
-/**
  * Renders a single group with its label and member names.
  * @param group - The proposed group to display
  * @param index - The group number for labeling
@@ -82,9 +68,9 @@ function printScoreDeltas(cut: CutEvaluation, result: AdviseResult): void {
     return;
   }
 
-  const avgFit = average(cut.groups.map((g) => g.childrenFit));
-  const avgUniq = average(cut.groups.map((g) => g.childrenUniqueness));
-  const avgScore = average(cut.groups.map((g) => g.childrenScore));
+  const avgFit = avg(cut.groups.map((g) => g.childrenFit));
+  const avgUniq = avg(cut.groups.map((g) => g.childrenUniqueness));
+  const avgScore = avg(cut.groups.map((g) => g.childrenScore));
 
   logger.log("");
   logger.log(`    ${colors.dim("Current \u2192 Proposed:")}`);

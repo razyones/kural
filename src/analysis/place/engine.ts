@@ -5,21 +5,19 @@
  * into a final suggestion — no other module runs the decision tiers.
  */
 
+import type { BridgeResult, PlacementResult, PlacementSuggestion, RankedPath } from "./types.ts";
 import {
-  BRIDGE_THRESHOLD,
   DECIMAL_PLACES,
   DISPLAY_PATHS,
-  HARD_ALIEN_RATIO,
   NONE,
   PERCENT_SCALE,
-  SAFETY_GATE,
   findCapabilityRoot,
   findRoot,
 } from "./helpers.ts";
-import type { BridgeResult, PlacementResult, PlacementSuggestion, RankedPath } from "./types.ts";
-import { bestLeafMatch, calibrateAlienFence, classifyAxis } from "./calibrate.ts";
+import { bestLeafMatch, calibrate, classifyAxis } from "./calibrate.ts";
 import { buildResult, buildUncertainSuggestion } from "./result.ts";
 import { classifyBridgeType, routeByLayer } from "./bridge.ts";
+import type { CalibrationResult } from "./calibrate.ts";
 import type { NodeMap } from "../tree/tree.ts";
 import type { PlacementEmbedder } from "./helpers.ts";
 import { chainSearch } from "./chain.ts";
@@ -28,9 +26,9 @@ import { findRelatedConcepts } from "./related.ts";
 const NEXT = 1;
 
 /**
- * Determines if the query is alien to the codebase.
+ * Determines if the query is alien to the codebase using self-calibrated thresholds.
  * @param leafSim - Best leaf-level cosine similarity for the query
- * @param alienFence - Calibrated similarity threshold for alien detection
+ * @param cal - Self-calibrated placement thresholds
  * @param topConfidence - Confidence score of the top-ranked path
  * @param topTrailHasCreateNew - Whether the top path's trail includes a create-new step
  * @returns Global and level alien flags
@@ -38,12 +36,12 @@ const NEXT = 1;
  */
 function detectAlien(
   leafSim: number,
-  alienFence: number,
+  cal: CalibrationResult,
   topConfidence: number,
   topTrailHasCreateNew: boolean,
 ): { globalAlien: boolean; levelAlien: boolean } {
-  const hardAlien = leafSim < alienFence * HARD_ALIEN_RATIO;
-  const softAlien = leafSim < alienFence && topConfidence < SAFETY_GATE;
+  const hardAlien = leafSim < cal.hardAlienFence;
+  const softAlien = leafSim < cal.alienFence && topConfidence < cal.safetyGate;
   return {
     globalAlien: hardAlien || softAlien,
     levelAlien: topTrailHasCreateNew,
@@ -137,12 +135,14 @@ function buildBridgeSuggestion(
 
 /**
  * Decides the placement tier and returns the suggestion + optional bridge info.
+ * Uses self-calibrated thresholds from the codebase's own probe distributions.
  * @param alien - Global and level alien detection flags
  * @param topPath - Highest-ranked placement path
  * @param paths - All ranked placement paths from chain search
  * @param leafMatch - Best leaf match similarity and name
  * @param nodes - The scored node map from the snapshot
  * @param root - Root key and node of the tree
+ * @param cal - Self-calibrated placement thresholds
  * @param q - Embedding vector of the query text
  * @param embedder - Function that embeds text strings into vectors
  * @returns Placement suggestion and optional bridge classification info
@@ -155,6 +155,7 @@ async function decideTier(
   leafMatch: { similarity: number; name: string },
   nodes: NodeMap,
   root: { key: string; node: ReturnType<typeof findRoot>["node"] },
+  cal: CalibrationResult,
   q: number[],
   embedder: PlacementEmbedder,
 ): Promise<{ suggestion: PlacementSuggestion; bridgeInfo: BridgeResult | null }> {
@@ -166,13 +167,13 @@ async function decideTier(
     };
   }
 
-  const isBridge = topPath.confidence < BRIDGE_THRESHOLD;
+  const isBridge = topPath.confidence < cal.bridgeThreshold;
   if (isBridge) {
     const bridgeInfo = await classifyBridgeType(embedder, q);
     return { suggestion: buildBridgeSuggestion(bridgeInfo, q, nodes, root, paths), bridgeInfo };
   }
 
-  if (topPath.confidence < SAFETY_GATE) {
+  if (topPath.confidence < cal.safetyGate) {
     return {
       suggestion: buildUncertainSuggestion(paths, nodes, topPath.confidence),
       bridgeInfo: null,
@@ -193,7 +194,7 @@ async function decideTier(
 /** Intermediate signals gathered before the tier decision. */
 type PlaceSignals = {
   root: { key: string; node: ReturnType<typeof findRoot>["node"] };
-  calibration: { alienFence: number; probeCount: number };
+  calibration: CalibrationResult;
   q: number[];
   axis: ReturnType<typeof classifyAxis>;
   leafMatch: { similarity: number; name: string };
@@ -217,7 +218,7 @@ async function gatherSignals(
   embedder: PlacementEmbedder,
 ): Promise<PlaceSignals> {
   const root = findRoot(nodes);
-  const calibration = await calibrateAlienFence(embedder, nodes, root.node);
+  const calibration = await calibrate(embedder, nodes, root.key, root.node);
   const [q] = await embedder([queryText]);
   const axis = classifyAxis(q, root.node, nodes);
   const leafMatch = bestLeafMatch(q, nodes);
@@ -229,12 +230,7 @@ async function gatherSignals(
   const second = paths.length > NEXT ? paths[NEXT] : null;
   const chainGap = second === null ? NEXT : topPath.confidence - second.confidence;
   const hasCreateNew = topPath.trail.some((t) => t.choice === "\u00ABcreate-new\u00BB");
-  const alien = detectAlien(
-    leafMatch.similarity,
-    calibration.alienFence,
-    topPath.confidence,
-    hasCreateNew,
-  );
+  const alien = detectAlien(leafMatch.similarity, calibration, topPath.confidence, hasCreateNew);
 
   return { root, calibration, q, axis, leafMatch, paths, topPath, chainGap, alien };
 }
@@ -260,6 +256,7 @@ async function place(
     s.leafMatch,
     nodes,
     s.root,
+    s.calibration,
     s.q,
     embedder,
   );

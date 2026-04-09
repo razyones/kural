@@ -5,15 +5,14 @@
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import { getChildren, isLeaf } from "../../tree/tree.ts";
+import { lowerFence, median } from "../fence.ts";
 import { cosineSimilarity } from "../../../utils/vectors.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../../utils/format.ts";
 import { isSuppressed } from "../context.ts";
-import { lowerFence } from "../fence.ts";
 import { num } from "../../../utils/record.ts";
 
 const NONE = 0;
-const INCOHERENT_CAP = 0.9;
 
 /**
  * Renders the label-fit deficit showing how far a container's declared identity strays from its actual content.
@@ -78,7 +77,8 @@ function detectIncoherent(ctx: AuditContext, utilMode: boolean): Finding[] {
   const { nodes, sensitivity } = ctx;
   const entries = collectLabelFits(nodes, utilMode);
   const fits = entries.map((e) => e.labelFit);
-  const fence = Math.min(lowerFence(fits, sensitivity), INCOHERENT_CAP);
+  const cap = median(fits);
+  const fence = Math.min(lowerFence(fits, sensitivity), cap);
   const auditName = utilMode ? "incoherent-utils" : "incoherent";
 
   const findings: Finding[] = [];

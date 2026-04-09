@@ -1,4 +1,4 @@
-import { bestLeafMatch, calibrateAlienFence, classifyAxis } from "./calibrate.ts";
+import { bestLeafMatch, calibrate, classifyAxis } from "./calibrate.ts";
 import { describe, expect, test } from "vite-plus/test";
 import { makeDir, makeFile, makeFunction, toNodeMap } from "../../../tests/helpers/audits.ts";
 
@@ -158,8 +158,8 @@ async function stubEmbedder(texts: string[]): Promise<number[][]> {
   return resolved;
 }
 
-describe("calibrateAlienFence — insufficient probes", () => {
-  test("returns zero fence when fewer than 2 probes", async () => {
+describe("calibrate — insufficient probes", () => {
+  test("returns zero thresholds when fewer than 2 probes", async () => {
     const root = makeDir({
       key: "dir:/src",
       name: "src",
@@ -179,14 +179,14 @@ describe("calibrateAlienFence — insufficient probes", () => {
       description: "Login flow",
     });
     const nodes = toNodeMap(root, auth, file);
-    const result = await calibrateAlienFence(stubEmbedder, nodes, root);
+    const result = await calibrate(stubEmbedder, nodes, root.key, root);
 
     expect(result.alienFence).toBe(NONE);
     expect(result.probeCount).toBe(NONE);
   });
 });
 
-describe("calibrateAlienFence — subdirectory probes", () => {
+describe("calibrate — subdirectory probes", () => {
   test("skips subdirectory with no described files", async () => {
     const root = makeDir({
       key: "dir:/src",
@@ -236,7 +236,7 @@ describe("calibrateAlienFence — subdirectory probes", () => {
       identity: [E1, E0],
     });
     const nodes = toNodeMap(root, dirA, fileA, sub, bare, dirB, fileB, leaf);
-    const result = await calibrateAlienFence(stubEmbedder, nodes, root);
+    const result = await calibrate(stubEmbedder, nodes, root.key, root);
 
     expect(result.probeCount).toBeGreaterThanOrEqual(NEXT);
   });

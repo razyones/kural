@@ -1,5 +1,4 @@
 import {
-  CONTAINMENT_FLOOR,
   E0,
   E01,
   E012,
@@ -13,7 +12,6 @@ import {
   E088,
   E09,
   E1,
-  MIN_GROUP,
   NONE,
   ONE,
   SENSITIVITY,
@@ -30,8 +28,6 @@ import { createContext } from "../context.ts";
 import outliers from "./outliers.ts";
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Embedding vectors for similarity tests. */

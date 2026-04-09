@@ -7,14 +7,13 @@
 
 import type { CodeNode, NodeMap } from "../tree/tree.ts";
 import { DECIMAL_PLACES, DISPLAY_PATHS, NONE, vecOf } from "./helpers.ts";
+import { avg, cosineSimilarity } from "../../utils/vectors.ts";
 import type { BridgeResult } from "./types.ts";
 import type { PlacementEmbedder } from "./helpers.ts";
-import { cosineSimilarity } from "../../utils/vectors.ts";
 import { getChildren } from "../tree/tree.ts";
+import { stddev } from "../audits/fence.ts";
 
 const NEXT = 1;
-const BRIDGE_TYPE_CONFIDENCE = 0.6;
-const BRIDGE_TYPE_GAP = 0.02;
 
 /** Bridge type reference descriptions. */
 const BRIDGE_TYPE_REFS: Record<string, string> = {
@@ -67,7 +66,11 @@ async function classifyBridgeType(
   const top = sims[NONE];
   const gap = sims.length > NEXT ? top.sim - sims[NEXT].sim : NONE;
   const layer = BRIDGE_TYPE_LAYER[top.type];
-  const confident = top.sim > BRIDGE_TYPE_CONFIDENCE && gap > BRIDGE_TYPE_GAP;
+
+  const allSimValues = sims.map((s) => s.sim);
+  const simMean = avg(allSimValues);
+  const simStd = stddev(allSimValues, simMean);
+  const confident = top.sim > simMean + simStd && gap > simStd;
 
   return {
     type: top.type,

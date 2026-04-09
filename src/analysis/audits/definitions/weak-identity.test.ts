@@ -6,7 +6,6 @@ import {
   E09,
   E095,
   E1,
-  MIN_GROUP,
   NONE,
   SENSITIVITY,
 } from "../../../../tests/constants/audits.ts";
@@ -16,11 +15,8 @@ import type { NodeMap } from "../../tree/tree.ts";
 import { createContext } from "../context.ts";
 import weakIdentity from "./weak-identity.ts";
 
-const CONTAINMENT_FLOOR = 0.9;
 const CONFIG = {
   sensitivity: SENSITIVITY,
-  containmentFloor: CONTAINMENT_FLOOR,
-  minGroup: MIN_GROUP,
 };
 
 /** Vectors for weak-identity tests. */

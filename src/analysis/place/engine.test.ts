@@ -214,15 +214,131 @@ function bridgeEmbedder(): (t: string[]) => Promise<number[][]> {
   return embed;
 }
 
-describe("place — bridge tier", () => {
-  test("reaches bridge-escalation with diluted confidence", async () => {
-    const nodes = buildDilutedTree();
-    const result = await place("generic concept", nodes, bridgeEmbedder());
+/**
+ * Builds a tree where func identity vectors are near-central, decoupling
+ * leaf similarity from routing confidence. Any query has high leaf sim
+ * (avoiding alien detection) while dir identity vectors are spread out
+ * (enabling decisive routing for probes, diluted routing for equidistant query).
+ */
+function buildBridgeTestTree(): NodeMap {
+  const E01 = 0.1;
+  const E02 = 0.2;
+  const E04 = 0.4;
+  const E06 = 0.6;
+  const E08 = 0.8;
+  const F_H = 0.52;
+  const F_M = 0.44;
+  const F_L = 0.38;
+  const F_MH = 0.5;
+  const F_ML = 0.36;
+  const keys = ["a", "b", "c", "d", "e", "f"];
+  const dirVecs = [
+    [E08, E02, E01],
+    [E01, E08, E02],
+    [E02, E01, E08],
+    [E06, E06, E01],
+    [E06, E01, E06],
+    [E01, E06, E06],
+  ];
+  const funcVecs = [
+    [F_H, F_M, F_L],
+    [F_L, F_H, F_M],
+    [F_M, F_L, F_H],
+    [F_MH, F_MH, F_ML],
+    [F_MH, F_ML, F_MH],
+    [F_ML, F_MH, F_MH],
+  ];
+  const root = makeDir({
+    key: "dir:/src",
+    name: "src",
+    identity: [E04, E04, E04],
+    leaf: [E04, E04, E04],
+    childKeys: keys.map((k) => `dir:/src/${k}`),
+    parentKey: null,
+    description: "Root module",
+  });
+  const all: Parameters<typeof toNodeMap> = [root];
+  for (let i = NONE; i < keys.length; i++) {
+    const n = keys[i];
+    all.push(
+      makeDir({
+        key: `dir:/src/${n}`,
+        name: n,
+        identity: dirVecs[i],
+        leaf: dirVecs[i],
+        childKeys: [`file:/src/${n}/f.ts`],
+        parentKey: "dir:/src",
+        description: `Module ${n}`,
+      }),
+      makeFile({
+        key: `file:/src/${n}/f.ts`,
+        name: "f.ts",
+        identity: funcVecs[i],
+        leaf: funcVecs[i],
+        childKeys: [`func:/src/${n}/f.ts:fn`],
+        parentKey: `dir:/src/${n}`,
+        description: `File in ${n}`,
+      }),
+      makeFunction({
+        key: `func:/src/${n}/f.ts:fn`,
+        name: "fn",
+        identity: funcVecs[i],
+        leaf: funcVecs[i],
+        parentKey: `file:/src/${n}/f.ts`,
+      }),
+    );
+  }
+  return toNodeMap(...all);
+}
 
+/**
+ * Stateful embedder for bridge-escalation tests.
+ * Call 1 (probes): biased toward each module → high routing confidence.
+ * Call 2 (query): near-equidistant → diluted confidence below bridge threshold.
+ * Call 3+ (bridge refs): identical non-proportional vectors → confident = false.
+ */
+function bridgeTestEmbedder(): (t: string[]) => Promise<number[][]> {
+  const P_H = 0.7;
+  const P_M = 0.35;
+  const P_L = 0.25;
+  const P_MH = 0.55;
+  const Q = 0.38;
+  const B_H = 0.5;
+  const B_M = 0.4;
+  const B_L = 0.35;
+  let call = NONE;
+  async function embed(texts: string[]): Promise<number[][]> {
+    call++;
+    const PROBE_CALL = 1;
+    const QUERY_CALL = 2;
+    if (call === PROBE_CALL) {
+      return [
+        [P_H, P_M, P_L],
+        [P_L, P_H, P_M],
+        [P_M, P_L, P_H],
+        [P_MH, P_MH, P_L],
+        [P_MH, P_L, P_MH],
+        [P_L, P_MH, P_MH],
+      ];
+    }
+    if (call === QUERY_CALL) {
+      return [[Q, Q, Q]];
+    }
+    const resolved = await Promise.resolve(texts.map(() => [B_H, B_M, B_L]));
+    return resolved;
+  }
+  return embed;
+}
+
+describe("place — bridge tier", () => {
+  test("triggers bridge-escalation for diluted query", async () => {
+    const nodes = buildBridgeTestTree();
+    const result = await place("generic concept", nodes, bridgeTestEmbedder());
+
+    expect(result.detection.globalAlien).toBe(false);
     expect(result.suggestion.method).toBe("bridge-escalation");
     expect(result.bridge).not.toBeNull();
     expect(result.bridge?.type).toBeDefined();
-    expect(result.detection.globalAlien).toBe(false);
   });
 });
 
