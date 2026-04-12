@@ -58,7 +58,7 @@ describe("detect", () => {
   test("respects disabled audits", () => {
     const nodes: NodeMap = new Map([makeDir("dir:/src", "src", [])]);
     const disabled = new Set(["incomplete-docs"]);
-    const report = detect(nodes, DEFAULT_CONFIG, null, disabled);
+    const report = detect(nodes, DEFAULT_CONFIG, disabled);
     expect(findResult(report, "incomplete-docs")).toBeUndefined();
   });
 

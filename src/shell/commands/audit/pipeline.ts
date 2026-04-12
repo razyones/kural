@@ -23,32 +23,6 @@ type AuditPipelineResult = {
 };
 
 /**
- * Restores axis scores from snapshot metadata so the identity-language audit can evaluate is-does balance.
- * @param text - JSON string to parse
- * @returns A record of string keys to number values, or null if input is not a valid object
- * @kuralPure
- * @kuralHelper
- */
-function parseNumberRecord(text: string): Record<string, number> | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(text);
-  } catch {
-    return null;
-  }
-  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    return null;
-  }
-  const record: Record<string, number> = {};
-  for (const [k, v] of Object.entries(parsed)) {
-    if (typeof v === "number") {
-      record[k] = v;
-    }
-  }
-  return record;
-}
-
-/**
  * Runs the audit pipeline: read snapshot → build tree → detect findings.
  * @param root - Absolute path to the project root
  * @param config - Audit sensitivity and tuning parameters
@@ -73,18 +47,13 @@ async function runAudits(
     const result = rebuildParseResult(snapshot.collections);
     const nodes = buildTree(result);
 
-    let axisScores: Record<string, number> | null = null;
     let createdAt: number | null = null;
     const metaCreatedAt = snapshot.collections.metadata.get("created_at");
     if (metaCreatedAt !== undefined) {
       createdAt = Number(metaCreatedAt.value);
     }
-    const metaAxis = snapshot.collections.metadata.get("axis-scores:is-does");
-    if (metaAxis !== undefined) {
-      axisScores = parseNumberRecord(metaAxis.value);
-    }
 
-    const report = detect(nodes, config, axisScores, disabledAudits);
+    const report = detect(nodes, config, disabledAudits);
     return { report, nodes, dbPath, createdAt };
   } finally {
     await closeSnapshot(snapshot);

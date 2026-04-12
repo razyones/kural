@@ -147,18 +147,6 @@ Detailed per-audit guidance for resolving kural findings.
 
 **The finding shows:** `minSiblingSim` (weakest sibling) and `crossPulls` (array of `{path, sim}` for top 3 non-sibling pulls).
 
-### identity-language
-
-**Detects:** KURAL.md descriptions leaning toward "is" (static identity) instead of "does" (dynamic purpose). Measured against the is-does axis.
-
-**Resolution:**
-
-1. **Rewrite with active verbs** — change "The configuration module" to "Loads, validates, and merges configuration from disk and CLI overrides"
-2. **Lead with what it does, not what it is** — "Persists and retrieves all application state" beats "The database layer"
-3. **Keep the metaphor** — the one-word metaphor ("The brain", "The memory") is fine as an anchor, but the rest of the description should be active
-
----
-
 ## Documentation & Coherence
 
 ### incoherent / incoherent-utils

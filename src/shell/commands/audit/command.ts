@@ -101,7 +101,7 @@ export default define({
     disable: {
       type: "string" as const,
       short: "d",
-      description: "Comma-separated audit names to skip (e.g. incomplete-docs,identity-language)",
+      description: "Comma-separated audit names to skip (e.g. incomplete-docs,vocabulary-bleed)",
     },
     expand: {
       type: "boolean" as const,

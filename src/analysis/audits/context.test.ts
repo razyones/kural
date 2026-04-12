@@ -55,23 +55,6 @@ describe("createContext — rootKey detection", () => {
   });
 });
 
-describe("createContext — axisScores", () => {
-  test("defaults axisScores to null", () => {
-    const nodes = toNodeMap();
-    const ctx = createContext(nodes, makeConfig());
-
-    expect(ctx.axisScores).toBeNull();
-  });
-
-  test("passes through provided axisScores", () => {
-    const scores = { identity: ONE };
-    const nodes = toNodeMap();
-    const ctx = createContext(nodes, makeConfig(), scores);
-
-    expect(ctx.axisScores).toBe(scores);
-  });
-});
-
 describe("createContext — lazy siblingPairs", () => {
   test("computes sibling pairs lazily on access", () => {
     const fnA = makeFunction({

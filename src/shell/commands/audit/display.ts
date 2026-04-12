@@ -205,7 +205,6 @@ function printAuditFooter(): void {
         term: "Identity-content",
         definition: "alignment between a container's name and its actual contents",
       },
-      { term: "Axis score", definition: "is-does linguistic measurement for descriptions" },
       {
         term: "clusters",
         definition: "groups of semantically similar children suggesting a split",
