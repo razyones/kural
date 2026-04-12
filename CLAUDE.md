@@ -138,7 +138,7 @@ A KURAL.md directive for directories that intentionally share vocabulary with a 
 ### Format
 
 ```markdown
-The consultant's desk. Parses directory targets and display flags...
+Parses directory targets and display flags...
 @kuralBorrows analysis/advise "terminal surface that formats and renders engine output as diagrams and tables"
 ```
 

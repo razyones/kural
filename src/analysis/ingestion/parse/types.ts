@@ -52,7 +52,7 @@ export type ModuleImports = {
 };
 
 /**
- * Identity is its data shape — the embedding of
+ * Its identity is its data shape — the embedding of
  * its field names and field types. Types represent declarative schemas:
  * named records with typed properties and cross-module references.
  */
@@ -80,7 +80,7 @@ export type KuralType = KuralUnit & {
 };
 
 /**
- * Identity is its call signature — the
+ * Its identity is its call signature — the
  * embedding of its parameter types and return type. Functions represent
  * executable transformations: inputs in, output out.
  */
