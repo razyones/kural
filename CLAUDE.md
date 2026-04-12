@@ -186,7 +186,7 @@ Imports are ordered by **member count first**, then **alphabetically by first sp
 2. **Within each group, sort alphabetically by the first imported name** (not the module path). ASCII order means `A-Z` before `a-z`: `DB_TRUE` < `ParseResult` < `createClient` < `initDb`.
 3. **`import type` counts the same as `import`** for member-count grouping. `import type { Client }` is single, `import type { Client, Row }` is multiple.
 4. **`import type` and `import` are freely interleaved** within each member-count group — they are not separated. Sort purely by first specifier name regardless of whether the import is a type or value.
-5. **ASCII comparison is character-by-character.** Names sharing a prefix but differing in case mid-word sort by the first differing character: `AXES` < `AxisCache` because at position 2, `E` (69) < `i` (105).
+5. **ASCII comparison is character-by-character.** Names sharing a prefix but differing in case mid-word sort by the first differing character: `DB_TRUE` < `describe` because `D` (68) < `d` (100).
 6. **Aliases use the local name for sorting.** `import { cosineSimilarity as similarity }` sorts by `similarity` (`s`), not `cosineSimilarity` (`c`).
 
 ```typescript
@@ -194,8 +194,6 @@ Imports are ordered by **member count first**, then **alphabetically by first sp
 // Note: import type and import are interleaved, not separated
 import type { KuralFile, KuralFunction } from "../parse/types.ts";
 import { describe, expect, it } from "vite-plus/test";
-import { AXES } from "../config/axis-anchors.ts";
-import type { AxisCache } from "../db/cache.ts";
 import type { Client } from "@libsql/client";
 import { createClient } from "@libsql/client";
 import { initDb } from "./schema.ts";

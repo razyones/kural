@@ -319,43 +319,6 @@ describe("containments trigger", () => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  identity-language                                                 */
-/* ------------------------------------------------------------------ */
-
-describe("identity-language trigger", () => {
-  it("flags directory whose description leans toward is instead of does", async () => {
-    tmpRoot = createTmpRoot();
-    const p = `${tmpRoot}/src`;
-    const authPath = `${p}/auth`;
-    const apiPath = `${p}/api`;
-    const badPath = `${p}/bad`;
-
-    const data: SeedData = {
-      directories: [
-        dir(p, "src", [authPath, apiPath, badPath], [E05, E05, E0]),
-        dir(authPath, "auth", [], [E1, E0, E0]),
-        dir(apiPath, "api", [], [E0, E1, E0]),
-        dir(badPath, "bad", [], [E0, E0, E1]),
-      ],
-      files: [],
-      functions: [],
-      extraMetadata: [
-        {
-          key: "axis-scores:is-does",
-          value: JSON.stringify({
-            [`dir:${authPath}`]: E08,
-            [`dir:${apiPath}`]: E06,
-            [`dir:${badPath}`]: E01,
-          }),
-        },
-      ],
-    };
-    await seedFullActiveSnapshot(tmpRoot, "main", data);
-    expectAudit(auditJson(tmpRoot), "identity-language");
-  });
-});
-
-/* ------------------------------------------------------------------ */
 /*  incoherent-utils                                                  */
 /* ------------------------------------------------------------------ */
 

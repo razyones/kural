@@ -74,7 +74,6 @@ After fixing: re-snapshot, compare scores (`-c <baseline>`), then re-audit. Proc
 **Phase 2: Fix documentation quality**
 Descriptions exist now, but may use wrong voice, borrow sibling vocabulary, or mismatch content. Fixing these is cheaper than structural changes and still cascades through the embedding space.
 
-- `identity-language` — Rewrite KURAL.md with active "does" verbs instead of static "is" descriptions
 - `vocabulary-bleed` — Rewrite KURAL.md using vocabulary exclusive to this module's domain. Never borrow sibling or cousin vocabulary. Use `@kuralBorrows` only if cross-module vocabulary is intentional
 - `incoherent` / `incoherent-utils` — Rename the unit or rewrite its description to match actual content
 

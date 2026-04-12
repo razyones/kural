@@ -8,7 +8,7 @@
 type AuditsConfig = {
   /** Standard deviations from the mean to flag (higher = stricter). Default: 2.0 */
   sensitivity: number;
-  /** Audit names to skip (e.g. ["incomplete-docs", "identity-language"]) */
+  /** Audit names to skip (e.g. ["incomplete-docs"]) */
   disable?: string[];
 };
 

@@ -79,22 +79,16 @@ function buildLazyAccessors(
  * Creates an AuditContext with lazy computation of shared data.
  * @param nodes - The code tree
  * @param config - Audit sensitivity and tuning parameters
- * @param axisScores - Pre-computed is-does axis scores (optional)
  * @returns A fully initialized AuditContext
  * @kuralPure
  */
-function createContext(
-  nodes: NodeMap,
-  config: AuditsConfig,
-  axisScores: Record<string, number> | null = null,
-): AuditContext {
+function createContext(nodes: NodeMap, config: AuditsConfig): AuditContext {
   const lazy = buildLazyAccessors(nodes, config);
 
   return {
     nodes,
     sensitivity: config.sensitivity,
     rootKey: findRootNode(nodes)?.key ?? null,
-    axisScores,
     outlierKeys: new Set<string>(),
 
     get siblingPairs(): SiblingPair[] {

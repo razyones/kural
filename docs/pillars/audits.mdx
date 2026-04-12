@@ -1,6 +1,6 @@
 ---
 title: Audits
-description: 15 statistical checks that surface specific structural issues
+description: 14 statistical checks that surface specific structural issues
 icon: SearchCheck
 ---
 
@@ -30,7 +30,7 @@ robustUpperFence = median + sensitivity × 1.4826 × MAD
 robustLowerFence = median - sensitivity × 1.4826 × MAD
 ```
 
-MAD (Median Absolute Deviation) resists outliers better than standard deviation. The constant 1.4826 makes MAD consistent with σ for normal data. When more than half the values are identical, MAD collapses to zero — the fence falls back to IQR/2 (the MAD-equivalent under normality, since IQR ≈ 2·MAD). When both MAD and IQR are zero (all values identical), there is no variation and the fence returns its sentinel — no outliers exist. Used for outlier detection, vocabulary bleed, and identity language.
+MAD (Median Absolute Deviation) resists outliers better than standard deviation. The constant 1.4826 makes MAD consistent with σ for normal data. When more than half the values are identical, MAD collapses to zero — the fence falls back to IQR/2 (the MAD-equivalent under normality, since IQR ≈ 2·MAD). When both MAD and IQR are zero (all values identical), there is no variation and the fence returns its sentinel — no outliers exist. Used for outlier detection and vocabulary bleed.
 
 ### Dendrogram gap
 
@@ -44,7 +44,7 @@ The `sensitivity` parameter (default 2.0) controls how many deviations from cent
 
 ---
 
-## 2. The 15 Audits
+## 2. The 14 Audits
 
 ### Bloating & Size
 
@@ -81,8 +81,6 @@ The `sensitivity` parameter (default 2.0) controls how many deviations from cent
 **incoherent** — Detects non-util containers whose identity-to-content similarity is a lower outlier. The name and description say one thing; the actual content says another. Capped at the median label-fit to avoid flagging near-perfect alignment as an issue.
 
 **incoherent-utils** — Same logic for util containers, scored within their own population.
-
-**identity-language** — Detects directories whose KURAL.md description leans toward "is" (static identity) instead of "does" (dynamic purpose). Measured against the is-does axis — 60 multilingual anchor sentences from `src/config/axis-anchors.ts`. Flags directories whose axis score falls below a robust lower fence.
 
 **weak-identity** — Detects containers where more than half the children fit a sibling module better than their own parent. Uses the drift ratio — the fraction of children whose uncle fit exceeds parent fit — and flags containers where this ratio is a Z-score upper outlier. Reports the strongest competing uncle and the parent-vs-uncle fit comparison. Requires at least 2 eligible children for the statistical test.
 
@@ -131,7 +129,6 @@ Examples from the Kural codebase:
 | `src/KURAL.md`                 | `bloated-directories [070d22b3]` | Root intentionally spans the full lifecycle       |
 | `src/config/KURAL.md`          | `containments [576a50e8]`        | Config intentionally contains all settings        |
 | `src/ingestion/parse/jsdoc.ts` | `containments [a1e18864]`        | JSDoc parser intentionally dominates its file     |
-| `src/ingestion/embed/axes.ts`  | `duplicates [1618cc7f]`          | Axis types share structure by design              |
 | `src/commands/audit/KURAL.md`  | `misplaced [ab944cdf]`           | Audit command must live near commands, not audits |
 
 ### Implicit suppression

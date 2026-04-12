@@ -25,7 +25,6 @@ type AuditReport = AuditResult[];
  * Runs all registered audits on a node map.
  * @param nodes - The code tree (flat map with parent pointers)
  * @param config - Sensitivity and tuning parameters
- * @param axisScores - Pre-computed is-does axis scores (optional)
  * @param disabledAudits - Set of audit names to skip
  * @returns Ordered list of audit results with definitions and findings
  * @kuralPure
@@ -33,10 +32,9 @@ type AuditReport = AuditResult[];
 function detect(
   nodes: NodeMap,
   config: AuditsConfig,
-  axisScores: Record<string, number> | null = null,
   disabledAudits: Set<string> = new Set(),
 ): AuditReport {
-  const ctx = createContext(nodes, config, axisScores);
+  const ctx = createContext(nodes, config);
   const report: AuditReport = [];
 
   for (const audit of allAudits) {

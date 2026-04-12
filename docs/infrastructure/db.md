@@ -138,14 +138,12 @@ Key-value store for snapshot configuration and computed data.
 
 Known keys:
 
-| Key                | Value                      | Purpose                                  |
-| ------------------ | -------------------------- | ---------------------------------------- |
-| `created_at`       | Unix timestamp (ms)        | When the snapshot was generated          |
-| `commit_hash`      | Short git commit hash      | Snapshot identity and provenance         |
-| `model_id`         | Embedding model identifier | Cache invalidation across model changes  |
-| `schema_version`   | Integer                    | Schema version for forward compatibility |
-| `axis:<id>`        | JSON number array          | Computed semantic axis vector            |
-| `axis-scores:<id>` | JSON                       | Directory scores on a semantic axis      |
+| Key              | Value                      | Purpose                                  |
+| ---------------- | -------------------------- | ---------------------------------------- |
+| `created_at`     | Unix timestamp (ms)        | When the snapshot was generated          |
+| `commit_hash`    | Short git commit hash      | Snapshot identity and provenance         |
+| `model_id`       | Embedding model identifier | Cache invalidation across model changes  |
+| `schema_version` | Integer                    | Schema version for forward compatibility |
 
 ## Snapshot Lifecycle
 

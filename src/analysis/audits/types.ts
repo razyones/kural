@@ -36,7 +36,6 @@ type AuditContext = {
   readonly siblingPairs: SiblingPair[];
   readonly leafMergeFence: number;
   readonly fileMergeFence: number;
-  readonly axisScores: Record<string, number> | null;
   outlierKeys: Set<string>;
 };
 

@@ -11,7 +11,6 @@ import type { AuditDefinition } from "../types.ts";
 import containments from "./containments.ts";
 import duplicates, { utilDuplicates as duplicateUtils } from "./duplicates.ts";
 import focalDrift from "./focal-drift.ts";
-import identityLanguage from "./identity-language.ts";
 import incompleteDocs from "./incomplete-docs.ts";
 import mergeCandidates from "./merge-candidates.ts";
 import misplaced from "./misplaced.ts";
@@ -34,7 +33,6 @@ const allAudits: AuditDefinition[] = [
   duplicateUtils,
   vocabularyBleed,
   weakIdentity,
-  identityLanguage,
   incompleteDocs,
 ];
 

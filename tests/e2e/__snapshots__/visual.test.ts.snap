@@ -16,7 +16,6 @@ Glossary:
 Similarity — cosine similarity between embedding vectors (0–100%)
 Dominant / next — highest and second-highest child-to-parent similarity
 Identity-content — alignment between a container's name and its actual contents
-Axis score — is-does linguistic measurement for descriptions
 clusters — groups of semantically similar children suggesting a split
 fence — statistical threshold computed from group distribution
 group — the peer set used as baseline for comparison
@@ -53,7 +52,6 @@ Glossary:
 Similarity — cosine similarity between embedding vectors (0–100%)
 Dominant / next — highest and second-highest child-to-parent similarity
 Identity-content — alignment between a container's name and its actual contents
-Axis score — is-does linguistic measurement for descriptions
 clusters — groups of semantically similar children suggesting a split
 fence — statistical threshold computed from group distribution
 group — the peer set used as baseline for comparison
