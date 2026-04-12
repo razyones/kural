@@ -1,5 +1,5 @@
 /**
- * The stage. Provides shared, lazily-computed data to all audits via a
+ * Provides shared, lazily-computed data to all audits via a
  * single context object. It is the only module that owns cross-audit
  * state — no other module caches sibling pairs or merge fences.
  */

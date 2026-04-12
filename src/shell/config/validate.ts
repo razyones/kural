@@ -1,5 +1,5 @@
 /**
- * The gatekeeper. Checks parsed configuration values for semantic validity
+ * Checks parsed configuration values for semantic validity
  * beyond shape — rejecting negative sensitivities, out-of-range floors,
  * and warning on empty collections. It is the only module that enforces
  * configuration semantics — no other module decides what constitutes a

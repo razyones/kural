@@ -1,5 +1,5 @@
 /**
- * The strategist. Simulates alternate groupings for a directory's children
+ * Simulates alternate groupings for a directory's children
  * by cutting a hierarchical clustering at multiple thresholds and projecting
  * the structural metrics each grouping would produce. It is the only module
  * that proposes reorganisation strategies — no other module evaluates

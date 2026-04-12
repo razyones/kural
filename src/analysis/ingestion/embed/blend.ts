@@ -1,5 +1,5 @@
 /**
- * The arithmetic. Weighted vector addition primitives for embedding
+ * Weighted vector addition primitives for embedding
  * facets — blend, signal application, and identity fusion. It is the
  * only module that defines the weight constants and mixing rules — no
  * other module decides how facets combine.

@@ -1,5 +1,5 @@
 /**
- * The recall. Reads embedding hashes and vectors from a previous snapshot
+ * Reads embedding hashes and vectors from a previous snapshot
  * for cache comparison. It is the only module that loads cached embeddings —
  * no other module reads previous embedding data for reuse.
  */

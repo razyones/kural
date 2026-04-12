@@ -1,5 +1,5 @@
 /**
- * The dial. Configures the sensitivity knobs that control when a structural
+ * Configures the sensitivity knobs that control when a structural
  * signal becomes a finding. It is the only module that owns audit tuning
  * parameters — no other module decides detection thresholds.
  */

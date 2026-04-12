@@ -1,5 +1,5 @@
 /**
- * The contract. Defines Zod schemas for every collection stored in a
+ * Defines Zod schemas for every collection stored in a
  * snapshot database. It is the only module that owns the persistence
  * shapes — no other module defines how units map to storage.
  */

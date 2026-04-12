@@ -1,5 +1,5 @@
 /**
- * The interface. Defines the CLI argument schema and wires user input
+ * Defines the CLI argument schema and wires user input
  * into the skill writer pipeline via Clack prompts. It is the only
  * module that speaks the Gunshi command protocol for the skill
  * command — no other module defines its arguments or orchestrates

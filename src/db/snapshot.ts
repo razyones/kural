@@ -1,5 +1,5 @@
 /**
- * The librarian. Manages the lifecycle of snapshot database files on disk —
+ * Manages the lifecycle of snapshot database files on disk —
  * creating, rotating, cloning, and evicting them. It is the only module
  * that decides which database files exist and where they live — no other
  * part of the system touches the .kural-db directory structure.

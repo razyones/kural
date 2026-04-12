@@ -1,5 +1,5 @@
 /**
- * The compass needle. Shared constants and node helpers used across every
+ * Shared constants and node helpers used across every
  * placement module. It is the only module that defines the placement
  * tuning parameters — no other placement file declares thresholds.
  */

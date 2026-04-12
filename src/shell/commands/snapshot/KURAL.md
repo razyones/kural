@@ -1,1 +1,1 @@
-The archive. Owns the full lifecycle of snapshot databases — creation, listing, pinning, and deletion. It is the only command group that manages snapshot state on disk — no other command group touches the .kural-db directory or modifies snapshot metadata.
+Owns the full lifecycle of snapshot databases — creation, listing, pinning, and deletion. It is the only command group that manages snapshot state on disk — no other command group touches the .kural-db directory or modifies snapshot metadata.

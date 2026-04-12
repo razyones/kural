@@ -1,5 +1,5 @@
 /**
- * The scout. Enumerates source files and directories to determine which
+ * Enumerates source files and directories to determine which
  * code units the parser will turn into structured representations. It is
  * the only module that touches the filesystem for source discovery — no
  * other part of the pipeline decides what code exists.

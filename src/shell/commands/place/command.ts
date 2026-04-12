@@ -1,5 +1,5 @@
 /**
- * The console. Defines the CLI argument schema for the place command
+ * Defines the CLI argument schema for the place command
  * and wires parsed flags to the engine. It is the only module that
  * speaks the Gunshi command protocol for this workflow — no other
  * module defines these arguments or renders this output.

@@ -1,5 +1,5 @@
 /**
- * The grid. Renders score breakdown tables using cliui's table API.
+ * Renders score breakdown tables using cliui's table API.
  * It is the only module that owns tabular score display — no other
  * module formats score data into rows and columns.
  */

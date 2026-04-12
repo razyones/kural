@@ -1,5 +1,5 @@
 /**
- * The writer. Reads the shared skill source files and writes
+ * Reads the shared skill source files and writes
  * editor-specific versions to disk. It is the only module that
  * performs file I/O for the skill command — no other module
  * reads skill sources or writes editor output.

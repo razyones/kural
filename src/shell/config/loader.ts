@@ -1,5 +1,5 @@
 /**
- * The reader. Loads project configuration from kural.config.json on disk.
+ * Loads project configuration from kural.config.json on disk.
  * It is the only module that reads the config file — no other module
  * touches the filesystem for configuration.
  */

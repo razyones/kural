@@ -1,5 +1,5 @@
 /**
- * The catalog. Defines every supported editor's skill file layout —
+ * Defines every supported editor's skill file layout —
  * path patterns, format adapters, and metadata conventions. It is
  * the only module that knows where each editor stores its instruction
  * files and how to transform shared skill content into editor-native

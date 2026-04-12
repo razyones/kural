@@ -1,5 +1,5 @@
 /**
- * The inspector. Runs all registered audits through a shared context and
+ * Runs all registered audits through a shared context and
  * returns findings grouped by audit name. It is the only entry point for
  * structural auditing — no other module triggers the full audit pipeline.
  */

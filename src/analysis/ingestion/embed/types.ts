@@ -1,5 +1,5 @@
 /**
- * The cache contract. Defines the shape of cached embedding data that flows
+ * Defines the shape of cached embedding data that flows
  * between the database boundary and the embedding pipeline. It is the only
  * module that owns the cache entry shape — no other module defines what a
  * cached unit looks like.

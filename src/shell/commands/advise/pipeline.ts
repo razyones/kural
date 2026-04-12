@@ -1,5 +1,5 @@
 /**
- * The compass needle. Opens a snapshot, rebuilds the code tree, and
+ * Opens a snapshot, rebuilds the code tree, and
  * delegates to the engine for the advise command. It is the only module
  * that bridges stored state to the engine for this command — no other
  * module orchestrates the snapshot-to-engine flow for directory advice.

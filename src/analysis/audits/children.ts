@@ -1,5 +1,5 @@
 /**
- * The indexer. Resolves a parent's child keys into key-node pairs so
+ * Resolves a parent's child keys into key-node pairs so
  * audit detectors can iterate children while retaining their map keys
  * for finding reports. It is the only module that provides keyed child
  * access for diagnostics — no other audit helper preserves the key

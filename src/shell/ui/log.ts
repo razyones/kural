@@ -1,5 +1,5 @@
 /**
- * The voice. Provides the shared cliui instance and reusable log
+ * Provides the shared cliui instance and reusable log
  * patterns for all terminal output. It is the only module that
  * instantiates cliui — no other module creates a UI renderer.
  */

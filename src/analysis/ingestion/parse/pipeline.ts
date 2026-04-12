@@ -1,5 +1,5 @@
 /**
- * The assembler. Coordinates the scout, dissector, and interpreter to produce
+ * Coordinates the scout, dissector, and interpreter to produce
  * a complete tree of code units from a directory. It is the only entry point
  * into the parse pipeline — nothing else in the system triggers parsing.
  */

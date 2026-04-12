@@ -1,1 +1,1 @@
-The dispatch. Binds CLI argument schemas to their execution pipelines. It is the only directory whose children define user-facing commands — no other part of the system speaks the Gunshi protocol or maps terminal input to internal logic.
+Binds CLI argument schemas to their execution pipelines. It is the only directory whose children define user-facing commands — no other part of the system speaks the Gunshi protocol or maps terminal input to internal logic.

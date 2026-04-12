@@ -1,5 +1,5 @@
 /**
- * The counselor. Defines the CLI argument schema for the advise command
+ * Defines the CLI argument schema for the advise command
  * and wires parsed flags to the engine. It is the only module that
  * speaks the Gunshi command protocol for this workflow — no other
  * module defines these arguments or invokes this run handler.

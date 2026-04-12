@@ -1,5 +1,5 @@
 /**
- * The judge. Orchestrates the complete scoring pipeline to produce a
+ * Orchestrates the complete scoring pipeline to produce a
  * ScoreCard for every node in the tree — capturing three perspectives:
  * as a child, as a parent, and as a subtree root.
  */

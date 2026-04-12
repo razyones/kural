@@ -1,5 +1,5 @@
 /**
- * The interface. Defines the CLI argument schema and wires user input
+ * Defines the CLI argument schema and wires user input
  * into the score display pipeline. It is the only module that speaks
  * the Gunshi command protocol for the score command — no other module
  * defines its arguments or orchestrates its output.

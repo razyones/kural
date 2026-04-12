@@ -1,5 +1,5 @@
 /**
- * The translator. Coordinates signature building and vector generation to
+ * Coordinates signature building and vector generation to
  * populate embeddings on every unit in a parse result. It is the only
  * entry point for enriching parsed code with numerical representations —
  * no other module triggers the embedding pipeline.

@@ -1,5 +1,5 @@
 /**
- * The inventory. Lists all history snapshots for the current branch,
+ * Lists all history snapshots for the current branch,
  * showing ID, timestamp, and pin name. It is the only command that
  * enumerates stored snapshots — no other command prints the full list.
  */

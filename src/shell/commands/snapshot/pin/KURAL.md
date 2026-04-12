@@ -1,1 +1,1 @@
-The tack. Wires the pin CLI arguments to the snapshot pinning logic. It is the only command that assigns human-readable names to snapshots — no other command writes pin metadata or protects snapshots from eviction.
+Wires the pin CLI arguments to the snapshot pinning logic. It is the only command that assigns human-readable names to snapshots — no other command writes pin metadata or protects snapshots from eviction.

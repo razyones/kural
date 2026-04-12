@@ -1,5 +1,5 @@
 /**
- * The voice. Defines the shape of LLM provider settings — which service
+ * Defines the shape of LLM provider settings — which service
  * to call for text generation tasks like translation. It is the only
  * module that owns LLM connection configuration — no other module
  * defines how the system connects to a generative language model.

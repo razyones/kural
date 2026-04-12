@@ -1,5 +1,5 @@
 /**
- * The bulletin board. Renders titled sections of list items to the terminal.
+ * Renders titled sections of list items to the terminal.
  * It is the only module that owns the bullet-heading-details display pattern —
  * no other module prints indented list items with dim detail lines.
  */
@@ -9,13 +9,13 @@ import { colors, logger } from "./log.ts";
 const NONE = 0;
 const BULLET = "\u25B8";
 
-/** The leaf entry — one bullet heading with optional indented detail lines beneath it. */
+/** One bullet heading with optional indented detail lines beneath it. */
 type ListItem = {
   heading: string;
   details: string[];
 };
 
-/** The titled container — groups entries under a category heading with a count badge. */
+/** Groups entries under a category heading with a count badge. */
 type ListSection = {
   title: string;
   /** Total findings (before truncation). */

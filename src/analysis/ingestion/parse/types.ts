@@ -1,5 +1,5 @@
 /**
- * The contract. Defines the structural vocabulary every module shares when
+ * Defines the structural vocabulary every module shares when
  * talking about code units. It is the only source of truth for what a parsed
  * type, function, file, or directory looks like — no other module invents
  * these shapes.
@@ -52,7 +52,7 @@ export type ModuleImports = {
 };
 
 /**
- * The atomic structural unit. Identity is its data shape — the embedding of
+ * Identity is its data shape — the embedding of
  * its field names and field types. Types represent declarative schemas:
  * named records with typed properties and cross-module references.
  */
@@ -80,7 +80,7 @@ export type KuralType = KuralUnit & {
 };
 
 /**
- * The atomic behavioral unit. Identity is its call signature — the
+ * Identity is its call signature — the
  * embedding of its parameter types and return type. Functions represent
  * executable transformations: inputs in, output out.
  */

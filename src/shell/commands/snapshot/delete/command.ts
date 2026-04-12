@@ -1,5 +1,5 @@
 /**
- * The eraser. Permanently removes a snapshot from history.
+ * Permanently removes a snapshot from history.
  * It is the only command that deletes snapshot database files —
  * no other command besides automatic eviction removes snapshots.
  */

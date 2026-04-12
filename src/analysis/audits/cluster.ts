@@ -1,5 +1,5 @@
 /**
- * The dendrogrammer. Computes hierarchical distance trees for diagnostic
+ * Computes hierarchical distance trees for diagnostic
  * split detection — the core algorithm behind bloat analysis. It is the
  * only module in the diagnostic suite that constructs merge-gap dendrograms
  * for issue detection — no other audit infrastructure performs hierarchical

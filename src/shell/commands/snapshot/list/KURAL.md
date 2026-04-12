@@ -1,1 +1,1 @@
-The inventory. Wires the list CLI arguments to the snapshot enumeration logic. It is the only command that reads and renders the full history of snapshots — no other command prints snapshot IDs, timestamps, or pin names.
+Wires the list CLI arguments to the snapshot enumeration logic. It is the only command that reads and renders the full history of snapshots — no other command prints snapshot IDs, timestamps, or pin names.

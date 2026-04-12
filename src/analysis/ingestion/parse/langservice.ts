@@ -1,5 +1,5 @@
 /**
- * The lens. Provides rich semantic information about code symbols by
+ * Provides rich semantic information about code symbols by
  * leveraging the TypeScript Language Service. It is the only module
  * that creates a Language Service instance — no other module accesses
  * hover-level type resolution.

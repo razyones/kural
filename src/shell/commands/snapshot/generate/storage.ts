@@ -1,5 +1,5 @@
 /**
- * The translator. Converts parsed units, score cards, and metadata into
+ * Converts parsed units, score cards, and metadata into
  * collection entries for the active snapshot. It is the only module that
  * maps domain structures to their on-disk shape — no other module decides
  * how pipeline output is written to a snapshot.

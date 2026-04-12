@@ -1,5 +1,5 @@
 /**
- * The inspector. Peeks into a snapshot database file to read pin metadata
+ * Peeks into a snapshot database file to read pin metadata
  * without triggering a full collection preload. It is the only module that
  * queries the collection registry table directly — no other module performs
  * raw SQL reads against snapshot files for pin names.

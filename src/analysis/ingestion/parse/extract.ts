@@ -1,4 +1,4 @@
-/** The dissector. Breaks a source file into structural parts — the only module that reads AST nodes. */
+/** Breaks a source file into structural parts — the only module that reads AST nodes. */
 
 import type { ExtractedFile, KuralFunction, KuralType, ModuleImports } from "./types.ts";
 import { getJSDoc, hasExportModifier, isUtilModule } from "./jsdoc.ts";

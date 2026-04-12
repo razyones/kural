@@ -1,5 +1,5 @@
 /**
- * The compass. Reads git state — current branch and commit hash — so
+ * Reads git state — current branch and commit hash — so
  * snapshot IDs can be tied to the code they were generated from. It is
  * the only module that shells out to git — no other module runs git
  * commands.

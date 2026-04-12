@@ -1,1 +1,1 @@
-The system. The only directory whose children span the full lifecycle from source code to scored output. It binds reading, scoring, storage, configuration, user interaction, and shared utilities into a single structural analysis pipeline.
+The only directory whose children span the full lifecycle from source code to scored output. It binds reading, scoring, storage, configuration, user interaction, and shared utilities into a single structural analysis pipeline.

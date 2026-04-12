@@ -1,5 +1,5 @@
 /**
- * The interface. Defines the CLI argument schema and wires user input
+ * Defines the CLI argument schema and wires user input
  * into the generation pipeline. It is the only module that speaks the
  * Gunshi command protocol — no other module defines the generate
  * command's arguments or output.

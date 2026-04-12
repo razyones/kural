@@ -1,5 +1,5 @@
 /**
- * The statistician. Computes detection boundaries from value distributions —
+ * Computes detection boundaries from value distributions —
  * Z-score fences, robust MAD fences, and leave-one-out variants. It is the
  * only module that turns a distribution into a threshold — no other module
  * decides where normal ends and abnormal begins.

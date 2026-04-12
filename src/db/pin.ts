@@ -1,5 +1,5 @@
 /**
- * The tack. Manages pin metadata on snapshot databases — assigning,
+ * Manages pin metadata on snapshot databases — assigning,
  * moving, and removing human-readable names that protect snapshots
  * from automatic eviction. It is the only module that writes pin
  * metadata — no other module touches the pin_name key.

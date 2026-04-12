@@ -1,5 +1,5 @@
 /**
- * The classifier. Detects cross-module concepts and routes them by bridge
+ * Detects cross-module concepts and routes them by bridge
  * type to the correct architectural layer. It is the only module that
  * classifies bridge types — no other module maps query semantics to
  * orchestrator/processor/presenter/resolver/gateway/adapter roles.

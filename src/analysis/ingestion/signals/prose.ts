@@ -1,5 +1,5 @@
 /**
- * The narrator. Translates Language Service display parts into natural
+ * Translates Language Service display parts into natural
  * language with dictionary-grounded terms. It is the only module that
  * produces prose from compiler semantics — no other module turns
  * SymbolDisplayPart arrays into human-readable sentences.
