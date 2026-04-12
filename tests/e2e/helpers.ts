@@ -48,7 +48,7 @@ function createTmpRoot(): string {
   for (let attempt = NONE; attempt < MAX_RETRIES; attempt++) {
     try {
       execSync(
-        "git init -b main && git config commit.gpgsign false && git commit --allow-empty -m init",
+        "git init -b main && git config user.email ci@test && git config user.name ci && git config commit.gpgsign false && git commit --allow-empty -m init",
         gitOpts,
       );
       return root;
