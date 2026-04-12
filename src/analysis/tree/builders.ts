@@ -1,5 +1,5 @@
 /**
- * The assembler. Constructs the scored node structures that carry
+ * Constructs the scored node structures that carry
  * embedding vectors, identity hashes, and placement metadata. It is the
  * only module that shapes the raw material the scoring engine evaluates —
  * no other module creates the nodes that metrics are computed over.

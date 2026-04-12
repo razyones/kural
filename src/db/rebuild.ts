@@ -1,5 +1,5 @@
 /**
- * The restorer. Reconstructs parsed codebase structures from snapshot
+ * Reconstructs parsed codebase structures from snapshot
  * rows so any command can open a database and build an in-memory tree.
  * It is the only module that transforms stored rows back into parse
  * results — no other module bridges snapshot collections to the tree

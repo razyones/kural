@@ -1,5 +1,5 @@
 /**
- * The selector. Picks the top domain keywords by aggregate cosine
+ * Picks the top domain keywords by aggregate cosine
  * similarity to all unit names. It is the only module that ranks
  * domain keywords — no other module decides which keywords best
  * represent the codebase.

@@ -1,5 +1,5 @@
 /**
- * The remover. Removes the pin from a snapshot so it becomes
+ * Removes the pin from a snapshot so it becomes
  * eligible for automatic eviction again. It is the only command
  * that clears pin metadata — no other command unpins snapshots.
  */

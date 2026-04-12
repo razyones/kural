@@ -1,5 +1,5 @@
 /**
- * The assembler. Creates typed TanStack DB collections backed by a SQLite
+ * Creates typed TanStack DB collections backed by a SQLite
  * database file. It is the only module that wires schemas to persistence —
  * no other module creates or configures collections.
  */

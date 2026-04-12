@@ -1,5 +1,5 @@
 /**
- * The tack. Pins a snapshot with a human-readable name so it is
+ * Pins a snapshot with a human-readable name so it is
  * exempt from automatic eviction. It is the only command that
  * assigns pin names — no other command writes pin metadata.
  */

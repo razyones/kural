@@ -1,2 +1,2 @@
-The consultant's desk. Parses directory targets and display flags into a Gunshi command, delegates to the engine, and renders its response as formatted diagrams and comparison tables on stdout. It is the only command that owns this terminal surface — no other command defines these arguments or produces this display layout.
+Parses directory targets and display flags into a Gunshi command, delegates to the engine, and renders its response as formatted diagrams and comparison tables on stdout. It is the only command that owns this terminal surface — no other command defines these arguments or produces this display layout.
 @kuralBorrows analysis/advise "terminal surface that formats and renders engine output as diagrams and comparison tables"

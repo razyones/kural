@@ -1,5 +1,5 @@
 /**
- * The shortener. Converts absolute filesystem paths into relative display
+ * Converts absolute filesystem paths into relative display
  * strings. It is the only module that owns path-to-label conversion — no
  * other module decides how paths appear in terminal output.
  * @kuralUtil

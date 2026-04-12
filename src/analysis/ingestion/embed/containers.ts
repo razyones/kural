@@ -1,5 +1,5 @@
 /**
- * The assembler. Blends all unit embeddings from facet vectors — leaves
+ * Blends all unit embeddings from facet vectors — leaves
  * from identity and signature, files from children, directories bottom-up.
  * It is the only module that produces final embedding vectors — no other
  * module aggregates facets into identity and leaf embeddings.

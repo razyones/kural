@@ -1,5 +1,5 @@
 /**
- * The negotiator. Reads raw audit command flags as strings and converts
+ * Reads raw audit command flags as strings and converts
  * each into a typed number, falling back to the caller's baseline when
  * a flag is absent or unparseable. It is the only module that performs
  * string-to-number argument translation for the audit command — no

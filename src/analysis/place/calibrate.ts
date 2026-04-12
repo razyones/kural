@@ -1,5 +1,5 @@
 /**
- * The surveyor. Probes the tree's own distributions to establish query-space
+ * Probes the tree's own distributions to establish query-space
  * baselines for alien detection. It is the only module that calibrates
  * detection thresholds from the tree — no other module measures probe
  * baselines or computes alien fences.

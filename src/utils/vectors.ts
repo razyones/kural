@@ -1,5 +1,5 @@
 /**
- * The compass. Provides vector distance and similarity functions used
+ * Provides vector distance and similarity functions used
  * across the embedding and scoring layers. It is the only module that
  * wraps DruidJS vector operations — no other module calls DruidJS
  * distance functions directly.

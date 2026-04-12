@@ -1,5 +1,5 @@
 /**
- * The extractor. Safely pulls typed values from untyped record bags.
+ * Safely pulls typed values from untyped record bags.
  * It is the only module that handles unknown-to-typed property access —
  * no other module guards against missing or mistyped record fields.
  * @kuralUtil

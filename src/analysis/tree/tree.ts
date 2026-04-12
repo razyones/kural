@@ -1,5 +1,5 @@
 /**
- * The cartographer. Assembles the hierarchical node map that every
+ * Assembles the hierarchical node map that every
  * downstream consumer operates on — wiring parent-child pointers,
  * detecting helpers, propagating util flags, and materializing patterns.
  * It is the only module that constructs this graph — no other module

@@ -1,5 +1,5 @@
 /**
- * The surveyor. Collects and aggregates childrenFit and childrenUniqueness
+ * Collects and aggregates childrenFit and childrenUniqueness
  * across subtrees using iterative post-order traversal. It is the only
  * module that walks the tree downward to summarize health.
  */

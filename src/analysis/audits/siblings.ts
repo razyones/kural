@@ -1,5 +1,5 @@
 /**
- * The comparator. Collects candidate pairs for duplicate and merge-candidate
+ * Collects candidate pairs for duplicate and merge-candidate
  * detection, excluding companions, helpers, and type-producer couples that
  * would be false positives. It is the only module that builds the filtered
  * pair list that downstream detectors fence against.

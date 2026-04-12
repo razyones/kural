@@ -1,5 +1,5 @@
 /**
- * The voice of causes. Extracts the side-effect description from impure
+ * Extracts the side-effect description from impure
  * functions as plain text. It is the only module that reads the causes
  * annotation — no other module extracts behavioral text from parsed units.
  */

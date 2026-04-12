@@ -1,5 +1,5 @@
 /**
- * The bridge. Opens a snapshot, builds a tree, and delegates to the
+ * Opens a snapshot, builds a tree, and delegates to the
  * engine for the place command. It is the only module that bridges
  * stored state to the engine for this command — no other module
  * orchestrates the snapshot-to-engine flow for code queries.

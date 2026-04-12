@@ -1,5 +1,5 @@
 /**
- * The measurer. Computes placement metrics from two perspectives — as a
+ * Computes placement metrics from two perspectives — as a
  * child (fit, uniqueness) and as a parent (childrenFit, childrenUniqueness).
  * It is the only module that evaluates a node against its neighborhood —
  * no other module compares identity and leaf vectors.

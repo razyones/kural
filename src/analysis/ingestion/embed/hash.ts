@@ -1,5 +1,5 @@
 /**
- * The fingerprinter. Computes content hashes for embedding facet texts so
+ * Computes content hashes for embedding facet texts so
  * unchanged units can skip re-embedding. It is the only module that decides
  * whether a unit's embedding inputs have changed — no other module computes
  * facet hashes or resolves cache hits.

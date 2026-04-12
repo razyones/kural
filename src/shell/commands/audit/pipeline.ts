@@ -1,5 +1,5 @@
 /**
- * The lens. Opens a snapshot, builds the code tree, and delegates to
+ * Opens a snapshot, builds the code tree, and delegates to
  * the detection engine for the audit command. It is the only module
  * that orchestrates the snapshot-to-findings flow — no other module
  * wires the stored tree to the detection engine for structural checks.

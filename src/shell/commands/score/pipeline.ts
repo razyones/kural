@@ -1,5 +1,5 @@
 /**
- * The reader. Loads score cards from a snapshot database and filters
+ * Loads score cards from a snapshot database and filters
  * them by path prefix. It is the only module that queries persisted
  * scores — no other module reads ScoreRow data from disk.
  */

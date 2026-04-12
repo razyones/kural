@@ -1,5 +1,5 @@
 /**
- * The illustrator. Renders tree diagrams, threshold comparisons, and
+ * Renders tree diagrams, threshold comparisons, and
  * metric deltas for the advise command's terminal output. It is the
  * only module that owns this command's display layout — no other
  * module formats these specific stdout sections.

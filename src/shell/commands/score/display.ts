@@ -1,5 +1,5 @@
 /**
- * The renderer. Converts loaded scores and deltas into terminal and JSON
+ * Converts loaded scores and deltas into terminal and JSON
  * output formats. It is the only module that decides how score data
  * appears to the user — no other module formats score displays.
  */

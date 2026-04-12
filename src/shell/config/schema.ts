@@ -1,5 +1,5 @@
 /**
- * The assembler. Merges sibling type shapes into one root import. It is
+ * Merges sibling type shapes into one root import. It is
  * the only module that composes individual setting groups into a single
  * aggregate type — no other module defines the combined root shape.
  */

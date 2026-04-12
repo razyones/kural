@@ -1,5 +1,5 @@
 /**
- * The narrator. Builds display context and delegates to each rule's own
+ * Builds display context and delegates to each rule's own
  * formatter. It is the only module that bridges diagnostic results to
  * terminal output — no other module knows how to resolve node labels
  * or build formatting context.

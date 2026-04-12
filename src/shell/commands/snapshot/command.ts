@@ -1,5 +1,5 @@
 /**
- * The registry. Defines the snapshot command group that nests all
+ * Defines the snapshot command group that nests all
  * snapshot management subcommands. It is the only module that wires
  * the snapshot subcommand tree — no other module defines the snapshot
  * parent command.

@@ -1,5 +1,5 @@
 /**
- * The roster. Assembles every detection rule and its formatting
+ * Assembles every detection rule and its formatting
  * function into display order. It is the only module that decides
  * which rules run and in what sequence they appear in output.
  */

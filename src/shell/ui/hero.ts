@@ -1,5 +1,5 @@
 /**
- * The spotlight. Renders the hero score display and owns the shared
+ * Renders the hero score display and owns the shared
  * vocabulary for score presentation — health-based coloring, delta
  * formatting, and human-readable verdicts. No other module decides
  * how scores look on screen.

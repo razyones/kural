@@ -1,5 +1,5 @@
 /**
- * The gateway. Crosses the network boundary to turn text into vectors
+ * Crosses the network boundary to turn text into vectors
  * via an external AI service. It is the only module that speaks the
  * AI SDK protocol — no other part of the system calls embedding APIs
  * directly.

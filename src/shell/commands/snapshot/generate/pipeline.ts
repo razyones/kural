@@ -1,5 +1,5 @@
 /**
- * The engine. Runs the full generation pipeline — parse, embed, score,
+ * Runs the full generation pipeline — parse, embed, score,
  * store — without any UI or CLI concerns. It is the only module that
  * chains all stages together — no other module orchestrates the full
  * lifecycle.

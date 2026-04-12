@@ -1,5 +1,5 @@
 /**
- * The signpost. Renders glossary definitions and next-step hints at the
+ * Renders glossary definitions and next-step hints at the
  * end of command output. It is the only module that owns the footer
  * layout — no other module prints glossary or hint sections.
  */

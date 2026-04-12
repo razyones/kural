@@ -1,5 +1,5 @@
 /**
- * The connection. Defines the shape of embedding provider settings —
+ * Defines the shape of embedding provider settings —
  * which service to call, which model to use, and how to authenticate.
  * It is the only module that owns provider configuration — no other
  * module defines how the system connects to an embedding API.

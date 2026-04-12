@@ -1,5 +1,5 @@
 /**
- * The interpreter. Reads kural-specific annotations and visibility modifiers
+ * Reads kural-specific annotations and visibility modifiers
  * from AST nodes. It is the only module that understands the @kural tag
  * vocabulary — no other part of the system inspects JSDoc semantics.
  */

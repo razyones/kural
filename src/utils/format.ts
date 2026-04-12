@@ -1,5 +1,5 @@
 /**
- * The printer. Converts numbers and ratios into human-readable display strings.
+ * Converts numbers and ratios into human-readable display strings.
  * It is the only module that owns numeric formatting conventions — no other
  * module decides decimal places or percentage rounding.
  * @kuralUtil

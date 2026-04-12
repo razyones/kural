@@ -1,5 +1,5 @@
 /**
- * The librarian. Finds existing functions and types that a newly placed
+ * Finds existing functions and types that a newly placed
  * piece of code would likely depend on. It is the only module that
  * performs flat similarity search across all leaves — no other module
  * computes the "shopping list" of related concepts.

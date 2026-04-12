@@ -1,5 +1,5 @@
 /**
- * The pathfinder. Evaluates all root-to-directory paths through the tree
+ * Evaluates all root-to-directory paths through the tree
  * using conditional probability chains ranked by geometric mean. It is
  * the only module that performs exhaustive probabilistic path search —
  * no other module explores the full routing tree.

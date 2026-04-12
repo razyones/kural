@@ -1,5 +1,5 @@
 /**
- * The bouncer. Deduplicates sibling nodes by pattern or companion group,
+ * Deduplicates sibling nodes by pattern or companion group,
  * keeping one representative per group so audits count distinct identities
  * rather than repeated instances. It is the only module that owns
  * group-based deduplication — no other module filters by pattern ID.
