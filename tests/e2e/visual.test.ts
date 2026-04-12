@@ -63,8 +63,8 @@ function normalize(stdout: string, root: string): string {
   out = out.replaceAll(/\u001B\[\d+m/g, "");
   // Replace temp root path with placeholder
   out = out.replaceAll(root, "<ROOT>");
-  // Replace locale-formatted dates (e.g., "4/2/2026, 9:43:24 AM")
-  out = out.replaceAll(/\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2}\s[AP]M/g, "<DATE>");
+  // Replace locale-formatted dates (e.g., "4/2/2026, 9:43:24 AM" or "11/4/2026, 2:02:11 pm").
+  out = out.replaceAll(/\d{1,2}\/\d{1,2}\/\d{4}, \d{1,2}:\d{2}:\d{2}[\s\u202F]+[AP]M/gi, "<DATE>");
   // Replace ISO dates (e.g., "2026-04-02T...")
   out = out.replaceAll(/\d{4}-\d{2}-\d{2}T[\d:.]+Z/g, "<ISO_DATE>");
   // Replace relative paths that escape the root (../../.../T/kural-e2e-...)

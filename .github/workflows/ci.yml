@@ -47,8 +47,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Build CLI for e2e
+        run: pnpm exec vp pack
+
       - name: Unit tests with coverage
         run: pnpm exec vp test --coverage --exclude 'tests/e2e/**'
+
+      - name: E2e tests
+        run: pnpm exec vp test tests/e2e/
 
   build:
     name: Build

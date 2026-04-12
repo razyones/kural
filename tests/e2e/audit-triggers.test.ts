@@ -344,7 +344,7 @@ describe("identity-language trigger", () => {
           key: "axis-scores:is-does",
           value: JSON.stringify({
             [`dir:${authPath}`]: E08,
-            [`dir:${apiPath}`]: E08,
+            [`dir:${apiPath}`]: E06,
             [`dir:${badPath}`]: E01,
           }),
         },

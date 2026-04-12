@@ -71,6 +71,7 @@ function cleanupTmpRoot(root: string): void {
 /**
  * Spawns `node dist/cli.mjs <args>` with `cwd` set to the given root.
  * Returns stdout, stderr, and exit code. Never throws on non-zero exit.
+ * Forces LC_ALL, LANG, and TZ so date formatting is deterministic across hosts.
  */
 function runCli(args: string[], cwd: string): CliResult {
   try {
@@ -78,7 +79,14 @@ function runCli(args: string[], cwd: string): CliResult {
       cwd,
       encoding: "utf-8",
       stdio: "pipe",
-      env: { ...process.env, NO_COLOR: "1", COLUMNS: "120" },
+      env: {
+        ...process.env,
+        NO_COLOR: "1",
+        COLUMNS: "120",
+        LC_ALL: "en_US.UTF-8",
+        LANG: "en_US.UTF-8",
+        TZ: "UTC",
+      },
       timeout: TIMEOUT_MS,
     });
     return { stdout, stderr: "", exitCode: NONE };
