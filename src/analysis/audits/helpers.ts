@@ -1,6 +1,7 @@
 /**
- * Shared helpers for audit definitions. Provides safe accessors for
- * discriminated union fields that only exist on certain node kinds.
+ * Safely extracts function-specific properties from discriminated union
+ * node kinds so audit detectors can handle polymorphic operations.
+ * @kuralHelper
  */
 
 import type { CodeNode, NodeMap } from "../tree/tree.ts";

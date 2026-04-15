@@ -1,2 +1,2 @@
-Wires the diagnostic CLI arguments to the issue display pipeline. It is the only command that reads and renders localized issues — no other command queries snapshot data for structural diagnostics.
+Bridges diagnostic results to terminal output — resolves node labels, builds formatting context, and delegates to each rule's own formatter for categorized rendering. It is the only command whose surface exists to translate findings into readable display, with flag parsing and snapshot orchestration serving that rendering goal.
 @kuralBorrows analysis/audits "terminal surface that parses dial flags, opens stored snapshots to run the detection engine, and renders findings as categorized reports"

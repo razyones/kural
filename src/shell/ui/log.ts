@@ -1,7 +1,8 @@
 /**
- * Provides the shared cliui instance and reusable log
- * patterns for all terminal output. It is the only module that
- * instantiates cliui — no other module creates a UI renderer.
+ * Exports the shared cliui instance and color palette — the sole
+ * instantiation point reused by sibling renderers. Also draws the
+ * owl-bordered command header that opens every CLI invocation.
+ * @kuralHelper
  */
 
 import { cliui } from "@poppinss/cliui";

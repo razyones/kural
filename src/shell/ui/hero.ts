@@ -18,7 +18,7 @@ const ARROW_UP = "\u25B4";
 const ARROW_DOWN = "\u25BE";
 const ARROW_FLAT = "\u25B8";
 
-/** Options for rendering the hero score display. */
+/** Configuration shape for health-colored score display with deltas. */
 type HeroOptions = {
   score: number;
   kind: string;
