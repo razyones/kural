@@ -57,6 +57,7 @@ function singleFileResult(): ParseResult {
         },
         types: {},
         imports: { internalImports: [], externalImports: [] },
+        helper: false,
         residuals: [],
       },
     },
@@ -96,6 +97,7 @@ function utilFileResult(): ParseResult {
         },
         types: {},
         imports: { internalImports: [], externalImports: [] },
+        helper: false,
         residuals: [],
       },
     },
@@ -204,6 +206,7 @@ function makeKuralFile(
   >;
   types: Record<string, never>;
   imports: { internalImports: string[]; externalImports: string[] };
+  helper: boolean;
   residuals: [];
 } {
   return {
@@ -234,6 +237,7 @@ function makeKuralFile(
     },
     types: {},
     imports: { internalImports: [], externalImports: [] },
+    helper: false,
     residuals: [],
   };
 }

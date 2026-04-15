@@ -66,6 +66,7 @@ function makeFile(
     functions,
     types,
     imports: { internalImports: [], externalImports: [] },
+    helper: false,
     residuals: [],
   };
 }

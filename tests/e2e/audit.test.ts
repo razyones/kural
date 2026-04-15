@@ -66,6 +66,7 @@ function makeProjectData(root: string): SeedData {
       leafEmbedding: [E07, E04, E02, E01],
       importsInternal: [`${srcPath}/utils.ts`],
       importsExternal: [],
+      helper: false,
       residuals: [],
     },
     {
@@ -76,6 +77,7 @@ function makeProjectData(root: string): SeedData {
       leafEmbedding: [E02, E07, E04, E01],
       importsInternal: [],
       importsExternal: [],
+      helper: false,
       residuals: [],
     },
   ];

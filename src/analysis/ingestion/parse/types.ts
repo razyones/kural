@@ -137,6 +137,8 @@ export type KuralFile = KuralUnit & {
   companion?: string;
   /** Bound direction from @kuralBound */
   bound?: BoundDirection;
+  /** Whether the file is a shared helper that supports siblings without owning a domain concept */
+  helper: boolean;
   /** Audit-specific suppression annotations from file-level @kuralResidual */
   residuals: ResidualEntry[];
 };
@@ -168,6 +170,7 @@ export type ExtractedFile = {
   imports: ModuleImports;
   companion?: string;
   bound?: BoundDirection;
+  helper: boolean;
   residuals: ResidualEntry[];
 };
 

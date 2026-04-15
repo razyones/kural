@@ -87,6 +87,7 @@ function makeFileRow(
   facetHash: string;
   importsInternal: string[];
   importsExternal: string[];
+  helper: boolean;
   residuals: { audit: string; hash?: string }[];
 } {
   return {
@@ -98,6 +99,7 @@ function makeFileRow(
     facetHash: "ghi789",
     importsInternal: ["/src/other.ts"],
     importsExternal: ["zod"],
+    helper: false,
     residuals: [],
   };
 }

@@ -127,6 +127,7 @@ function rebuildParseResult(collections: SnapshotCollections): ParseResult {
       },
       companion: row.companion,
       bound: row.bound,
+      helper: row.helper,
       residuals: row.residuals,
     };
   });

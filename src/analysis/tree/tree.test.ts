@@ -74,6 +74,7 @@ function makeFile(overrides: Partial<KuralFile> = {}): KuralFile {
     functions: {},
     types: {},
     imports: { internalImports: [], externalImports: [] },
+    helper: false,
     residuals: [],
     description: undefined,
     ...overrides,
