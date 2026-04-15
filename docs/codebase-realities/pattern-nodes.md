@@ -102,7 +102,7 @@ Fit for pattern members measures `cosineSimilarity(patternNode.identity, member.
 
 ### Auditing
 
-Pattern members are no longer siblings of each other — they live under different parents (the pattern node vs other pattern nodes / the file). Sibling pair collection skips pattern nodes as parents since intra-pattern similarity is by design. Duplicate detection skips pairs sharing the same pattern ID, and also skips cross-pattern pairs within the same file (different pattern nodes sharing a file parent). Outliers and containments still audit pattern internals — a pattern group could have a mis-tagged member or be dominated by one child.
+Pattern members are no longer siblings of each other — they live under different parents (the pattern node vs other pattern nodes / the file). Sibling pair collection skips pattern nodes as parents since intra-pattern similarity is by design. Duplicate detection skips pairs sharing the same pattern ID, and also skips cross-pattern pairs within the same file (different pattern nodes sharing a file parent). Outliers and containments still audit pattern internals — a pattern group could have a mis-tagged member or be dominated by one child. The incoherent audit skips pattern nodes as containers, since their name is an abstract category label rather than a description of their contents — identity-vs-content similarity has no meaning by construction.
 
 `deduplicateByGroup` in `audits/groups.ts` is no longer used by scoring — the tree handles it. Bloated, outliers, and containments audits iterate `getEligibleChildren`, which returns pattern nodes directly.
 

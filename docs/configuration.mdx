@@ -143,22 +143,22 @@ kural audit -k 2.5
 
 ### How each audit uses `k`
 
-| Audit                   | Fencing strategy   | What `k` fences on                                                                                                     |
-| :---------------------- | :----------------- | :--------------------------------------------------------------------------------------------------------------------- |
-| **bloated-directories** | dendrogram gap     | `maxGap > medianGap × (1 + k)` on hierarchical merge distances                                                         |
-| **bloated-files**       | dendrogram gap     | `maxGap > medianGap × (1 + k)` on hierarchical merge distances                                                         |
-| **outliers**            | robust lower (MAD) | `median − k × 1.4826 × MAD` on per-child mean sibling similarities                                                     |
-| **merge-candidates**    | Z-score upper      | `mean + k × σ` on leaf-level and file-level sibling pair similarities                                                  |
-| **containments**        | Z-score upper      | `mean + k × σ` on dominance gaps between the top two children                                                          |
-| **misplaced**           | Z-score upper      | `mean + k × σ` on uncle-fit minus parent-fit deltas                                                                    |
-| **duplicates**          | Z-score upper      | `mean + k × σ` on leaf-level and file-level sibling pair similarities                                                  |
-| **util-duplicates**     | Z-score upper      | `mean + k × σ` on leaf-level sibling pair similarities                                                                 |
-| **vocabulary-bleed**    | robust upper (MAD) | `median + k × 1.4826 × MAD` on max cross-pull deltas (closest non-sibling similarity minus weakest sibling similarity) |
-| **incoherent**          | Z-score lower      | `mean − k × σ` on identity-to-content similarities (capped at 0.9)                                                     |
-| **incoherent-utils**    | Z-score lower      | `mean − k × σ` on identity-to-content similarities (capped at 0.9)                                                     |
-| **weak-identity**       | Z-score upper      | `mean + k × σ` on child drift ratios (fraction of children fitting an uncle better than parent)                        |
-| **focal-drift**         | —                  | deterministic comparison, not influenced by `k`                                                                        |
-| **incomplete-docs**     | —                  | rule-based, not influenced by `k`                                                                                      |
+| Audit                   | Fencing strategy   | What `k` fences on                                                                                                                                                            |
+| :---------------------- | :----------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **bloated-directories** | dendrogram gap     | `maxGap > medianGap × (1 + k)` on hierarchical merge distances                                                                                                                |
+| **bloated-files**       | dendrogram gap     | `maxGap > medianGap × (1 + k)` on hierarchical merge distances                                                                                                                |
+| **outliers**            | robust lower (MAD) | `median − k × 1.4826 × max(localSpread, spreadFloor)` on per-child mean sibling similarities, where `spreadFloor` is Q1 of pooled within-group deviations across the codebase |
+| **merge-candidates**    | Z-score upper      | `mean + k × σ` on leaf-level and file-level sibling pair similarities                                                                                                         |
+| **containments**        | Z-score upper      | `mean + k × σ` on dominance gaps between the top two children                                                                                                                 |
+| **misplaced**           | Z-score upper      | `mean + k × σ` on uncle-fit minus parent-fit deltas                                                                                                                           |
+| **duplicates**          | Z-score upper      | `mean + k × σ` on leaf-level and file-level sibling pair similarities                                                                                                         |
+| **util-duplicates**     | Z-score upper      | `mean + k × σ` on leaf-level sibling pair similarities                                                                                                                        |
+| **vocabulary-bleed**    | robust upper (MAD) | `median + k × 1.4826 × MAD` on max cross-pull deltas (closest non-sibling similarity minus weakest sibling similarity)                                                        |
+| **incoherent**          | Z-score lower      | `mean − k × σ` on identity-to-content similarities (capped at the median label-fit; `@kuralPatterns` centroid nodes excluded)                                                 |
+| **incoherent-utils**    | Z-score lower      | `mean − k × σ` on identity-to-content similarities (capped at the median label-fit; `@kuralPatterns` centroid nodes excluded)                                                 |
+| **weak-identity**       | Z-score upper      | `mean + k × σ` on child drift ratios (fraction of children fitting an uncle better than parent)                                                                               |
+| **focal-drift**         | —                  | deterministic comparison, not influenced by `k`                                                                                                                               |
+| **incomplete-docs**     | —                  | rule-based, not influenced by `k`                                                                                                                                             |
 
 ---
 

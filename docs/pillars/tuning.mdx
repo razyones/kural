@@ -150,6 +150,16 @@ containmentFloor = robustLowerFence(dominantSims, k)
 
 Computed from the codebase's own parent-child dominance similarities. This eliminated the `--containmentFloor` CLI flag — one less config field, one less thing to explain.
 
+#### Outlier spread floor
+
+```
+spreadFloor = Q1 of pooled |value − group_median| across all sibling groups
+spread      = max(localSpread, spreadFloor)
+fence       = robustLowerFence(median, spread, k)
+```
+
+The outliers audit pools every child's deviation from its parent's local median, then takes Q1 of that pooled distribution. Q1 represents the spread that the tightest-cohesion quartile of sibling groups exhibits — any single parent's spread below this is implausibly tight (an artifact of the inlier-only MAD when one sibling stands apart). Using Q1 (rather than the median) keeps the floor small enough to still flag genuine outliers in cohesive groups while preventing the fence from collapsing onto the inlier band. Both the floor and the local spread come from the codebase's own data — no external constant.
+
 ### Robust spread floor
 
 The spread estimate used by the robust fences is `max(MAD, IQR / 2)`. Under normality the two are equal (`IQR ≈ 2 · MAD`), so the max returns MAD on well-behaved data. When the distribution's center concentrates while the tails persist — typical of tightly clustered embedding distributions — MAD shrinks faster than IQR/2, and the IQR-derived value floors the spread. This prevents fences from collapsing onto the median and flagging routine borderline values, without introducing any external constant: both estimators are intrinsic to the distribution. When both MAD and IQR are zero (no variation at all), the fence returns its sentinel value (-Infinity for lower, Infinity for upper), meaning no outliers exist.
