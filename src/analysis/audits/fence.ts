@@ -75,17 +75,36 @@ function quartile(sorted: number[], q: number): number {
  * larger of MAD and IQR/2 — under normality these are equal, so the max is
  * MAD on well-behaved data and IQR-floored when MAD degenerates toward zero
  * faster than IQR (concentrated center with preserved tails).
- * @param sorted - Already-sorted array of values
- * @param med - Pre-computed median
+ * @param values - Sample of values
  * @returns Spread estimate suitable for fence scaling, or 0 if both MAD and IQR are zero
  * @kuralPure
- * @kuralHelper
  */
-function robustSpread(sorted: number[], med: number): number {
+function robustSpread(values: number[]): number {
+  if (values.length < MIN_SAMPLE) {
+    return NONE;
+  }
+  const sorted = [...values].toSorted((a, b) => a - b);
+  const med = median(sorted);
   const deviations = sorted.map((v) => Math.abs(v - med));
   const mad = median(deviations);
   const iqr = quartile(sorted, UPPER_QUARTILE) - quartile(sorted, LOWER_QUARTILE);
   return Math.max(mad, iqr / IQR_TO_MAD);
+}
+
+/**
+ * Lower fence built from a precomputed median and spread, letting callers
+ * apply their own spread blending or flooring before fencing.
+ * @param med - Center of the distribution
+ * @param spread - MAD-scale spread estimate (may be a blended/floored value)
+ * @param sensitivity - Number of scaled MAD units from the median
+ * @returns Lower fence threshold, or -Infinity when spread is zero
+ * @kuralPure
+ */
+function buildLowerFence(med: number, spread: number, sensitivity: number): number {
+  if (spread === NONE) {
+    return -Infinity;
+  }
+  return med - sensitivity * MAD_SCALE * spread;
 }
 
 /**
@@ -133,13 +152,7 @@ function robustLowerFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {
     return -Infinity;
   }
-  const sorted = [...values].toSorted((a, b) => a - b);
-  const med = median(sorted);
-  const spread = robustSpread(sorted, med);
-  if (spread === NONE) {
-    return -Infinity;
-  }
-  return med - sensitivity * MAD_SCALE * spread;
+  return buildLowerFence(median(values), robustSpread(values), sensitivity);
 }
 
 /**
@@ -155,13 +168,21 @@ function robustUpperFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {
     return Infinity;
   }
-  const sorted = [...values].toSorted((a, b) => a - b);
-  const med = median(sorted);
-  const spread = robustSpread(sorted, med);
+  const spread = robustSpread(values);
   if (spread === NONE) {
     return Infinity;
   }
-  return med + sensitivity * MAD_SCALE * spread;
+  return median(values) + sensitivity * MAD_SCALE * spread;
 }
 
-export { lowerFence, median, robustLowerFence, robustUpperFence, stddev, upperFence };
+export {
+  buildLowerFence,
+  lowerFence,
+  median,
+  quartile,
+  robustLowerFence,
+  robustSpread,
+  robustUpperFence,
+  stddev,
+  upperFence,
+};
