@@ -44,7 +44,7 @@ function collectLabelFits(
 ): { key: string; labelFit: number; childCount: number }[] {
   const entries: { key: string; labelFit: number; childCount: number }[] = [];
   for (const [key, node] of nodes) {
-    if (isLeaf(node)) {
+    if (isLeaf(node) || node.kind === "pattern") {
       continue;
     }
     if (utilMode ? !node.util : node.util) {
