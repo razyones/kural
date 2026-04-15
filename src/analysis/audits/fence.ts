@@ -71,23 +71,21 @@ function quartile(sorted: number[], q: number): number {
 }
 
 /**
- * Computes the robust spread estimate for fence computation. Uses MAD as the
- * primary estimator, falling back to IQR/2 (MAD-equivalent under normality)
- * when MAD collapses to zero — standard practice in robust statistics.
+ * Computes the robust spread estimate for fence computation. Returns the
+ * larger of MAD and IQR/2 — under normality these are equal, so the max is
+ * MAD on well-behaved data and IQR-floored when MAD degenerates toward zero
+ * faster than IQR (concentrated center with preserved tails).
  * @param sorted - Already-sorted array of values
  * @param med - Pre-computed median
- * @returns MAD value suitable for fence scaling, or 0 if both MAD and IQR are zero
+ * @returns Spread estimate suitable for fence scaling, or 0 if both MAD and IQR are zero
  * @kuralPure
  * @kuralHelper
  */
 function robustSpread(sorted: number[], med: number): number {
   const deviations = sorted.map((v) => Math.abs(v - med));
   const mad = median(deviations);
-  if (mad > NONE) {
-    return mad;
-  }
   const iqr = quartile(sorted, UPPER_QUARTILE) - quartile(sorted, LOWER_QUARTILE);
-  return iqr / IQR_TO_MAD;
+  return Math.max(mad, iqr / IQR_TO_MAD);
 }
 
 /**
