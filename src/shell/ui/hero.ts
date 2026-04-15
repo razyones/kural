@@ -18,7 +18,10 @@ const ARROW_UP = "\u25B4";
 const ARROW_DOWN = "\u25BE";
 const ARROW_FLAT = "\u25B8";
 
-/** Configuration shape for health-colored score display with deltas. */
+/**
+ * Score, kind label, optional child count, and delta — the values
+ * renderHero formats with health colors and a verdict line.
+ */
 type HeroOptions = {
   score: number;
   kind: string;

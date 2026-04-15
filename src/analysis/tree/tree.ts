@@ -227,9 +227,11 @@ function getEligibleChildren(node: CodeNode, nodes: NodeMap): CodeNode[] {
 }
 
 /**
- * Returns true if the node is a leaf (type or function).
- * @param node - The node to check
- * @returns True if the node is a type or function node
+ * Identifies the terminal nodes of the scoring tree — types and
+ * functions, the units the tree is built around as opposed to file
+ * and directory containers.
+ * @param node - The tree node to classify
+ * @returns True when the node sits at the bottom of the hierarchy
  * @kuralPure
  */
 function isLeaf(node: CodeNode): boolean {

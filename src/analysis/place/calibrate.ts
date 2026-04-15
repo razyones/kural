@@ -88,10 +88,12 @@ function scoreProbes(
 }
 
 /**
- * Computes self-calibrated confidence thresholds from probe distributions.
- * @param probeSims - Best-match similarities from probes
- * @param probeConfidences - Chain-search confidences from probes
- * @returns Alien fences, safety gate, and bridge threshold
+ * Reduces probe leaf-match similarities and chain-search confidences
+ * into the alien fence, hard-alien fence, safety gate, and bridge
+ * threshold that downstream placement uses to gate query routing.
+ * @param probeSims - Best-leaf-match similarities collected from probes
+ * @param probeConfidences - Chain-search confidences collected from probes
+ * @returns Alien fences, safety gate, and bridge threshold for placement
  * @kuralPure
  */
 function computeThresholds(

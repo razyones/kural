@@ -67,9 +67,38 @@ type ParentBatch = {
 };
 
 /**
+ * Builds a batch from a partition of children, or returns null if the
+ * partition is too small for a meaningful fence.
+ * @param parentKey - Key of the parent owning these children
+ * @param partition - Children to compare against each other
+ * @returns A populated batch, or null if below MIN_GROUP
+ * @kuralPure
+ * @kuralHelper
+ */
+function buildBatch(
+  parentKey: string,
+  partition: { key: string; node: CodeNode }[],
+): ParentBatch | null {
+  if (partition.length < MIN_GROUP) {
+    return null;
+  }
+  const perChildMeans = meanSiblingSimPerChild(partition.map(({ node: c }) => c.leaf));
+  return {
+    parentKey,
+    valid: partition,
+    perChildMeans,
+    localMedian: median(perChildMeans),
+    localSpread: robustSpread(perChildMeans),
+  };
+}
+
+/**
  * Walks every non-leaf parent and collects its child-mean-similarity vector
  * along with its local median and robust spread, skipping groups too small
- * for a meaningful fence.
+ * for a meaningful fence. Inside files, types and non-types are partitioned
+ * into separate batches so that a type sitting among functions is never
+ * judged against function siblings — that is a structurally normal kind
+ * split, not a misplacement signal.
  * @param nodes - The full node map
  * @returns Per-parent batches ready for fence application
  * @kuralPure
@@ -85,17 +114,19 @@ function collectBatches(nodes: NodeMap): ParentBatch[] {
       ({ node: c }) => !c.util && !c.helper && c.bound === null,
     );
     const valid = cwk.filter(({ node: c }) => c.leaf.length > NONE);
-    if (valid.length < MIN_GROUP) {
-      continue;
+    const partitions =
+      parentNode.kind === "file"
+        ? [
+            valid.filter(({ node: c }) => c.kind === "type"),
+            valid.filter(({ node: c }) => c.kind !== "type"),
+          ]
+        : [valid];
+    for (const partition of partitions) {
+      const batch = buildBatch(parentKey, partition);
+      if (batch) {
+        batches.push(batch);
+      }
     }
-    const perChildMeans = meanSiblingSimPerChild(valid.map(({ node: c }) => c.leaf));
-    batches.push({
-      parentKey,
-      valid,
-      perChildMeans,
-      localMedian: median(perChildMeans),
-      localSpread: robustSpread(perChildMeans),
-    });
   }
   return batches;
 }
