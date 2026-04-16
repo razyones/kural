@@ -8,7 +8,14 @@
 
 import type { CodeNode, NodeMap } from "../tree/tree.ts";
 import { HierarchicalClustering, Matrix, cosine, distance_matrix } from "@saehrimnir/druidjs";
-import { avg, centroid, cosineSimilarity, harmonicMean, subtract } from "../../utils/vectors.ts";
+import {
+  avg,
+  centroid,
+  cosineSimilarity,
+  harmonicMean,
+  subtract,
+  unitizeCosine,
+} from "../../utils/vectors.ts";
 import { collectMerges, isHCNode } from "../audits/cluster.ts";
 import { getChildren } from "../tree/tree.ts";
 
@@ -111,7 +118,7 @@ function simulateGroup(members: NamedVector[]): ProposedGroup {
   const groupLeaf = centroid(members.map((m) => m.leaf));
   const childrenFit = cosineSimilarity(groupIdentity, groupLeaf);
   const childrenUniqueness = computeCV(groupIdentity, members);
-  const childrenScore = harmonicMean(childrenFit, childrenUniqueness);
+  const childrenScore = harmonicMean(unitizeCosine(childrenFit), childrenUniqueness);
   return {
     names: members.map((m) => m.name),
     childrenFit,
@@ -215,7 +222,7 @@ function analyzeVectors(items: NamedVector[], parentIdentity: number[]): AdviseR
   const leafVecs = items.map((it) => it.leaf);
   const currentFit = cosineSimilarity(parentIdentity, centroid(leafVecs));
   const currentUniqueness = computeCV(parentIdentity, items);
-  const currentScore = harmonicMean(currentFit, currentUniqueness);
+  const currentScore = harmonicMean(unitizeCosine(currentFit), currentUniqueness);
   const thresholds = generateThresholds(merges);
   const cuts = thresholds.map((t) => evaluateCut(hc, t, items));
   const bestCutIndex = selectBestCut(cuts, currentScore);

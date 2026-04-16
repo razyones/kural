@@ -93,10 +93,10 @@ directory · 1 children
 
 Glossary:
 
-Self — how well this node fits under its parent (-1…1)
-Children — how coherent this node's direct children are (-1…1)
-Subtree — recursive health of the entire subtree below (-1…1)
-Overall — harmonic mean of Self and Subtree (-1…1)
+Self — how well this node fits under its parent (0…1)
+Children — how coherent this node's direct children are (0…1)
+Subtree — recursive health of the entire subtree below (0…1)
+Overall — harmonic mean of Self and Subtree (0…1)
 (—) — not applicable (leaves have no Children or Subtree)
 
 Next steps:
@@ -140,10 +140,10 @@ Explanation:
 
 Glossary:
 
-Self — how well this node fits under its parent (-1…1)
-Children — how coherent this node's direct children are (-1…1)
-Subtree — recursive health of the entire subtree below (-1…1)
-Overall — harmonic mean of Self and Subtree (-1…1)
+Self — how well this node fits under its parent (0…1)
+Children — how coherent this node's direct children are (0…1)
+Subtree — recursive health of the entire subtree below (0…1)
+Overall — harmonic mean of Self and Subtree (0…1)
 (—) — not applicable (leaves have no Children or Subtree)
 
 Next steps:

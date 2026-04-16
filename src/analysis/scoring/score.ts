@@ -15,8 +15,8 @@ import {
 } from "./metrics.ts";
 import { buildTree, getEligibleChildren, isLeaf } from "../tree/tree.ts";
 import { collectSubtree, descendantScores } from "./subtree.ts";
+import { harmonicMean, unitizeCosine, unitizeDistance } from "../../utils/vectors.ts";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
-import { harmonicMean } from "../../utils/vectors.ts";
 
 const NONE = 0;
 
@@ -96,7 +96,8 @@ function computeScore(fit: number | null, uniqueness: number): number | null {
   if (fit === null || uniqueness === NO_SIBLINGS) {
     return null;
   }
-  return harmonicMean(fit, uniqueness);
+  // uniqueness is mean pairwise distance ∈ [0, 2]; rescale to [0, 1].
+  return harmonicMean(unitizeCosine(fit), unitizeDistance(uniqueness));
 }
 
 /**
@@ -113,7 +114,8 @@ function computeChildrenScore(
   if (childrenFit === null || childrenUniqueness === null) {
     return null;
   }
-  return harmonicMean(childrenFit, childrenUniqueness);
+  // childrenUniqueness is CV-derived ∈ [0, 1]; no rescale needed.
+  return harmonicMean(unitizeCosine(childrenFit), childrenUniqueness);
 }
 
 /**
@@ -169,10 +171,11 @@ function computeSubtreeScores(
   const sub = collectSubtree(key, nodes, metrics.childrenFitMap, metrics.childrenUniqMap);
   const { subtreeFit, subtreeUniqueness } = descendantScores(sub, cFit, cUniq);
 
+  // subtreeUniqueness is the mean of CV values ∈ [0, 1]; no rescale needed.
   const subtreeScore =
     subtreeFit === null || subtreeUniqueness === null
       ? null
-      : harmonicMean(subtreeFit, subtreeUniqueness);
+      : harmonicMean(unitizeCosine(subtreeFit), subtreeUniqueness);
 
   return { subtreeFit, subtreeUniqueness, subtreeScore };
 }

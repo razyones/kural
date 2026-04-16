@@ -116,20 +116,55 @@ function pruneOutliers(vectors: number[][], minSize: number, stddevMultiplier: n
 }
 
 const TWO = 2;
+const ONE = 1;
 
 /**
- * Computes the harmonic mean of two values.
- * Penalizes imbalance — both values must be good to score well.
- * @param a - First value
- * @param b - Second value
- * @returns Harmonic mean, or 0 if either value is 0
+ * Rescales a cosine similarity from [-1, 1] to [0, 1].
+ * Required before harmonic-mean combination, which is only well-defined
+ * on non-negative inputs.
+ * @param value - Cosine similarity in [-1, 1]
+ * @returns Rescaled value in [0, 1]
+ * @kuralPure
+ */
+function unitizeCosine(value: number): number {
+  return (value + ONE) / TWO;
+}
+
+/**
+ * Rescales a pairwise cosine distance from [0, 2] to [0, 1].
+ * Used for per-node uniqueness, which is the mean of (1 − cos) across
+ * sibling pairs and can therefore exceed 1.
+ * @param value - Cosine-distance mean in [0, 2]
+ * @returns Rescaled value in [0, 1]
+ * @kuralPure
+ */
+function unitizeDistance(value: number): number {
+  return value / TWO;
+}
+
+/**
+ * Computes the harmonic mean of two non-negative values. Mixed signs
+ * or a near-zero sum make the formula produce values outside the input
+ * range, so any non-positive input returns 0.
+ * @param a - First value, expected in [0, 1]
+ * @param b - Second value, expected in [0, 1]
+ * @returns Harmonic mean, or 0 if either input is non-positive
  * @kuralPure
  */
 function harmonicMean(a: number, b: number): number {
-  if (a + b === NONE) {
+  if (a <= NONE || b <= NONE) {
     return NONE;
   }
   return (TWO * a * b) / (a + b);
 }
 
-export { avg, centroid, cosineSimilarity, harmonicMean, pruneOutliers, subtract };
+export {
+  avg,
+  centroid,
+  cosineSimilarity,
+  harmonicMean,
+  pruneOutliers,
+  subtract,
+  unitizeCosine,
+  unitizeDistance,
+};

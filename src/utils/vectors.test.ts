@@ -5,6 +5,8 @@ import {
   harmonicMean,
   pruneOutliers,
   subtract,
+  unitizeCosine,
+  unitizeDistance,
 } from "./vectors.ts";
 import { describe, expect, it } from "vite-plus/test";
 
@@ -278,6 +280,14 @@ const HM_EQUAL = 0.6;
 const HM_HIGH = 0.8;
 const HM_LOW = 0.4;
 
+/** Negative and mixed-sign fixtures for harmonicMean clamping. */
+const NEG_SMALL = -0.2;
+const POS_SMALL = 0.1;
+const NEG_LARGE = -0.5;
+const NEAR_CANCEL_A = 0.5;
+const NEAR_CANCEL_B = -0.49;
+const UNIQ_ABOVE_ONE = 1.5;
+
 describe("harmonicMean", () => {
   it("returns 0 when both inputs are 0", () => {
     expect(harmonicMean(ZERO, ZERO)).toBe(ZERO);
@@ -296,5 +306,50 @@ describe("harmonicMean", () => {
     const hm = harmonicMean(HM_A, HM_B);
     const arithmeticMean = (HM_A + HM_B) / TWO;
     expect(hm).toBeLessThan(arithmeticMean);
+  });
+});
+
+describe("harmonicMean clamping", () => {
+  it("returns 0 when either input is negative (mixed sign)", () => {
+    expect(harmonicMean(HM_HIGH, NEG_SMALL)).toBe(ZERO);
+    expect(harmonicMean(NEG_SMALL, POS_SMALL)).toBe(ZERO);
+  });
+
+  it("returns 0 when both inputs are negative", () => {
+    expect(harmonicMean(NEG_LARGE, NEG_LARGE)).toBe(ZERO);
+  });
+
+  it("does not explode on near-cancellation once clamped", () => {
+    expect(harmonicMean(NEAR_CANCEL_A, NEAR_CANCEL_B)).toBe(ZERO);
+  });
+});
+
+describe("unitizeCosine", () => {
+  it("maps -1 to 0", () => {
+    expect(unitizeCosine(NEGATIVE_ONE)).toBeCloseTo(ZERO, TOLERANCE);
+  });
+
+  it("maps 0 to 0.5", () => {
+    expect(unitizeCosine(ZERO)).toBeCloseTo(HALF, TOLERANCE);
+  });
+
+  it("maps 1 to 1", () => {
+    expect(unitizeCosine(ONE)).toBeCloseTo(ONE, TOLERANCE);
+  });
+});
+
+describe("unitizeDistance", () => {
+  it("maps 0 to 0", () => {
+    expect(unitizeDistance(ZERO)).toBeCloseTo(ZERO, TOLERANCE);
+  });
+
+  it("maps 2 to 1", () => {
+    expect(unitizeDistance(TWO)).toBeCloseTo(ONE, TOLERANCE);
+  });
+
+  it("maps a distance above 1 into (0, 1]", () => {
+    const result = unitizeDistance(UNIQ_ABOVE_ONE);
+    expect(result).toBeLessThanOrEqual(ONE);
+    expect(result).toBeGreaterThan(ZERO);
   });
 });

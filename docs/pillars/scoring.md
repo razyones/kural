@@ -46,7 +46,7 @@ fit(N) = cosineSimilarity(parent.identity, N.leaf)
 
 How well does this node's content match what its parent claims to be? A function in `src/db/` should have content that aligns with the "db" module's identity.
 
-- Range: [-1, 1] in theory, [0, 1] in practice
+- Range: [-1, 1] (raw cosine); typically positive in practice
 - 1.0 = perfect alignment with parent
 - Null if N has no parent (root node)
 - Null if N is a util container (capability containers have no semantic parent direction)
@@ -71,11 +71,12 @@ How different is this node from its siblings, after factoring out the shared par
 ### score (as a child)
 
 ```
-score(N) = harmonicMean(fit, uniqueness)
+score(N) = harmonicMean(unitizeCosine(fit), unitizeDistance(uniqueness))
 ```
 
-Combined placement quality. The harmonic mean penalizes imbalance — a node needs both good fit and good uniqueness to score well. A well-fitting but non-unique node (duplicate) or a unique but poorly-fitting node (misplaced) both score low.
+Combined placement quality. `fit` is rescaled from [-1, 1] to [0, 1] and `uniqueness` from [0, 2] to [0, 1] before combination (see [§6 Harmonic Mean](#6-harmonic-mean)). The harmonic mean penalizes imbalance — a node needs both good fit and good uniqueness to score well. A well-fitting but non-unique node (duplicate) or a unique but poorly-fitting node (misplaced) both score low.
 
+- Range: [0, 1]
 - Null if fit is null or uniqueness is N/A
 
 ### childrenFit (as a parent)
@@ -123,10 +124,10 @@ How evenly distributed are the container's children? Uses the Coefficient of Var
 ### childrenScore (as a parent)
 
 ```
-childrenScore(N) = harmonicMean(childrenFit, childrenUniqueness)
+childrenScore(N) = harmonicMean(unitizeCosine(childrenFit), childrenUniqueness)
 ```
 
-Combined quality of direct children organization. Null if either input is null or N/A.
+Combined quality of direct children organization. `childrenFit` is rescaled from [-1, 1] to [0, 1]; `childrenUniqueness` is already in (0, 1]. Range: [0, 1]. Null if either input is null or N/A.
 
 ### subtreeFit (subtree root)
 
@@ -154,10 +155,10 @@ Average childrenUniqueness across all descendants. Captures whether children are
 ### subtreeScore (subtree root)
 
 ```
-subtreeScore(N) = harmonicMean(subtreeFit, subtreeUniqueness)
+subtreeScore(N) = harmonicMean(unitizeCosine(subtreeFit), subtreeUniqueness)
 ```
 
-Combined subtree health. Null if either input is null or N/A.
+Combined subtree health. `subtreeFit` is rescaled from [-1, 1] to [0, 1]; `subtreeUniqueness` is already in (0, 1]. Range: [0, 1]. Null if either input is null or N/A.
 
 ### overallScore
 
@@ -193,23 +194,23 @@ The two direct children with the smallest pairwise distance (most similar after 
 
 ## 3. ScoreCard Fields
 
-| Field                | Type                     | Leaf | Container | Description                                               |
-| :------------------- | :----------------------- | :--- | :-------- | :-------------------------------------------------------- |
-| `key`                | string                   | yes  | yes       | Unique node identifier                                    |
-| `kind`               | string                   | yes  | yes       | `"function"`, `"type"`, `"file"`, `"directory"`           |
-| `name`               | string                   | yes  | yes       | Display name                                              |
-| `fit`                | number \| null           | yes  | yes       | Content-to-parent alignment                               |
-| `uniqueness`         | number                   | yes  | yes       | Mean distance to siblings (N/A = 2.0)                     |
-| `score`              | number \| null           | yes  | yes       | harmonicMean(fit, uniqueness)                             |
-| `childrenFit`        | number \| null           | null | yes       | Identity-to-content alignment                             |
-| `childrenUniqueness` | number \| null           | null | yes       | CV spread quality of children (N/A = 2.0)                 |
-| `childrenScore`      | number \| null           | null | yes       | harmonicMean(childrenFit, childrenUniqueness)             |
-| `subtreeFit`         | number \| null           | null | yes       | Mean childrenFit of descendants                           |
-| `subtreeUniqueness`  | number \| null           | null | yes       | Mean childrenUniqueness of descendants                    |
-| `subtreeScore`       | number \| null           | null | yes       | harmonicMean(subtreeFit, subtreeUniqueness)               |
-| `overallScore`       | number \| null           | yes  | yes       | Leaf: score. Container: harmonicMean(score, subtreeScore) |
-| `worstPair`          | [string, string] \| null | null | yes       | Most similar child pair                                   |
-| `bestUncle`          | {name, score} \| null    | yes  | yes       | Best-fitting uncle node                                   |
+| Field                | Type                     | Leaf | Container | Description                                                   |
+| :------------------- | :----------------------- | :--- | :-------- | :------------------------------------------------------------ |
+| `key`                | string                   | yes  | yes       | Unique node identifier                                        |
+| `kind`               | string                   | yes  | yes       | `"function"`, `"type"`, `"file"`, `"directory"`               |
+| `name`               | string                   | yes  | yes       | Display name                                                  |
+| `fit`                | number \| null           | yes  | yes       | Content-to-parent alignment                                   |
+| `uniqueness`         | number                   | yes  | yes       | Mean distance to siblings (N/A = 2.0)                         |
+| `score`              | number \| null           | yes  | yes       | harmonicMean(unitizeCosine(fit), unitizeDistance(uniqueness)) |
+| `childrenFit`        | number \| null           | null | yes       | Identity-to-content alignment                                 |
+| `childrenUniqueness` | number \| null           | null | yes       | CV spread quality of children (N/A = 2.0)                     |
+| `childrenScore`      | number \| null           | null | yes       | harmonicMean(unitizeCosine(childrenFit), childrenUniqueness)  |
+| `subtreeFit`         | number \| null           | null | yes       | Mean childrenFit of descendants                               |
+| `subtreeUniqueness`  | number \| null           | null | yes       | Mean childrenUniqueness of descendants                        |
+| `subtreeScore`       | number \| null           | null | yes       | harmonicMean(unitizeCosine(subtreeFit), subtreeUniqueness)    |
+| `overallScore`       | number \| null           | yes  | yes       | Leaf: score. Container: harmonicMean(score, subtreeScore)     |
+| `worstPair`          | [string, string] \| null | null | yes       | Most similar child pair                                       |
+| `bestUncle`          | {name, score} \| null    | yes  | yes       | Best-fitting uncle node                                       |
 
 ---
 
@@ -235,10 +236,20 @@ Neither measures absolute separation. A folder where all children are uniformly 
 ## 6. Harmonic Mean
 
 ```
-H(a, b) = 2ab / (a + b)
+H(a, b) = 2ab / (a + b)    for a, b ≥ 0
+H(a, b) = 0                if either a ≤ 0 or b ≤ 0
 ```
 
 Used for `score`, `childrenScore`, `subtreeScore`, and `overallScore`. The harmonic mean is stricter than arithmetic mean — it heavily penalizes when one value is much lower than the other. Both metrics must be good for the combined score to be good.
+
+The formula is only well-defined on non-negative inputs; mixed signs or a near-zero sum produce values outside the input range. Raw cosine similarities sit in `[-1, 1]` and per-node uniqueness in `[0, 2]`, so callers rescale first:
+
+```
+unitizeCosine(x)   = (x + 1) / 2   rescales [-1, 1] → [0, 1]
+unitizeDistance(x) = x / 2         rescales [0, 2]  → [0, 1]
+```
+
+All four score fields are therefore strictly in `[0, 1]`.
 
 | a   | b   | H(a,b) | Arithmetic |
 | :-- | :-- | :----- | :--------- |
