@@ -194,23 +194,23 @@ The two direct children with the smallest pairwise distance (most similar after 
 
 ## 3. ScoreCard Fields
 
-| Field                | Type                     | Leaf | Container | Description                                               |
-| :------------------- | :----------------------- | :--- | :-------- | :-------------------------------------------------------- |
-| `key`                | string                   | yes  | yes       | Unique node identifier                                    |
-| `kind`               | string                   | yes  | yes       | `"function"`, `"type"`, `"file"`, `"directory"`           |
-| `name`               | string                   | yes  | yes       | Display name                                              |
-| `fit`                | number \| null           | yes  | yes       | Content-to-parent alignment                               |
-| `uniqueness`         | number                   | yes  | yes       | Mean distance to siblings (N/A = 2.0)                     |
-| `score`              | number \| null           | yes  | yes       | harmonicMean(fit, uniqueness)                             |
-| `childrenFit`        | number \| null           | null | yes       | Identity-to-content alignment                             |
-| `childrenUniqueness` | number \| null           | null | yes       | CV spread quality of children (N/A = 2.0)                 |
-| `childrenScore`      | number \| null           | null | yes       | harmonicMean(childrenFit, childrenUniqueness)             |
-| `subtreeFit`         | number \| null           | null | yes       | Mean childrenFit of descendants                           |
-| `subtreeUniqueness`  | number \| null           | null | yes       | Mean childrenUniqueness of descendants                    |
-| `subtreeScore`       | number \| null           | null | yes       | harmonicMean(subtreeFit, subtreeUniqueness)               |
-| `overallScore`       | number \| null           | yes  | yes       | Leaf: score. Container: harmonicMean(score, subtreeScore) |
-| `worstPair`          | [string, string] \| null | null | yes       | Most similar child pair                                   |
-| `bestUncle`          | {name, score} \| null    | yes  | yes       | Best-fitting uncle node                                   |
+| Field                | Type                     | Leaf | Container | Description                                                   |
+| :------------------- | :----------------------- | :--- | :-------- | :------------------------------------------------------------ |
+| `key`                | string                   | yes  | yes       | Unique node identifier                                        |
+| `kind`               | string                   | yes  | yes       | `"function"`, `"type"`, `"file"`, `"directory"`               |
+| `name`               | string                   | yes  | yes       | Display name                                                  |
+| `fit`                | number \| null           | yes  | yes       | Content-to-parent alignment                                   |
+| `uniqueness`         | number                   | yes  | yes       | Mean distance to siblings (N/A = 2.0)                         |
+| `score`              | number \| null           | yes  | yes       | harmonicMean(unitizeCosine(fit), unitizeDistance(uniqueness)) |
+| `childrenFit`        | number \| null           | null | yes       | Identity-to-content alignment                                 |
+| `childrenUniqueness` | number \| null           | null | yes       | CV spread quality of children (N/A = 2.0)                     |
+| `childrenScore`      | number \| null           | null | yes       | harmonicMean(unitizeCosine(childrenFit), childrenUniqueness)  |
+| `subtreeFit`         | number \| null           | null | yes       | Mean childrenFit of descendants                               |
+| `subtreeUniqueness`  | number \| null           | null | yes       | Mean childrenUniqueness of descendants                        |
+| `subtreeScore`       | number \| null           | null | yes       | harmonicMean(unitizeCosine(subtreeFit), subtreeUniqueness)    |
+| `overallScore`       | number \| null           | yes  | yes       | Leaf: score. Container: harmonicMean(score, subtreeScore)     |
+| `worstPair`          | [string, string] \| null | null | yes       | Most similar child pair                                       |
+| `bestUncle`          | {name, score} \| null    | yes  | yes       | Best-fitting uncle node                                       |
 
 ---
 
