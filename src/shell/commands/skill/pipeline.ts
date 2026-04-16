@@ -8,9 +8,8 @@
 import { dirname, resolve } from "node:path";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import type { Editor } from "./editors.ts";
-import { fileURLToPath } from "node:url";
 
-const PKG_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const PKG_ROOT = resolve(import.meta.dirname, "..");
 const SKILL_DIR = resolve(PKG_ROOT, "skills", "kural-audit");
 
 /** Result of writing a single editor skill file. */

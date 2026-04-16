@@ -31,6 +31,20 @@ function extractSymbolInfos(filePath: string): Map<string, SymbolInfo> {
 }
 
 /**
+ * Reads a file, returning undefined when it does not exist.
+ * @param path - Absolute path to the file
+ * @returns File contents or undefined if the file cannot be read
+ * @kuralPure
+ */
+function safeRead(path: string): string | undefined {
+  try {
+    return readFileSync(path, "utf-8");
+  } catch {
+    return undefined;
+  }
+}
+
+/**
  * Creates a minimal LanguageServiceHost for a single file.
  * @param filePath - Path to the source file
  * @param sourceText - Content of the source file
@@ -41,15 +55,9 @@ function createHost(filePath: string, sourceText: string): ts.LanguageServiceHos
   return {
     getScriptFileNames: () => [filePath],
     getScriptVersion: () => "1",
-    getScriptSnapshot: (fileName: string) => {
-      if (fileName === filePath) {
-        return ts.ScriptSnapshot.fromString(sourceText);
-      }
-      try {
-        return ts.ScriptSnapshot.fromString(readFileSync(fileName, "utf-8"));
-      } catch {
-        /* file not found — Language Service will skip it */
-      }
+    getScriptSnapshot: (fileName: string): ts.IScriptSnapshot | undefined => {
+      const text = fileName === filePath ? sourceText : safeRead(fileName);
+      return text === undefined ? undefined : ts.ScriptSnapshot.fromString(text);
     },
     getCurrentDirectory: () => ".",
     getCompilationSettings: () => ({ target: ts.ScriptTarget.Latest }),
