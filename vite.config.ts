@@ -33,6 +33,7 @@ export default defineConfig({
       "typescript/use-unknown-in-catch-callback-variable": "warn",
       "typescript/prefer-literal-enum-member": "warn",
       "typescript/no-unsafe-type-assertion": "warn",
+      "typescript/prefer-readonly-parameter-types": "off",
 
       // Code organization — imports
       "import/no-cycle": "error",

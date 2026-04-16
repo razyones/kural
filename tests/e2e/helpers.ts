@@ -145,6 +145,7 @@ async function seedSnapshot(
  * Extracts the first JSON value (array or object) from CLI stdout,
  * skipping any banner text printed by gunshi before the JSON payload.
  */
+// eslint-disable-next-line typescript/no-unnecessary-type-parameters -- generic enables typed call-site narrowing for JSON results
 function extractJson<T>(stdout: string): T {
   const arrayStart = stdout.indexOf("[");
   const objectStart = stdout.indexOf("{");

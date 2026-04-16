@@ -118,7 +118,7 @@ describe("embedSignatures execution", () => {
   });
 
   it("calls onProgress callback", async () => {
-    const onProgress = vi.fn();
+    const onProgress = vi.fn<(completed: number, total: number) => void>();
     const sigs = ["hello", "world"];
 
     await embedSignatures(sigs, testEmbed, { onProgress });
@@ -178,7 +178,7 @@ describe("embedSignatures concurrency", () => {
 
   it("calls onProgress incrementally across batches", async () => {
     const batchSize = 2;
-    const onProgress = vi.fn();
+    const onProgress = vi.fn<(completed: number, total: number) => void>();
     const sigs = ["a", "b", "c"];
 
     await embedSignatures(sigs, testEmbed, { batchSize, onProgress });
