@@ -41,6 +41,7 @@ function medianOfSorted(sorted: number[]): number {
  * @param distribution - Sample of numbers to find the midpoint of
  * @returns The middle value (or average of two middle values for even length)
  * @kuralPure
+ * @kuralHelper
  */
 function median(distribution: number[]): number {
   return medianOfSorted([...distribution].toSorted((a, b) => a - b));
@@ -119,6 +120,7 @@ function robustSpread(values: number[]): number {
  * @param spread - MAD-scale spread estimate (may be a blended/floored value)
  * @param sensitivity - Number of scaled MAD units from the median
  * @returns Lower fence threshold, or -Infinity when spread is zero
+ * @kuralPatterns buildFence
  * @kuralPure
  */
 function buildLowerFence(med: number, spread: number, sensitivity: number): number {
@@ -135,6 +137,7 @@ function buildLowerFence(med: number, spread: number, sensitivity: number): numb
  * @param spread - MAD-scale spread estimate (may be a blended/floored value)
  * @param sensitivity - Number of scaled MAD units from the median
  * @returns Upper fence threshold, or Infinity when spread is zero
+ * @kuralPatterns buildFence
  * @kuralPure
  */
 function buildUpperFence(med: number, spread: number, sensitivity: number): number {
