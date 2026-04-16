@@ -1,14 +1,16 @@
 /**
- * Merges sibling type shapes into one root import. It is
- * the only module that composes individual setting groups into a single
- * aggregate type — no other module defines the combined root shape.
+ * Defines the top-level application configuration shape — the single
+ * aggregate type that joins audit tuning, embedding provider, LLM
+ * provider, domain keywords, and dictionary settings into one root.
+ * It is the only module that owns this aggregate; no other module
+ * defines the combined configuration shape.
  */
 
 import type { AuditsConfig } from "./audits.ts";
 import type { EmbeddingsConfig } from "./embeddings.ts";
 import type { LLMConfig } from "./llm.ts";
 
-/** Top-level application configuration. */
+/** Top-level application configuration — joins audit, embedding, LLM, keyword, and dictionary settings. */
 type KuralConfig = {
   /** Embedding provider and model settings */
   embeddings: EmbeddingsConfig;

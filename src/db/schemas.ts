@@ -17,6 +17,7 @@ const fileSchema = z.object({
   importsExternal: z.array(z.string()),
   companion: z.string().optional(),
   bound: z.enum(["inward", "outward"]).optional(),
+  helper: z.boolean(),
   residuals: z.array(z.object({ audit: z.string(), hash: z.string().optional() })),
 });
 

@@ -131,7 +131,7 @@ function fileNode(file: KuralFile, filePath: string, childKeys: string[]): FileN
     patterns: null,
     companion: file.companion ?? null,
     util: false,
-    helper: false,
+    helper: file.helper,
     residuals: file.residuals,
     hash: unitHash(file),
     exported: false,

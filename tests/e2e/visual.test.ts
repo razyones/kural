@@ -146,6 +146,7 @@ function makeAuditProject(root: string): SeedData {
       leafEmbedding: [E1, E0],
       importsInternal: [],
       importsExternal: [],
+      helper: false,
       residuals: [],
     },
   ];
@@ -266,6 +267,7 @@ describe("visual: audit", () => {
           leafEmbedding: [E1, E0],
           importsInternal: [],
           importsExternal: [],
+          helper: false,
           residuals: [],
         },
       ],

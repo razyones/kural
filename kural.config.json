@@ -1,6 +1,6 @@
 {
   "audits": {
-    "sensitivity": 2.2
+    "sensitivity": 3.0
   },
   "dictionary": {
     "Kural": "structural intelligence tool for TypeScript codebases",

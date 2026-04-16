@@ -137,6 +137,8 @@ export type KuralFile = KuralUnit & {
   companion?: string;
   /** Bound direction from @kuralBound */
   bound?: BoundDirection;
+  /** Whether the file is a shared helper that supports siblings without owning a domain concept */
+  helper: boolean;
   /** Audit-specific suppression annotations from file-level @kuralResidual */
   residuals: ResidualEntry[];
 };
@@ -158,6 +160,12 @@ export type KuralDirectory = KuralUnit & {
   borrows?: BorrowsEntry;
 };
 
+/** Parsed codebase: files and directories keyed by absolute path. */
+export type ParseResult = {
+  files: Record<string, KuralFile>;
+  directories: Record<string, KuralDirectory>;
+};
+
 /** Extracted contents of a single source file before embedding. */
 export type ExtractedFile = {
   name: string;
@@ -168,6 +176,7 @@ export type ExtractedFile = {
   imports: ModuleImports;
   companion?: string;
   bound?: BoundDirection;
+  helper: boolean;
   residuals: ResidualEntry[];
 };
 

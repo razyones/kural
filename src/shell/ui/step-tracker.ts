@@ -3,6 +3,7 @@
  * coordinating step sequencing and batch callbacks. It is the only module
  * that orchestrates multi-step execution with progress rendering — no
  * other module manages stateful step advancement or batch progress tracking.
+ * @kuralHelper
  */
 
 import { logger } from "./log.ts";

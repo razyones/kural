@@ -69,6 +69,7 @@ function makeParseResult(): ParseResult {
     functions: { createUser: createFn },
     types: { User: userType },
     imports: { internalImports: [], externalImports: [] },
+    helper: false,
     residuals: [],
   };
 

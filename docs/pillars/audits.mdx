@@ -26,11 +26,12 @@ Used when the sample size is large enough for parametric assumptions. Detects me
 ### Robust fencing (MAD-based)
 
 ```
-robustUpperFence = median + sensitivity × 1.4826 × MAD
-robustLowerFence = median - sensitivity × 1.4826 × MAD
+spread            = max(MAD, IQR/2)
+robustUpperFence  = median + sensitivity × 1.4826 × spread
+robustLowerFence  = median - sensitivity × 1.4826 × spread
 ```
 
-MAD (Median Absolute Deviation) resists outliers better than standard deviation. The constant 1.4826 makes MAD consistent with σ for normal data. When more than half the values are identical, MAD collapses to zero — the fence falls back to IQR/2 (the MAD-equivalent under normality, since IQR ≈ 2·MAD). When both MAD and IQR are zero (all values identical), there is no variation and the fence returns its sentinel — no outliers exist. Used for outlier detection and vocabulary bleed.
+MAD (Median Absolute Deviation) resists outliers better than standard deviation. The constant 1.4826 makes MAD consistent with σ for normal data. The spread estimate is `max(MAD, IQR/2)` — under normality the two are equal (IQR ≈ 2·MAD), so the max returns MAD on well-behaved data. When the center concentrates while tails persist (typical of tightened embedding distributions), MAD shrinks faster than IQR/2 and the IQR-derived value floors the spread, preventing fence collapse. When both MAD and IQR are zero (all values identical), there is no variation and the fence returns its sentinel — no outliers exist. Used for outlier detection and vocabulary bleed.
 
 ### Dendrogram gap
 
@@ -54,7 +55,7 @@ The `sensitivity` parameter (default 2.0) controls how many deviations from cent
 
 ### Outliers & Cohesion
 
-**outliers** — Detects children whose mean similarity to siblings falls below a robust lower fence. Uses cosine similarity between each child and all its siblings, then flags children whose mean is statistically low. Excludes util, helper, and `@kuralBound inward` nodes. Populates a shared `outlierKeys` set that downstream audits use for adjusted thresholds.
+**outliers** — Detects children whose mean similarity to siblings falls below a robust lower fence. Uses cosine similarity between each child and all its siblings, then flags children whose mean is statistically low. The per-parent spread is floored by a codebase-derived baseline — Q1 of pooled `|value − group_median|` across every sibling group — so a tight inlier band cannot collapse the fence onto itself when one sibling stands apart. Excludes util, helper, and `@kuralBound inward` nodes. Populates a shared `outlierKeys` set that downstream audits use for adjusted thresholds.
 
 **merge-candidates** — Detects sibling pairs whose similarity exceeds the upper fence — near-duplicates within the same parent. Separate fences for file-level pairs (computed from file sibling similarities) and leaf-level pairs (computed from leaf sibling similarities). Filters out caller-callee pairs and `@kuralBound inward` nodes.
 
@@ -78,7 +79,7 @@ The `sensitivity` parameter (default 2.0) controls how many deviations from cent
 
 ### Documentation & Coherence
 
-**incoherent** — Detects non-util containers whose identity-to-content similarity is a lower outlier. The name and description say one thing; the actual content says another. Capped at the median label-fit to avoid flagging near-perfect alignment as an issue.
+**incoherent** — Detects non-util containers whose identity-to-content similarity is a lower outlier. The name and description say one thing; the actual content says another. Capped at the median label-fit to avoid flagging near-perfect alignment as an issue. Pattern nodes (synthetic centroids materialised from `@kuralPatterns`-tagged code) are skipped — their names are intentionally abstract category labels, so identity-content similarity is meaningless by construction.
 
 **incoherent-utils** — Same logic for util containers, scored within their own population.
 

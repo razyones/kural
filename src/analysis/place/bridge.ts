@@ -14,6 +14,8 @@ import { getChildren } from "../tree/tree.ts";
 import { stddev } from "../audits/fence.ts";
 
 const NEXT = 1;
+/** 1σ — requires the top type to be at least one stddev above the mean and gap. */
+const Z_THRESHOLD = 1;
 
 /** Bridge type reference descriptions. */
 const BRIDGE_TYPE_REFS: Record<string, string> = {
@@ -70,7 +72,8 @@ async function classifyBridgeType(
   const allSimValues = sims.map((s) => s.sim);
   const simMean = avg(allSimValues);
   const simStd = stddev(allSimValues, simMean);
-  const confident = top.sim > simMean + simStd && gap > simStd;
+  const confident =
+    simStd > NONE && top.sim - simMean > Z_THRESHOLD * simStd && gap > Z_THRESHOLD * simStd;
 
   return {
     type: top.type,

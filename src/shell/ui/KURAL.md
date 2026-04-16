@@ -1,1 +1,1 @@
-Renders all terminal output — banners, spinners, tables, heroes, footers, and bullet lists. It is the only part of the system that owns display formatting — no other module prints styled text to the terminal.
+Owns all composition of terminal rendering — controls the UI instance, orchestrates multi-step progress, and defines reusable patterns for score display, tables, lists, and footers. No other module decides how output is layered or styled.

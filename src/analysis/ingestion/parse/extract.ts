@@ -291,6 +291,7 @@ function extractFile(filePath: string): ExtractedFile {
     imports,
     companion: fileJSDoc.companion,
     bound: fileJSDoc.bound ?? (isBarrelExport ? "inward" : undefined),
+    helper: fileJSDoc.helper,
     residuals: fileJSDoc.residuals,
   };
 }

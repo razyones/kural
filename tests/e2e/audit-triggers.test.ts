@@ -105,6 +105,7 @@ function file(path: string, name: string, leaf: number[], desc?: string): FileRo
     leafEmbedding: leaf,
     importsInternal: [],
     importsExternal: [],
+    helper: false,
     residuals: [],
   };
 }

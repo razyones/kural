@@ -15,7 +15,7 @@ import {
   currentCommitHash,
   rotateActive,
 } from "../../../../db/snapshot.ts";
-import { writeMetadata, writeScoreCards, writeUnits } from "./storage.ts";
+import { writeMetadata, writeScoreCards, writeUnits } from "../../../../db/persist.ts";
 import { embed } from "../../../../analysis/ingestion/embed/pipeline.ts";
 import { loadEmbeddingCache } from "../../../../db/cache.ts";
 import { parse } from "../../../../analysis/ingestion/parse/pipeline.ts";

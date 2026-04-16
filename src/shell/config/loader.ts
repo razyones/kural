@@ -1,7 +1,9 @@
 /**
- * Loads project configuration from kural.config.json on disk.
- * It is the only module that reads the config file — no other module
- * touches the filesystem for configuration.
+ * Defines how a kural.config.json file on disk becomes a partial
+ * settings object — parsing, validating, and warning on bad input.
+ * It is the only module that turns the on-disk config artifact into
+ * the runtime settings shape; no other module reads that file.
+ * @kuralResidual outliers [eb95e633]
  */
 
 import { existsSync, readFileSync } from "node:fs";

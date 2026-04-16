@@ -43,6 +43,7 @@ function makeFileWith(fns: Record<string, KuralFunction>, filePath: string): Kur
     functions: fns,
     types: {},
     imports: { internalImports: [], externalImports: [] },
+    helper: false,
     residuals: [],
   };
 }
@@ -65,6 +66,7 @@ function makeParseResult(): ParseResult {
     functions: { createUser: createFn },
     types: {},
     imports: { internalImports: [], externalImports: [] },
+    helper: false,
     residuals: [],
   };
 

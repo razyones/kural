@@ -11,8 +11,8 @@ import type {
   KuralFile,
   KuralFunction,
   KuralType,
+  ParseResult,
 } from "../analysis/ingestion/parse/types.ts";
-import type { ParseResult } from "../analysis/ingestion/parse/pipeline.ts";
 import type { SnapshotCollections } from "./collections.ts";
 
 /**
@@ -127,6 +127,7 @@ function rebuildParseResult(collections: SnapshotCollections): ParseResult {
       },
       companion: row.companion,
       bound: row.bound,
+      helper: row.helper,
       residuals: row.residuals,
     };
   });

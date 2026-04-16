@@ -1,13 +1,19 @@
 /**
- * Converts parsed units, score cards, and metadata into
- * collection entries for the active snapshot. It is the only module that
- * maps domain structures to their on-disk shape — no other module decides
- * how pipeline output is written to a snapshot.
+ * Maps parsed codebase structures, score cards, and metadata
+ * into snapshot rows so any command can write its pipeline output to disk.
+ * It is the only module that turns in-memory domain shapes into stored
+ * collection entries — the inverse of rebuild's row-to-domain mapping.
  */
 
-import type { ScoreCard } from "../../../../analysis/scoring/score.ts";
-import type { SnapshotCollections } from "../../../../db/collections.ts";
-import { parse } from "../../../../analysis/ingestion/parse/pipeline.ts";
+import type {
+  KuralDirectory,
+  KuralFile,
+  KuralFunction,
+  KuralType,
+  ParseResult,
+} from "../analysis/ingestion/parse/types.ts";
+import type { ScoreCard } from "../analysis/scoring/score.ts";
+import type { SnapshotCollections } from "./collections.ts";
 
 const NONE = 0;
 
@@ -59,15 +65,15 @@ async function writeMetadata(
  * @returns Resolves when all unit rows are persisted
  * @kuralCauses persists all unit rows to the snapshot database
  */
-async function writeUnits(
-  collections: SnapshotCollections,
-  result: Awaited<ReturnType<typeof parse>>,
-): Promise<void> {
+async function writeUnits(collections: SnapshotCollections, result: ParseResult): Promise<void> {
   const files = Object.values(result.files);
+  const types = files.flatMap((f) => Object.values(f.types));
+  const functions = files.flatMap((f) => Object.values(f.functions));
+  const directories = Object.values(result.directories);
   await writeFiles(collections, files);
-  await writeTypes(collections, files);
-  await writeFunctions(collections, files);
-  await writeDirectories(collections, result);
+  await writeTypes(collections, types);
+  await writeFunctions(collections, functions);
+  await writeDirectories(collections, directories);
 }
 
 /**
@@ -78,10 +84,7 @@ async function writeUnits(
  * @kuralPatterns writeCollection
  * @kuralCauses persists file rows to the snapshot database
  */
-async function writeFiles(
-  collections: SnapshotCollections,
-  files: Awaited<ReturnType<typeof parse>>["files"][string][],
-): Promise<void> {
+async function writeFiles(collections: SnapshotCollections, files: KuralFile[]): Promise<void> {
   await persistRows(
     collections.files,
     files.map((f) => ({
@@ -95,6 +98,7 @@ async function writeFiles(
       importsExternal: f.imports.externalImports,
       companion: f.companion,
       bound: f.bound,
+      helper: f.helper,
       residuals: f.residuals,
     })),
   );
@@ -103,94 +107,87 @@ async function writeFiles(
 /**
  * Persists type units with their field shapes and embeddings so the snapshot captures the declarative schema layer.
  * @param collections - Snapshot collections to write into
- * @param files - Parsed file objects containing types to persist
+ * @param types - Parsed type objects to persist
  * @returns Resolves when type rows are persisted
  * @kuralPatterns writeCollection
  * @kuralCauses persists type rows to the snapshot database
  */
-async function writeTypes(
-  collections: SnapshotCollections,
-  files: Awaited<ReturnType<typeof parse>>["files"][string][],
-): Promise<void> {
+async function writeTypes(collections: SnapshotCollections, types: KuralType[]): Promise<void> {
   await persistRows(
     collections.types,
-    files.flatMap((f) =>
-      Object.values(f.types).map((t) => ({
-        path: t.path,
-        name: t.name,
-        description: t.description,
-        fields: t.fields,
-        exported: t.exported,
-        refs: t.references,
-        util: t.util,
-        helper: t.helper,
-        residuals: t.residuals,
-        identityEmbedding: t.identityEmbedding,
-        leafEmbedding: t.leafEmbedding,
-        facetHash: t.facetHash,
-        patterns: t.patterns,
-        bound: t.bound,
-      })),
-    ),
+    types.map((t) => ({
+      path: t.path,
+      name: t.name,
+      description: t.description,
+      fields: t.fields,
+      exported: t.exported,
+      refs: t.references,
+      util: t.util,
+      helper: t.helper,
+      residuals: t.residuals,
+      identityEmbedding: t.identityEmbedding,
+      leafEmbedding: t.leafEmbedding,
+      facetHash: t.facetHash,
+      patterns: t.patterns,
+      bound: t.bound,
+    })),
   );
 }
 
 /**
  * Persists function units with their signatures, purity annotations, and embeddings so the snapshot captures the behavioral layer.
  * @param collections - Snapshot collections to write into
- * @param files - Parsed file objects containing functions to persist
+ * @param functions - Parsed function objects to persist
  * @returns Resolves when function rows are persisted
  * @kuralPatterns writeCollection
  * @kuralCauses persists function rows to the snapshot database
  */
 async function writeFunctions(
   collections: SnapshotCollections,
-  files: Awaited<ReturnType<typeof parse>>["files"][string][],
+  functions: KuralFunction[],
 ): Promise<void> {
   await persistRows(
     collections.functions,
-    files.flatMap((f) =>
-      Object.values(f.functions).map((fn) => ({
-        path: fn.path,
-        name: fn.name,
-        description: fn.description,
-        params: fn.params,
-        paramNames: fn.paramNames,
-        returnsType: fn.returns,
-        exported: fn.exported,
-        pure: fn.pure,
-        util: fn.util,
-        helper: fn.helper,
-        residuals: fn.residuals,
-        causes: fn.causes,
-        calls: fn.calls,
-        identityEmbedding: fn.identityEmbedding,
-        leafEmbedding: fn.leafEmbedding,
-        facetHash: fn.facetHash,
-        patterns: fn.patterns,
-        documentedParams: fn.documentedParams,
-        hasReturnDoc: fn.hasReturnDoc,
-        bound: fn.bound,
-      })),
-    ),
+    functions.map((fn) => ({
+      path: fn.path,
+      name: fn.name,
+      description: fn.description,
+      params: fn.params,
+      paramNames: fn.paramNames,
+      returnsType: fn.returns,
+      exported: fn.exported,
+      pure: fn.pure,
+      util: fn.util,
+      helper: fn.helper,
+      residuals: fn.residuals,
+      causes: fn.causes,
+      calls: fn.calls,
+      identityEmbedding: fn.identityEmbedding,
+      leafEmbedding: fn.leafEmbedding,
+      facetHash: fn.facetHash,
+      patterns: fn.patterns,
+      documentedParams: fn.documentedParams,
+      hasReturnDoc: fn.hasReturnDoc,
+      bound: fn.bound,
+    })),
   );
 }
 
 /**
- * Persists directory units with their child lists and embeddings so the snapshot captures the hierarchical container structure. Takes the full parse result to access the directories map, unlike sibling write functions which receive extracted unit arrays.
+ * Persists directory units with their child lists and embeddings so the snapshot captures the hierarchical container structure.
  * @param collections - Snapshot collections to write into
- * @param result - Full parse result with directory objects to persist
+ * @param directories - Parsed directory objects to persist
  * @returns Resolves when directory rows are persisted
  * @kuralCauses persists directory rows to the snapshot database
  * @kuralPatterns writeCollection
  */
 async function writeDirectories(
   collections: SnapshotCollections,
-  result: Awaited<ReturnType<typeof parse>>,
+  directories: KuralDirectory[],
 ): Promise<void> {
   await persistRows(
     collections.directories,
-    Object.values(result.directories).map((d) => ({
+    directories.map((d) => ({
       path: d.path,
       name: d.name,
       description: d.description,

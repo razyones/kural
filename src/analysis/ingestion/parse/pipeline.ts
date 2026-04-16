@@ -4,7 +4,13 @@
  * into the parse pipeline — nothing else in the system triggers parsing.
  */
 
-import type { BorrowsEntry, KuralDirectory, KuralFile, ResidualEntry } from "./types.ts";
+import type {
+  BorrowsEntry,
+  KuralDirectory,
+  KuralFile,
+  ParseResult,
+  ResidualEntry,
+} from "./types.ts";
 import { basename, dirname, join } from "node:path";
 import { extractFile } from "./extract.ts";
 import { readFile } from "node:fs/promises";
@@ -18,12 +24,6 @@ const AFTER_QUOTE = 1;
 const NOT_FOUND = -1;
 
 const EMPTY_EMBEDDING: number[] = [];
-
-/** Parsed codebase: files and directories keyed by absolute path. */
-type ParseResult = {
-  files: Record<string, KuralFile>;
-  directories: Record<string, KuralDirectory>;
-};
 
 /**
  * Parses a @kuralBorrows directive from a single line.
