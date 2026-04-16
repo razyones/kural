@@ -23,17 +23,27 @@ const LOWER_QUARTILE = 1;
 const UPPER_QUARTILE = 3;
 
 /**
+ * Picks the middle element from an already-sorted array.
+ * @param sorted - Pre-sorted array of numbers
+ * @returns The middle value (or average of two middle values for even length)
+ * @kuralPure
+ * @kuralHelper
+ */
+function medianOfSorted(sorted: number[]): number {
+  const mid = Math.floor(sorted.length / MIN_SAMPLE);
+  return sorted.length % MIN_SAMPLE === NONE
+    ? (sorted[mid - BESSEL] + sorted[mid]) / MIN_SAMPLE
+    : sorted[mid];
+}
+
+/**
  * Sorts the distribution and picks the middle element as the central tendency.
  * @param distribution - Sample of numbers to find the midpoint of
  * @returns The middle value (or average of two middle values for even length)
  * @kuralPure
  */
 function median(distribution: number[]): number {
-  const sorted = [...distribution].toSorted((a, b) => a - b);
-  const mid = Math.floor(sorted.length / MIN_SAMPLE);
-  return sorted.length % MIN_SAMPLE === NONE
-    ? (sorted[mid - BESSEL] + sorted[mid]) / MIN_SAMPLE
-    : sorted[mid];
+  return medianOfSorted([...distribution].toSorted((a, b) => a - b));
 }
 
 /**
@@ -71,6 +81,21 @@ function quartile(sorted: number[], q: number): number {
 }
 
 /**
+ * Computes the robust spread from an already-sorted array and its median.
+ * @param sorted - Pre-sorted array of values
+ * @param med - Precomputed median of the sorted array
+ * @returns Spread estimate suitable for fence scaling
+ * @kuralPure
+ * @kuralHelper
+ */
+function spreadOfSorted(sorted: number[], med: number): number {
+  const deviations = sorted.map((v) => Math.abs(v - med));
+  const mad = median(deviations);
+  const iqr = quartile(sorted, UPPER_QUARTILE) - quartile(sorted, LOWER_QUARTILE);
+  return Math.max(mad, iqr / IQR_TO_MAD);
+}
+
+/**
  * Computes the robust spread estimate for fence computation. Returns the
  * larger of MAD and IQR/2 — under normality these are equal, so the max is
  * MAD on well-behaved data and IQR-floored when MAD degenerates toward zero
@@ -84,11 +109,7 @@ function robustSpread(values: number[]): number {
     return NONE;
   }
   const sorted = [...values].toSorted((a, b) => a - b);
-  const med = median(sorted);
-  const deviations = sorted.map((v) => Math.abs(v - med));
-  const mad = median(deviations);
-  const iqr = quartile(sorted, UPPER_QUARTILE) - quartile(sorted, LOWER_QUARTILE);
-  return Math.max(mad, iqr / IQR_TO_MAD);
+  return spreadOfSorted(sorted, medianOfSorted(sorted));
 }
 
 /**
@@ -105,6 +126,22 @@ function buildLowerFence(med: number, spread: number, sensitivity: number): numb
     return -Infinity;
   }
   return med - sensitivity * MAD_SCALE * spread;
+}
+
+/**
+ * Upper fence built from a precomputed median and spread, letting callers
+ * apply their own spread blending or flooring before fencing.
+ * @param med - Center of the distribution
+ * @param spread - MAD-scale spread estimate (may be a blended/floored value)
+ * @param sensitivity - Number of scaled MAD units from the median
+ * @returns Upper fence threshold, or Infinity when spread is zero
+ * @kuralPure
+ */
+function buildUpperFence(med: number, spread: number, sensitivity: number): number {
+  if (spread === NONE) {
+    return Infinity;
+  }
+  return med + sensitivity * MAD_SCALE * spread;
 }
 
 /**
@@ -152,7 +189,9 @@ function robustLowerFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {
     return -Infinity;
   }
-  return buildLowerFence(median(values), robustSpread(values), sensitivity);
+  const sorted = [...values].toSorted((a, b) => a - b);
+  const med = medianOfSorted(sorted);
+  return buildLowerFence(med, spreadOfSorted(sorted, med), sensitivity);
 }
 
 /**
@@ -168,15 +207,15 @@ function robustUpperFence(values: number[], sensitivity: number): number {
   if (values.length < MIN_SAMPLE) {
     return Infinity;
   }
-  const spread = robustSpread(values);
-  if (spread === NONE) {
-    return Infinity;
-  }
-  return median(values) + sensitivity * MAD_SCALE * spread;
+  const sorted = [...values].toSorted((a, b) => a - b);
+  const med = medianOfSorted(sorted);
+  return buildUpperFence(med, spreadOfSorted(sorted, med), sensitivity);
 }
 
 export {
+  LOWER_QUARTILE,
   buildLowerFence,
+  buildUpperFence,
   lowerFence,
   median,
   quartile,

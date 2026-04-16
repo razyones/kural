@@ -7,6 +7,7 @@
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
+import type { CodeNode } from "../../tree/tree.ts";
 import { defineAudit } from "../types.ts";
 import { isSuppressed } from "../context.ts";
 
@@ -34,7 +35,7 @@ function formatIncompleteDocs({ finding, prefix, label, location }: FormatCtx): 
  * @returns Names of the metadata fields the node is missing
  * @kuralPure
  */
-function collectMissingFields(node: import("../../tree/tree.ts").CodeNode): string[] {
+function collectMissingFields(node: CodeNode): string[] {
   const missing: string[] = [];
   if (node.kind === "function") {
     if (node.description === undefined || node.description.trim().length === NONE) {

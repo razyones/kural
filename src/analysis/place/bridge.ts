@@ -14,6 +14,7 @@ import { getChildren } from "../tree/tree.ts";
 import { stddev } from "../audits/fence.ts";
 
 const NEXT = 1;
+/** 1σ — requires the top type to be at least one stddev above the mean and gap. */
 const Z_THRESHOLD = 1;
 
 /** Bridge type reference descriptions. */

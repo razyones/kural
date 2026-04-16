@@ -6,6 +6,7 @@
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import { getChildren, isLeaf } from "../../tree/tree.ts";
 import { lowerFence, median } from "../fence.ts";
+import type { CodeNode } from "../../tree/tree.ts";
 import { cosineSimilarity } from "../../../utils/vectors.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../../utils/format.ts";
@@ -39,7 +40,7 @@ function formatIncoherent({ finding, prefix, label }: FormatCtx): ListItem {
  * @kuralPure
  */
 function collectLabelFits(
-  nodes: Map<string, import("../../tree/tree.ts").CodeNode>,
+  nodes: Map<string, CodeNode>,
   utilMode: boolean,
 ): { key: string; labelFit: number; childCount: number }[] {
   const entries: { key: string; labelFit: number; childCount: number }[] = [];

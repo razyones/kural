@@ -6,9 +6,9 @@
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";
 import type { CodeNode, NodeMap } from "../../tree/tree.ts";
+import { LOWER_QUARTILE, buildLowerFence, median, quartile, robustSpread } from "../fence.ts";
 import { MIN_GROUP, isSuppressed } from "../context.ts";
 import { avg, cosineSimilarity } from "../../../utils/vectors.ts";
-import { buildLowerFence, median, quartile, robustSpread } from "../fence.ts";
 import { defineAudit } from "../types.ts";
 import { fmtPct } from "../../../utils/format.ts";
 import { getChildrenWithKeys } from "../children.ts";
@@ -16,7 +16,6 @@ import { isLeaf } from "../../tree/tree.ts";
 
 const NONE = 0;
 const NEXT = 1;
-const LOWER_QUARTILE = 1;
 
 /**
  * Renders the sibling similarity gap showing how semantically distant a child is from its group.
@@ -186,6 +185,8 @@ function findingsForBatch(batch: ParentBatch, fence: number): Finding[] {
   return out;
 }
 
+export { buildBatch, collectBatches, tightGroupDeviationFloor };
+
 export default defineAudit({
   name: "outliers",
   title: "Outliers",
@@ -202,6 +203,7 @@ export default defineAudit({
       findings.push(...findingsForBatch(batch, fence));
     }
 
+    // Populate context for downstream audits (misplaced uses outlierKeys)
     ctx.outlierKeys = new Set(findings.map((f) => f.key));
     findings.sort((a, b) => (a.value ?? NONE) - (b.value ?? NONE));
     return findings;

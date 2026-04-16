@@ -11,9 +11,9 @@ import type {
   KuralFunction,
   KuralType,
 } from "../analysis/ingestion/parse/types.ts";
+import type { ParseResult } from "../analysis/ingestion/parse/pipeline.ts";
 import type { ScoreCard } from "../analysis/scoring/score.ts";
 import type { SnapshotCollections } from "./collections.ts";
-import { parse } from "../analysis/ingestion/parse/pipeline.ts";
 
 const NONE = 0;
 
@@ -65,10 +65,7 @@ async function writeMetadata(
  * @returns Resolves when all unit rows are persisted
  * @kuralCauses persists all unit rows to the snapshot database
  */
-async function writeUnits(
-  collections: SnapshotCollections,
-  result: Awaited<ReturnType<typeof parse>>,
-): Promise<void> {
+async function writeUnits(collections: SnapshotCollections, result: ParseResult): Promise<void> {
   const files = Object.values(result.files);
   const types = files.flatMap((f) => Object.values(f.types));
   const functions = files.flatMap((f) => Object.values(f.functions));
