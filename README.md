@@ -219,12 +219,12 @@ Kural is a five-stage pipeline:
 
 Every node gets a score card:
 
-- **Fit** — how well the node's content matches its parent's identity (-1...1)
-- **Uniqueness** — mean distance to siblings (-1...1)
-- **Score** — harmonic mean of fit and uniqueness
-- **Children** — direct children quality (containers only)
-- **Subtree** — recursive health of the entire subtree below (containers only)
-- **Overall** — harmonic mean of self and subtree scores
+- **Fit** — how well the node's content matches its parent's identity (raw cosine, -1...1)
+- **Uniqueness** — mean distance to siblings (0...2)
+- **Score** — harmonic mean of normalized fit and uniqueness (0...1)
+- **Children** — direct children quality, containers only (0...1)
+- **Subtree** — recursive health of the entire subtree below, containers only (0...1)
+- **Overall** — harmonic mean of self and subtree scores (0...1)
 
 ## Tech stack
 

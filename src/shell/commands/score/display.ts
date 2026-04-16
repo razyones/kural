@@ -64,10 +64,10 @@ function buildTableRows(
 function printScoreFooter(): void {
   renderFooter(
     [
-      { term: "Self", definition: "how well this node fits under its parent (-1…1)" },
-      { term: "Children", definition: "how coherent this node's direct children are (-1…1)" },
-      { term: "Subtree", definition: "recursive health of the entire subtree below (-1…1)" },
-      { term: "Overall", definition: "harmonic mean of Self and Subtree (-1…1)" },
+      { term: "Self", definition: "how well this node fits under its parent (0…1)" },
+      { term: "Children", definition: "how coherent this node's direct children are (0…1)" },
+      { term: "Subtree", definition: "recursive health of the entire subtree below (0…1)" },
+      { term: "Overall", definition: "harmonic mean of Self and Subtree (0…1)" },
       { term: "(\u2014)", definition: "not applicable (leaves have no Children or Subtree)" },
     ],
     [
