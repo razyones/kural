@@ -10,8 +10,8 @@ import type {
   KuralFile,
   KuralFunction,
   KuralType,
+  ParseResult,
 } from "../analysis/ingestion/parse/types.ts";
-import type { ParseResult } from "../analysis/ingestion/parse/pipeline.ts";
 import type { ScoreCard } from "../analysis/scoring/score.ts";
 import type { SnapshotCollections } from "./collections.ts";
 

@@ -160,6 +160,12 @@ export type KuralDirectory = KuralUnit & {
   borrows?: BorrowsEntry;
 };
 
+/** Parsed codebase: files and directories keyed by absolute path. */
+export type ParseResult = {
+  files: Record<string, KuralFile>;
+  directories: Record<string, KuralDirectory>;
+};
+
 /** Extracted contents of a single source file before embedding. */
 export type ExtractedFile = {
   name: string;
