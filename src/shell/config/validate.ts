@@ -81,6 +81,47 @@ function validateAudits(audits: Bag, warnings: string[]): void {
   }
 }
 
+const BRIEF_KEYS = [
+  "siblings",
+  "utilities",
+  "symbols",
+  "related",
+  "ancestors",
+  "patternMembers",
+  "companionMembers",
+] as const;
+
+/**
+ * Validates brief caps — each known field must be a positive integer.
+ * Strips invalid or unknown fields so downstream defaults apply.
+ * @param brief - Mutable brief config bag
+ * @param warnings - Accumulator for human-readable warnings
+ * @kuralPure
+ * @kuralHelper
+ */
+function validateBrief(brief: Bag, warnings: string[]): void {
+  const accepted: Bag = {};
+  for (const key of BRIEF_KEYS) {
+    const value = brief[key];
+    if (value === undefined) {
+      continue;
+    }
+    if (typeof value === "number" && Number.isInteger(value) && value > MIN_SENSITIVITY) {
+      accepted[key] = value;
+    } else {
+      warnings.push(`brief.${key} must be a positive integer — ignoring`);
+    }
+  }
+  const known = new Set<string>(BRIEF_KEYS);
+  for (const key of Object.keys(brief)) {
+    if (!known.has(key)) {
+      warnings.push(`brief.${key} is not a recognized cap — ignoring`);
+    }
+    Reflect.deleteProperty(brief, key);
+  }
+  Object.assign(brief, accepted);
+}
+
 /**
  * Validates a parsed config object for semantic correctness. Strips fields
  * that violate constraints (so defaults apply downstream) and returns
@@ -100,6 +141,15 @@ function validateConfig(raw: unknown): { config: Bag; warnings: string[] } {
     const sanitized = { ...config.audits };
     validateAudits(sanitized, warnings);
     config.audits = sanitized;
+  }
+
+  if (isRecord(config.brief)) {
+    const sanitized = { ...config.brief };
+    validateBrief(sanitized, warnings);
+    config.brief = sanitized;
+  } else if ("brief" in config) {
+    warnings.push("brief must be an object of positive integer caps — ignoring");
+    delete config.brief;
   }
 
   if ("domainKeywords" in config && !Array.isArray(config.domainKeywords)) {

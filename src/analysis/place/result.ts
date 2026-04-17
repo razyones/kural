@@ -117,6 +117,7 @@ function buildResult(
     suggestion,
     confidence: Number((topPath.confidence * PERCENT_SCALE).toFixed(NEXT)),
     topPaths: paths.slice(NONE, DISPLAY_PATHS).map((p) => ({
+      parentKey: p.parentKey,
       parentName: p.parentName,
       confidence: Number((p.confidence * PERCENT_SCALE).toFixed(NEXT)),
       trail: p.trail,

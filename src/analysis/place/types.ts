@@ -69,7 +69,7 @@ type PlacementSuggestion =
 type RelatedGroup = {
   file: string;
   path: string;
-  items: { name: string; kind: string; similarity: number }[];
+  items: { name: string; kind: string; description: string; similarity: number }[];
 };
 
 /** Complete placement result. */
@@ -86,7 +86,7 @@ type PlacementResult = {
   };
   suggestion: PlacementSuggestion;
   confidence: number;
-  topPaths: { parentName: string; confidence: number; trail: TrailEntry[] }[];
+  topPaths: { parentKey: string; parentName: string; confidence: number; trail: TrailEntry[] }[];
   bridge: BridgeResult | null;
   relatedConcepts: RelatedGroup[];
 };

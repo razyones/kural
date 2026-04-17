@@ -45,6 +45,7 @@
     "@tanstack/node-db-sqlite-persistence": "^0.1.5",
     "ai": "^6.0.116",
     "better-sqlite3": "^12.8.0",
+    "cli-highlight": "^2.1.11",
     "gunshi": "^0.29.3",
     "zod": "^4.3.6"
   },
