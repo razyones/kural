@@ -7,6 +7,7 @@
  */
 
 import type { AuditsConfig } from "./audits.ts";
+import type { BriefConfig } from "./brief.ts";
 import type { EmbeddingsConfig } from "./embeddings.ts";
 import type { LLMConfig } from "./llm.ts";
 
@@ -22,6 +23,8 @@ type KuralConfig = {
   dictionary: Record<string, string>;
   /** Structural audit tuning parameters */
   audits: AuditsConfig;
+  /** Per-section caps for the brief command's facet index */
+  brief?: BriefConfig;
 };
 
 export type { KuralConfig };

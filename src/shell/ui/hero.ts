@@ -6,17 +6,11 @@
  */
 
 import { colors, logger } from "./log.ts";
+import { formatDelta } from "./delta.ts";
 
 const GOOD_THRESHOLD = 0.7;
 const MODERATE_THRESHOLD = 0.4;
-const UNCHANGED = 0;
 const SCORE_DECIMALS = 2;
-const DELTA_DECIMALS = 8;
-
-/** Delta arrows for score comparison. */
-const ARROW_UP = "\u25B4";
-const ARROW_DOWN = "\u25BE";
-const ARROW_FLAT = "\u25B8";
 
 /**
  * Score, kind label, optional child count, and delta — the values
@@ -63,24 +57,6 @@ function verdict(value: number): string {
 }
 
 /**
- * Formats the delta indicator with directional arrow and color.
- * @param delta - Score change value (positive, negative, or zero)
- * @returns Formatted string with directional arrow and color
- * @kuralPure
- */
-function formatDelta(delta: number): string {
-  const sign = delta > UNCHANGED ? "+" : "";
-  const formatted = `${sign}${delta.toFixed(DELTA_DECIMALS)}`;
-  if (delta > UNCHANGED) {
-    return ` ${colors.green(`${ARROW_UP} ${formatted}`)}`;
-  }
-  if (delta < UNCHANGED) {
-    return ` ${colors.red(`${ARROW_DOWN} ${formatted}`)}`;
-  }
-  return ` ${colors.dim(`${ARROW_FLAT} ${formatted}`)}`;
-}
-
-/**
  * Renders a hero score display with verdict and metadata.
  * @param options - Hero display configuration including score, kind, and optional delta
  * @kuralBound outward
@@ -90,7 +66,8 @@ function renderHero(options: HeroOptions): void {
   const scoreText = colors.bold(
     colorByHealth(options.score, options.score.toFixed(SCORE_DECIMALS)),
   );
-  const deltaText = options.delta === undefined ? "" : formatDelta(options.delta);
+  const deltaText =
+    options.delta === undefined ? "" : ` ${formatDelta(options.delta, { colored: true })}`;
 
   logger.log(`${colors.cyan("\u25C6")} ${scoreText}${deltaText}`);
   logger.log("");

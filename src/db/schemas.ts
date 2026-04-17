@@ -36,6 +36,8 @@ const typeSchema = z.object({
   facetHash: z.string().optional(),
   patterns: z.array(z.string()).optional(),
   bound: z.enum(["inward", "outward"]).optional(),
+  startLine: z.number().optional(),
+  endLine: z.number().optional(),
 });
 
 const functionSchema = z.object({
@@ -59,6 +61,8 @@ const functionSchema = z.object({
   documentedParams: z.number(),
   hasReturnDoc: z.boolean(),
   bound: z.enum(["inward", "outward"]).optional(),
+  startLine: z.number().optional(),
+  endLine: z.number().optional(),
 });
 
 const directorySchema = z.object({

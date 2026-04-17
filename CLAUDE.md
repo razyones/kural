@@ -120,16 +120,16 @@ Every unit's description — directory KURAL.md, file-level JSDoc, function JSDo
 
 ## Kural Params
 
-| Param                         | Role in scoring                                              |
-| :---------------------------- | :----------------------------------------------------------- |
-| `@kuralHelper`                | Participates in scoring, excluded from audits                |
-| `@kuralUtil`                  | Excluded from domain scoring, scored in own sandbox          |
-| `@kuralPatterns`              | Deduplicated to centroid representative                      |
-| `@kuralCompanion`             | Deduplicated to centroid representative                      |
-| `@kuralResidual`              | No role in scoring, audit suppression only                   |
-| `@kuralBound inward/outward`  | Adjusted scoring + selective audit suppression               |
-| `@kuralBorrows target "role"` | Instruction prefix for name/desc embedding + audit exclusion |
-| `@kuralPure` / `@kuralCauses` | Influences what gets embedded, not how scores compute        |
+| Param                         | Role in scoring                                                 |
+| :---------------------------- | :-------------------------------------------------------------- |
+| `@kuralHelper`                | Participates in scoring, excluded from audits except duplicates |
+| `@kuralUtil`                  | Excluded from domain scoring, scored in own sandbox             |
+| `@kuralPatterns`              | Deduplicated to centroid representative                         |
+| `@kuralCompanion`             | Deduplicated to centroid representative                         |
+| `@kuralResidual`              | No role in scoring, audit suppression only                      |
+| `@kuralBound inward/outward`  | Adjusted scoring + selective audit suppression                  |
+| `@kuralBorrows target "role"` | Instruction prefix for name/desc embedding + audit exclusion    |
+| `@kuralPure` / `@kuralCauses` | Influences what gets embedded, not how scores compute           |
 
 ## `@kuralBorrows` — Cross-Layer Vocabulary Borrowing
 

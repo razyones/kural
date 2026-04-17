@@ -151,3 +151,53 @@ describe("validateConfig — dictionary", () => {
     expect(warnings).toHaveLength(ZERO);
   });
 });
+
+const VALID_CAP = 5;
+const INVALID_FRACTIONAL_CAP = 2.5;
+
+/** Reads a field from the sanitized brief sub-object without type assertion. */
+function briefField(config: Record<string, unknown>, key: string): unknown {
+  const brief = config.brief;
+  if (typeof brief !== "object" || brief === null || Array.isArray(brief)) {
+    return undefined;
+  }
+  return Object.getOwnPropertyDescriptor(brief, key)?.value;
+}
+
+describe("validateConfig — brief caps", () => {
+  it("rejects non-object brief", () => {
+    const { config, warnings } = validateConfig({ brief: "oops" });
+    expect(warnings[ZERO]).toContain("brief must be an object");
+    expect(config.brief).toBeUndefined();
+  });
+
+  it("keeps positive integer caps", () => {
+    const { config, warnings } = validateConfig({ brief: { siblings: VALID_CAP } });
+    expect(warnings).toHaveLength(ZERO);
+    expect(briefField(config, "siblings")).toBe(VALID_CAP);
+  });
+
+  it("accepts zero as a valid cap to disable a section", () => {
+    const { config, warnings } = validateConfig({ brief: { utilities: ZERO } });
+    expect(warnings).toHaveLength(ZERO);
+    expect(briefField(config, "utilities")).toBe(ZERO);
+  });
+
+  it("strips negative caps and warns", () => {
+    const NEGATIVE_CAP = -ONE;
+    const { config, warnings } = validateConfig({ brief: { utilities: NEGATIVE_CAP } });
+    expect(warnings[ZERO]).toContain("brief.utilities must be a non-negative integer");
+    expect(briefField(config, "utilities")).toBeUndefined();
+  });
+
+  it("strips fractional caps and warns", () => {
+    const { warnings } = validateConfig({ brief: { symbols: INVALID_FRACTIONAL_CAP } });
+    expect(warnings[ZERO]).toContain("brief.symbols must be a non-negative integer");
+  });
+
+  it("strips unknown keys and warns", () => {
+    const { config, warnings } = validateConfig({ brief: { mystery: VALID_CAP } });
+    expect(warnings[ZERO]).toContain("brief.mystery is not a recognized cap");
+    expect(briefField(config, "mystery")).toBeUndefined();
+  });
+});

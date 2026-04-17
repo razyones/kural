@@ -15,6 +15,8 @@ import type {
 } from "../analysis/ingestion/parse/types.ts";
 import type { SnapshotCollections } from "./collections.ts";
 
+const FIRST_LINE = 1;
+
 /**
  * Indexes snapshot functions by path into a lookup map.
  * @param fns - Snapshot function collection to index
@@ -38,6 +40,8 @@ function indexFunctionsByPath(
       leafEmbedding: fn.leafEmbedding,
       facetHash: fn.facetHash,
       description: fn.description,
+      startLine: fn.startLine ?? FIRST_LINE,
+      endLine: fn.endLine ?? FIRST_LINE,
       params: fn.params,
       paramNames: fn.paramNames,
       returns: fn.returnsType,
@@ -80,6 +84,8 @@ function indexTypesByPath(
       leafEmbedding: t.leafEmbedding,
       facetHash: t.facetHash,
       description: t.description,
+      startLine: t.startLine ?? FIRST_LINE,
+      endLine: t.endLine ?? FIRST_LINE,
       fields: t.fields,
       exported: t.exported,
       references: t.refs,

@@ -13,6 +13,7 @@ import {
 } from "./signatures.ts";
 
 const EMPTY: number[] = [];
+const FIRST_LINE = 1;
 
 function makeType(overrides: Partial<KuralType> & { name: string }): KuralType {
   return {
@@ -25,6 +26,8 @@ function makeType(overrides: Partial<KuralType> & { name: string }): KuralType {
     util: false,
     helper: false,
     residuals: [],
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
     ...overrides,
   };
 }
@@ -45,6 +48,8 @@ function makeFunction(overrides: Partial<KuralFunction> & { name: string }): Kur
     helper: false,
     documentedParams: 0,
     hasReturnDoc: false,
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
     ...overrides,
   };
 }

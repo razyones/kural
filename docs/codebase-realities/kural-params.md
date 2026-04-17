@@ -49,14 +49,14 @@ See [Util Scoring](/docs/pillars/util-scoring) for the full specification.
 
 **Problem in vector space:** Helpers compete as siblings with the file's primary exports. They distort uniqueness measurements and trigger false outlier or merge-candidate findings.
 
-**Solution:** Helpers are excluded from audits. They participate in scoring but are not treated as domain-level siblings. Auto-detected when an unexported function is called by 2+ siblings in the same file.
+**Solution:** Helpers are excluded from most audits — outliers, bloat, containments, focal-drift — so they aren't treated as domain-level siblings. They remain included in duplicate detection, since a helper copied across modules is still a duplication worth catching. Auto-detected when an unexported function is called by 2+ siblings in the same file.
 
-| Pillar    | Impact                                                                |
-| :-------- | :-------------------------------------------------------------------- |
-| **Embed** | No change                                                             |
-| **Score** | Participates normally — helpers still need good fit within their file |
-| **Audit** | Excluded from outlier, sibling pair, and bloat analysis               |
-| **Place** | Not considered as candidates for cross-file movement                  |
+| Pillar    | Impact                                                                                                |
+| :-------- | :---------------------------------------------------------------------------------------------------- |
+| **Embed** | No change                                                                                             |
+| **Score** | Participates normally — helpers still need good fit within their file                                 |
+| **Audit** | Excluded from outlier, bloat, containment, and focal-drift analysis — included in duplicate detection |
+| **Place** | Not considered as candidates for cross-file movement                                                  |
 
 ---
 

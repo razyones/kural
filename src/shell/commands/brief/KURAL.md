@@ -1,0 +1,2 @@
+Defines the Gunshi argument schema and stdout rendering for the brief command — surfacing placement, lineage, siblings, utilities, symbols, related concepts, and group expansions. It is the only directory that speaks the brief command's CLI protocol — no other module maps terminal input to facet retrieval or formats the brief for display.
+@kuralBorrows analysis/brief "terminal surface that formats and renders facet index output as sectioned tables"

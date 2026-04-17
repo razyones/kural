@@ -266,12 +266,8 @@ const duplicates = defineAudit({
   detect: (ctx: AuditContext): Finding[] => {
     const { nodes, leafMergeFence, fileMergeFence } = ctx;
     const all = [...nodes.entries()];
-    const leafEntries = all.filter(
-      ([, n]) => isLeaf(n) && !n.util && !n.helper && n.leaf.length > NONE,
-    );
-    const utilEntries = all.filter(
-      ([, n]) => isLeaf(n) && n.util && !n.helper && n.leaf.length > NONE,
-    );
+    const leafEntries = all.filter(([, n]) => isLeaf(n) && !n.util && n.leaf.length > NONE);
+    const utilEntries = all.filter(([, n]) => isLeaf(n) && n.util && n.leaf.length > NONE);
     const fileEntries = all.filter(([, n]) => n.kind === "file" && !n.util && n.leaf.length > NONE);
     const findings = [
       ...scanLeafCrossFile(leafEntries, nodes, leafMergeFence),

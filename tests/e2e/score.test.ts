@@ -167,4 +167,42 @@ describe("kural score", () => {
     const parsed = extractJson<{ error: string }>(stdout);
     expect(parsed.error).toBe("No scores found");
   });
+
+  it("renders glossary with the normalized (0…1) range", async () => {
+    tmpRoot = createTmpRoot();
+    await seedActiveSnapshot(tmpRoot, "main", makeScoreRows(tmpRoot));
+
+    const { stdout, exitCode } = runCli(["score"], tmpRoot);
+
+    expect(exitCode).toBe(NONE);
+    expect(stdout).toContain("Self — how well this node fits under its parent (0\u20261)");
+    expect(stdout).not.toContain("(-1\u20261)");
+  });
+
+  it("every breakdown score in --json --explain output is in [0, 1]", async () => {
+    tmpRoot = createTmpRoot();
+    await seedActiveSnapshot(tmpRoot, "main", makeScoreRows(tmpRoot));
+
+    const { stdout, exitCode } = runCli(["score", "--json", "-e"], tmpRoot);
+
+    expect(exitCode).toBe(NONE);
+    const parsed = extractJson<{
+      breakdown: Array<{
+        self: number | null;
+        children: number | null;
+        subtree: number | null;
+        overall: number | null;
+      }>;
+    }>(stdout);
+    const ONE = 1;
+    for (const row of parsed.breakdown) {
+      for (const v of [row.self, row.children, row.subtree, row.overall]) {
+        if (v === null) {
+          continue;
+        }
+        expect(v).toBeGreaterThanOrEqual(NONE);
+        expect(v).toBeLessThanOrEqual(ONE);
+      }
+    }
+  });
 });

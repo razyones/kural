@@ -1,6 +1,7 @@
 /** Breaks a source file into structural parts — the only module that reads AST nodes. */
 
 import type { ExtractedFile, KuralFunction, KuralType, ModuleImports } from "./types.ts";
+import { declarationEndLine, declarationStartLine } from "./positions.ts";
 import { getJSDoc, hasExportModifier, isUtilModule } from "./jsdoc.ts";
 import type { JSDocInfo } from "./jsdoc.ts";
 import { basename } from "node:path";
@@ -27,11 +28,16 @@ const EMPTY_JSDOC: JSDocInfo = {
 /**
  * Converts a function declaration AST node into a KuralFunction.
  * @param node - The function declaration AST node
+ * @param sourceFile - The parsed source file the node belongs to
  * @param filePath - Absolute path to the source file
  * @returns A KuralFunction with params, return type, JSDoc tags, and calls
  * @kuralPure
  */
-function extractFunction(node: ts.FunctionDeclaration, filePath: string): KuralFunction {
+function extractFunction(
+  node: ts.FunctionDeclaration,
+  sourceFile: ts.SourceFile,
+  filePath: string,
+): KuralFunction {
   const name = node.name?.text ?? "";
   const jsdoc = getJSDoc(node);
   const exported = hasExportModifier(node);
@@ -52,6 +58,8 @@ function extractFunction(node: ts.FunctionDeclaration, filePath: string): KuralF
     identityEmbedding: EMPTY_EMBEDDING,
     leafEmbedding: EMPTY_EMBEDDING,
     description: jsdoc.description,
+    startLine: declarationStartLine(node, sourceFile),
+    endLine: declarationEndLine(node, sourceFile),
     params,
     paramNames,
     returns,
@@ -74,6 +82,7 @@ function extractFunction(node: ts.FunctionDeclaration, filePath: string): KuralF
  * Shared by type alias and interface extraction paths.
  * @param node - The type alias or interface declaration AST node
  * @param fields - Pre-extracted field names mapped to their type strings
+ * @param sourceFile - The parsed source file the node belongs to
  * @param filePath - Absolute path to the source file
  * @param imports - Resolved imports from the containing file
  * @returns A KuralType with fields, references, and JSDoc tags
@@ -82,6 +91,7 @@ function extractFunction(node: ts.FunctionDeclaration, filePath: string): KuralF
 function buildKuralType(
   node: ts.TypeAliasDeclaration | ts.InterfaceDeclaration,
   fields: Record<string, string>,
+  sourceFile: ts.SourceFile,
   filePath: string,
   imports: ModuleImports,
 ): KuralType {
@@ -93,6 +103,8 @@ function buildKuralType(
     identityEmbedding: EMPTY_EMBEDDING,
     leafEmbedding: EMPTY_EMBEDDING,
     description: jsdoc.description,
+    startLine: declarationStartLine(node, sourceFile),
+    endLine: declarationEndLine(node, sourceFile),
     fields,
     exported: hasExportModifier(node),
     references: extractFieldReferences(fields, imports),
@@ -113,14 +125,12 @@ function buildKuralType(
  */
 function extractFields(node: ts.TypeLiteralNode | ts.InterfaceDeclaration): Record<string, string> {
   const fields: Record<string, string> = {};
-
   for (const member of node.members) {
     if (ts.isPropertySignature(member) && member.type) {
       const name = member.name.getText();
       fields[name] = member.type.getText();
     }
   }
-
   return fields;
 }
 
@@ -150,17 +160,6 @@ function extractImports(sourceFile: ts.SourceFile): ModuleImports {
 }
 
 /**
- * Uppercases the first character of a string.
- * @param str - The string to capitalize
- * @returns The string with its first character uppercased
- * @kuralPure
- * @kuralUtil
- */
-function capitalizeFirst(str: string): string {
-  return str.charAt(FIRST).toUpperCase() + str.slice(AFTER_FIRST);
-}
-
-/**
  * Resolves which internal import paths are referenced by a type's fields.
  * Matches capitalized filenames from import paths against field type strings.
  * @param fields - Field names mapped to their type strings
@@ -175,7 +174,9 @@ function extractFieldReferences(fields: Record<string, string>, imports: ModuleI
   for (const path of imports.internalImports) {
     const match = path.match(/\/([^/]+)\.ts$/);
     if (match) {
-      importedNames.set(capitalizeFirst(match[AFTER_FIRST]), path);
+      const filename = match[AFTER_FIRST] ?? "";
+      const typeName = filename.charAt(FIRST).toUpperCase() + filename.slice(AFTER_FIRST);
+      importedNames.set(typeName, path);
     }
   }
 
@@ -234,19 +235,19 @@ function collectDeclarations(
 
   ts.forEachChild(sourceFile, (node) => {
     if (ts.isFunctionDeclaration(node) && node.name) {
-      const fn = extractFunction(node, filePath);
+      const fn = extractFunction(node, sourceFile, filePath);
       fn.util = fn.util || moduleIsUtil;
       functions[fn.name] = fn;
     }
 
     if (ts.isTypeAliasDeclaration(node) && ts.isTypeLiteralNode(node.type)) {
-      const type = buildKuralType(node, extractFields(node.type), filePath, imports);
+      const type = buildKuralType(node, extractFields(node.type), sourceFile, filePath, imports);
       type.util = type.util || moduleIsUtil;
       types[type.name] = type;
     }
 
     if (ts.isInterfaceDeclaration(node)) {
-      const type = buildKuralType(node, extractFields(node), filePath, imports);
+      const type = buildKuralType(node, extractFields(node), sourceFile, filePath, imports);
       type.util = type.util || moduleIsUtil;
       types[type.name] = type;
     }

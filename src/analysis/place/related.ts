@@ -23,6 +23,7 @@ function findRelatedConcepts(q: number[], nodes: NodeMap, placementKey: string):
   const candidates: {
     name: string;
     kind: string;
+    description: string;
     file: string;
     sim: number;
   }[] = [];
@@ -33,6 +34,7 @@ function findRelatedConcepts(q: number[], nodes: NodeMap, placementKey: string):
     candidates.push({
       name: node.name,
       kind: node.kind,
+      description: node.description ?? "",
       file: node.parentKey ?? "",
       sim: cosineSimilarity(q, node.identity),
     });
@@ -50,6 +52,7 @@ function findRelatedConcepts(q: number[], nodes: NodeMap, placementKey: string):
     group.items.push({
       name: c.name,
       kind: c.kind,
+      description: c.description,
       similarity: Number(c.sim.toFixed(DECIMAL_PLACES)),
     });
   }

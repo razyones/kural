@@ -86,6 +86,7 @@ describe("buildResult — full assembly", () => {
     };
     const result = buildResult(
       "login handler",
+      [E1, E0],
       { classification: "domain" as const, domainFit: E08, capabilityFit: E05 },
       { alienFence: E07, probeCount: 5 },
       { similarity: E08, name: "authenticate" },
@@ -99,6 +100,7 @@ describe("buildResult — full assembly", () => {
     );
 
     expect(result.query).toBe("login handler");
+    expect(result.queryVec).toEqual([E1, E0]);
     expect(result.axis.classification).toBe("domain");
     expect(result.detection.globalAlien).toBe(false);
     expect(result.detection.levelAlien).toBeNull();
@@ -132,6 +134,7 @@ describe("buildResult — full assembly", () => {
     };
     const result = buildResult(
       "pipeline runner",
+      [E0, E1],
       { classification: "domain" as const, domainFit: E05, capabilityFit: E05 },
       { alienFence: E07, probeCount: 3 },
       { similarity: E05, name: "run" },

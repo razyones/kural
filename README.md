@@ -194,16 +194,16 @@ Create `kural.config.json` in your project root:
 
 JSDoc annotations that declare structural realities the vector space can't capture alone:
 
-| Param                           | Purpose                                                  |
-| ------------------------------- | -------------------------------------------------------- |
-| `@kuralPure`                    | Marks functions with no side effects                     |
-| `@kuralCauses <desc>`           | Describes what a function does beyond its type signature |
-| `@kuralUtil`                    | Excludes from domain scoring, scored in own sandbox      |
-| `@kuralHelper`                  | Participates in scoring, excluded from audits            |
-| `@kuralPatterns <group>`        | Deduplicates siblings to a centroid representative       |
-| `@kuralCompanion <group>`       | Groups structurally coupled units                        |
-| `@kuralBound inward/outward`    | Adjusts scoring for entry points and primary exports     |
-| `@kuralResidual <audit> [hash]` | Suppresses a specific audit finding                      |
+| Param                           | Purpose                                                         |
+| ------------------------------- | --------------------------------------------------------------- |
+| `@kuralPure`                    | Marks functions with no side effects                            |
+| `@kuralCauses <desc>`           | Describes what a function does beyond its type signature        |
+| `@kuralUtil`                    | Excludes from domain scoring, scored in own sandbox             |
+| `@kuralHelper`                  | Participates in scoring, excluded from audits except duplicates |
+| `@kuralPatterns <group>`        | Deduplicates siblings to a centroid representative              |
+| `@kuralCompanion <group>`       | Groups structurally coupled units                               |
+| `@kuralBound inward/outward`    | Adjusts scoring for entry points and primary exports            |
+| `@kuralResidual <audit> [hash]` | Suppresses a specific audit finding                             |
 
 ## How it works
 

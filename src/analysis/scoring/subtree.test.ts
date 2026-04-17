@@ -14,6 +14,7 @@ import { NO_SIBLINGS } from "./metrics.ts";
 const NONE = 0;
 const ONE = 1;
 const TWO = 2;
+const FIRST_LINE = 1;
 const TOLERANCE = 10;
 
 /** Metric values for test nodes. */
@@ -89,6 +90,8 @@ function makeLeafNode(key: string, name: string): FunctionNode {
     causes: undefined,
     paramNames: [],
     paramTypes: [],
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
   };
 }
 

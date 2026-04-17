@@ -9,6 +9,7 @@
 import type { AuditsConfig } from "./audits.ts";
 
 const MIN_SENSITIVITY = 0;
+const MIN_CAP = 0;
 const NONE = 0;
 const DEFAULT_SENSITIVITY = 2.0;
 
@@ -81,6 +82,41 @@ function validateAudits(audits: Bag, warnings: string[]): void {
   }
 }
 
+const BRIEF_KEYS = [
+  "siblings",
+  "utilities",
+  "symbols",
+  "related",
+  "ancestors",
+  "patternMembers",
+  "companionMembers",
+] as const;
+
+/**
+ * Validates brief caps — each known field must be a non-negative
+ * integer. Zero is accepted so consumers can disable a section.
+ * Strips invalid or unknown fields so downstream defaults apply.
+ * @param brief - Mutable brief config bag
+ * @param warnings - Accumulator for human-readable warnings
+ * @kuralPure
+ * @kuralHelper
+ */
+function validateBrief(brief: Bag, warnings: string[]): void {
+  const known = new Set<string>(BRIEF_KEYS);
+  for (const key of Object.keys(brief)) {
+    if (!known.has(key)) {
+      warnings.push(`brief.${key} is not a recognized cap — ignoring`);
+      Reflect.deleteProperty(brief, key);
+      continue;
+    }
+    const value = brief[key];
+    if (typeof value !== "number" || !Number.isInteger(value) || value < MIN_CAP) {
+      warnings.push(`brief.${key} must be a non-negative integer — ignoring`);
+      Reflect.deleteProperty(brief, key);
+    }
+  }
+}
+
 /**
  * Validates a parsed config object for semantic correctness. Strips fields
  * that violate constraints (so defaults apply downstream) and returns
@@ -100,6 +136,15 @@ function validateConfig(raw: unknown): { config: Bag; warnings: string[] } {
     const sanitized = { ...config.audits };
     validateAudits(sanitized, warnings);
     config.audits = sanitized;
+  }
+
+  if (isRecord(config.brief)) {
+    const sanitized = { ...config.brief };
+    validateBrief(sanitized, warnings);
+    config.brief = sanitized;
+  } else if ("brief" in config) {
+    warnings.push("brief must be an object of non-negative integer caps — ignoring");
+    delete config.brief;
   }
 
   if ("domainKeywords" in config && !Array.isArray(config.domainKeywords)) {

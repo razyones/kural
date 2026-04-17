@@ -9,6 +9,7 @@ import { describe, expect, it } from "vite-plus/test";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
 
 const NONE = 0;
+const FIRST_LINE = 1;
 const ONE = 1;
 const TWO = 2;
 const FOUR = 4;
@@ -44,6 +45,8 @@ function makeFunction(overrides: Partial<KuralFunction> = {}): KuralFunction {
     documentedParams: NONE,
     hasReturnDoc: false,
     description: undefined,
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
     ...overrides,
   };
 }
@@ -61,6 +64,8 @@ function makeType(overrides: Partial<KuralType> = {}): KuralType {
     helper: false,
     residuals: [],
     description: undefined,
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
     ...overrides,
   };
 }

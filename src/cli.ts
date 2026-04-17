@@ -9,6 +9,7 @@
 
 import advise from "./shell/commands/advise/command.ts";
 import audit from "./shell/commands/audit/command.ts";
+import brief from "./shell/commands/brief/command.ts";
 import { cli } from "gunshi";
 import { existsSync } from "node:fs";
 import { loadEnvFile } from "node:process";
@@ -32,5 +33,5 @@ if (existsSync(".env")) {
 await cli(process.argv.slice(ARGV_START), snapshot, {
   name: "kural",
   version: "0.0.0",
-  subCommands: { advise, audit, place, score, skill },
+  subCommands: { advise, audit, brief, place, score, skill },
 });

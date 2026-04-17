@@ -6,6 +6,7 @@ import { score } from "./score.ts";
 /** Numeric constants. */
 const NONE = 0;
 const ONE = 1;
+const FIRST_LINE = 1;
 
 /** Simple embedding vectors for test data. */
 const EMB_X = 0.9;
@@ -53,6 +54,8 @@ function singleFileResult(): ParseResult {
             calls: [],
             documentedParams: ONE,
             hasReturnDoc: false,
+            startLine: FIRST_LINE,
+            endLine: FIRST_LINE,
           },
         },
         types: {},
@@ -93,6 +96,8 @@ function utilFileResult(): ParseResult {
             calls: [],
             documentedParams: NONE,
             hasReturnDoc: false,
+            startLine: FIRST_LINE,
+            endLine: FIRST_LINE,
           },
         },
         types: {},
@@ -202,6 +207,8 @@ function makeKuralFile(
       calls: string[];
       documentedParams: number;
       hasReturnDoc: boolean;
+      startLine: number;
+      endLine: number;
     }
   >;
   types: Record<string, never>;
@@ -233,6 +240,8 @@ function makeKuralFile(
         calls: [],
         documentedParams: NONE,
         hasReturnDoc: false,
+        startLine: FIRST_LINE,
+        endLine: FIRST_LINE,
       },
     },
     types: {},
@@ -266,5 +275,53 @@ describe("score card count", () => {
     const cards = score(singleFileResult());
     const fileCard = cards.find((c) => c.kind === "file");
     expect(fileCard?.childrenScore).toBeNull();
+  });
+});
+
+/** Opposing unit vectors produce a negative cosine fit, the case the rescale exists for. */
+const POS_X = [ONE, NONE] as const;
+const NEG_X = [-ONE, NONE] as const;
+
+/** Builds a two-file ParseResult where one file's leaf opposes the directory identity. */
+function adversarialResult(): ParseResult {
+  return {
+    files: {
+      "src/a.ts": makeKuralFile("a.ts", "src/a.ts", "fn1", [...POS_X]),
+      "src/b.ts": makeKuralFile("b.ts", "src/b.ts", "fn2", [...NEG_X]),
+    },
+    directories: {
+      src: {
+        name: "src",
+        path: "src",
+        identityEmbedding: [...POS_X],
+        leafEmbedding: [...POS_X],
+        children: ["src/a.ts", "src/b.ts"],
+        residuals: [],
+      },
+    },
+  };
+}
+
+describe("score range normalization", () => {
+  it("keeps all score fields in [0, 1] even when a child's fit is negative", () => {
+    const cards = score(adversarialResult());
+    const fieldsToCheck = ["score", "childrenScore", "subtreeScore", "overallScore"] as const;
+    for (const card of cards) {
+      for (const field of fieldsToCheck) {
+        const value = card[field];
+        if (value === null) {
+          continue;
+        }
+        expect(value).toBeGreaterThanOrEqual(NONE);
+        expect(value).toBeLessThanOrEqual(ONE);
+      }
+    }
+  });
+
+  it("opposing leaf vector yields a negative fit but a clamped score", () => {
+    const cards = score(adversarialResult());
+    const bCard = cards.find((c) => c.name === "b.ts");
+    expect(bCard?.fit).toBeLessThan(NONE);
+    expect(bCard?.score).toBe(NONE);
   });
 });

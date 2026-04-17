@@ -12,6 +12,7 @@ import type {
 } from "../../../analysis/advise/analyze.ts";
 import { colors, logger } from "../../ui/log.ts";
 import { avg } from "../../../utils/vectors.ts";
+import { formatDelta } from "../../ui/delta.ts";
 import { renderFooter } from "../../ui/footer.ts";
 
 const NONE = 0;
@@ -30,20 +31,6 @@ const BEST_CUT_MARKER = " \u2605 best";
  */
 function pct(value: number): string {
   return `${(value * PERCENT).toFixed(PERCENT_DECIMALS)}%`;
-}
-
-/**
- * Formats a delta value with a directional arrow indicator.
- * @param delta - The signed difference value
- * @returns Formatted delta string like "+1.5" with an arrow
- * @kuralPure
- * @kuralHelper
- */
-function formatDelta(delta: number): string {
-  const scaled = delta * PERCENT;
-  const sign = scaled >= NONE ? "+" : "";
-  const arrow = scaled > NONE ? "\u25B4" : scaled < NONE ? "\u25BE" : " ";
-  return `${arrow} ${sign}${scaled.toFixed(PERCENT_DECIMALS)}`;
 }
 
 /**
@@ -78,19 +65,19 @@ function printScoreDeltas(cut: CutEvaluation, result: AdviseResult): void {
   if (result.currentChildrenFit !== null) {
     const delta = avgFit - result.currentChildrenFit;
     logger.log(
-      `      childrenFit:        ${pct(result.currentChildrenFit)} \u2192 ${pct(avgFit)}  ${formatDelta(delta)}`,
+      `      childrenFit:        ${pct(result.currentChildrenFit)} \u2192 ${pct(avgFit)}  ${formatDelta(delta, { percent: true })}`,
     );
   }
 
   const uniqDelta = avgUniq - result.currentChildrenUniqueness;
   logger.log(
-    `      childrenUniqueness: ${pct(result.currentChildrenUniqueness)} \u2192 ${pct(avgUniq)}  ${formatDelta(uniqDelta)}`,
+    `      childrenUniqueness: ${pct(result.currentChildrenUniqueness)} \u2192 ${pct(avgUniq)}  ${formatDelta(uniqDelta, { percent: true })}`,
   );
 
   if (result.currentChildrenScore !== null) {
     const scoreDelta = avgScore - result.currentChildrenScore;
     logger.log(
-      `      childrenScore:      ${pct(result.currentChildrenScore)} \u2192 ${pct(avgScore)}  ${formatDelta(scoreDelta)}`,
+      `      childrenScore:      ${pct(result.currentChildrenScore)} \u2192 ${pct(avgScore)}  ${formatDelta(scoreDelta, { percent: true })}`,
     );
   }
 }

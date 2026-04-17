@@ -13,6 +13,7 @@ const CAUSES_WEIGHT = 0.3;
 const ARRAY_FIRST = 0;
 const ROOT_PATH = "/src";
 const DOMAIN_KEYWORDS = ["code", "structure", "scoring"];
+const FIRST_LINE = 1;
 
 function makeFunction(overrides: Partial<KuralFunction> & { name: string }): KuralFunction {
   return {
@@ -30,6 +31,8 @@ function makeFunction(overrides: Partial<KuralFunction> & { name: string }): Kur
     helper: false,
     documentedParams: 0,
     hasReturnDoc: false,
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
     ...overrides,
   };
 }

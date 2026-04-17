@@ -70,6 +70,7 @@ function formatBridge(bridgeInfo: BridgeResult | null): PlacementResult["bridge"
 /**
  * Assembles the final PlacementResult from all computed signals.
  * @param queryText - The original query string
+ * @param queryVec - Embedding vector of the query, reused by downstream consumers
  * @param axis - Axis classification with domain and capability fit scores
  * @param calibration - Alien fence threshold and probe count from calibration
  * @param leafMatch - Best matching leaf node name and similarity score
@@ -85,6 +86,7 @@ function formatBridge(bridgeInfo: BridgeResult | null): PlacementResult["bridge"
  */
 function buildResult(
   queryText: string,
+  queryVec: number[],
   axis: AxisResult,
   calibration: { alienFence: number; probeCount: number },
   leafMatch: { similarity: number; name: string },
@@ -98,6 +100,7 @@ function buildResult(
 ): PlacementResult {
   return {
     query: queryText,
+    queryVec,
     axis: {
       classification: axis.classification,
       domainFit: Number(axis.domainFit.toFixed(DECIMAL_PLACES)),
@@ -117,6 +120,7 @@ function buildResult(
     suggestion,
     confidence: Number((topPath.confidence * PERCENT_SCALE).toFixed(NEXT)),
     topPaths: paths.slice(NONE, DISPLAY_PATHS).map((p) => ({
+      parentKey: p.parentKey,
       parentName: p.parentName,
       confidence: Number((p.confidence * PERCENT_SCALE).toFixed(NEXT)),
       trail: p.trail,
