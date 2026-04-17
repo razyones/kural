@@ -125,6 +125,40 @@ describe("analyzeFromDescriptions — bestCutIndex", () => {
   });
 });
 
+describe("analyzeFromDescriptions — score range", () => {
+  test("currentChildrenScore stays in [0, 1] when leaf opposes identity", () => {
+    const items: NamedVector[] = [
+      { name: "a", identity: [E1, E0], leaf: [-E1, E0] },
+      { name: "b", identity: [E1, E0], leaf: [-E1, E0] },
+    ];
+    const result = analyzeFromDescriptions(items);
+
+    expect(result).not.toBeNull();
+    expect(result?.currentChildrenFit).toBeLessThan(NONE);
+    const score = result?.currentChildrenScore ?? NONE;
+    expect(score).toBeGreaterThanOrEqual(NONE);
+    expect(score).toBeLessThanOrEqual(E1);
+  });
+
+  test("every simulated group childrenScore is in [0, 1]", () => {
+    const items: NamedVector[] = [
+      { name: "a", identity: [E1, E0, E0], leaf: [-E1, E0, E0] },
+      { name: "b", identity: [E08, E02, E0], leaf: [-E08, -E02, E0] },
+      { name: "c", identity: [E0, E1, E0], leaf: [E0, -E1, E0] },
+      { name: "d", identity: [E0, E08, E02], leaf: [E0, -E08, -E02] },
+    ];
+    const result = analyzeFromDescriptions(items);
+
+    expect(result).not.toBeNull();
+    for (const cut of result?.cuts ?? []) {
+      for (const group of cut.groups) {
+        expect(group.childrenScore).toBeGreaterThanOrEqual(NONE);
+        expect(group.childrenScore).toBeLessThanOrEqual(E1);
+      }
+    }
+  });
+});
+
 describe("analyzeFromTree — tree mode", () => {
   test("returns null when directory has fewer than 2 dir children", () => {
     const root = makeDir({
