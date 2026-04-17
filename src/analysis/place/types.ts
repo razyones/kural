@@ -75,6 +75,7 @@ type RelatedGroup = {
 /** Complete placement result. */
 type PlacementResult = {
   query: string;
+  queryVec: number[];
   axis: AxisResult;
   detection: {
     alienFence: number;

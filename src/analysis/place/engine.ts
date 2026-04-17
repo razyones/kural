@@ -264,6 +264,7 @@ async function place(
     suggestion.action === "add-to-directory" ? suggestion.target : s.topPath.parentKey;
   return buildResult(
     queryText,
+    s.q,
     s.axis,
     s.calibration,
     s.leafMatch,

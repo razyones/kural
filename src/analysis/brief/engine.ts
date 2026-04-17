@@ -124,14 +124,15 @@ function resolveCaps(overrides: Partial<BriefCaps> | undefined): BriefCaps {
 }
 
 /**
- * Runs the full brief pipeline: place, embed, fan out rankers, expand
- * patterns and companions, and assemble the bounded output.
+ * Runs the full brief pipeline: place, fan out rankers against the
+ * query vector returned by placement, expand patterns and companions,
+ * and assemble the bounded output.
  * @param queryText - Description of the code the agent plans to write
  * @param nodes - The scored node map from the snapshot
  * @param embedder - Function that embeds text strings into vectors
  * @param capsOverride - Optional per-section overrides for output caps
  * @returns Fully assembled brief suitable for an agent's prefill
- * @kuralCauses calls the placement engine and the embedding API
+ * @kuralCauses calls the placement engine
  */
 async function brief(
   queryText: string,
@@ -141,7 +142,7 @@ async function brief(
 ): Promise<Brief> {
   const caps = resolveCaps(capsOverride);
   const result = await place(queryText, nodes, embedder);
-  const [queryVec] = await embedder([queryText]);
+  const queryVec = result.queryVec;
   const target = placementKey(result, nodes);
   const symbols: SymbolFacet[] = rankSymbols(queryVec, nodes, target, caps.symbols);
   return {
@@ -157,4 +158,4 @@ async function brief(
   };
 }
 
-export { brief };
+export { brief, placementKey, toPlacementFacet };
