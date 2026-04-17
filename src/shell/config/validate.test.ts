@@ -177,15 +177,22 @@ describe("validateConfig — brief caps", () => {
     expect(briefField(config, "siblings")).toBe(VALID_CAP);
   });
 
-  it("strips non-positive caps and warns", () => {
+  it("accepts zero as a valid cap to disable a section", () => {
     const { config, warnings } = validateConfig({ brief: { utilities: ZERO } });
-    expect(warnings[ZERO]).toContain("brief.utilities must be a positive integer");
+    expect(warnings).toHaveLength(ZERO);
+    expect(briefField(config, "utilities")).toBe(ZERO);
+  });
+
+  it("strips negative caps and warns", () => {
+    const NEGATIVE_CAP = -ONE;
+    const { config, warnings } = validateConfig({ brief: { utilities: NEGATIVE_CAP } });
+    expect(warnings[ZERO]).toContain("brief.utilities must be a non-negative integer");
     expect(briefField(config, "utilities")).toBeUndefined();
   });
 
   it("strips fractional caps and warns", () => {
     const { warnings } = validateConfig({ brief: { symbols: INVALID_FRACTIONAL_CAP } });
-    expect(warnings[ZERO]).toContain("brief.symbols must be a positive integer");
+    expect(warnings[ZERO]).toContain("brief.symbols must be a non-negative integer");
   });
 
   it("strips unknown keys and warns", () => {

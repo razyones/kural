@@ -9,6 +9,7 @@
 import type { AuditsConfig } from "./audits.ts";
 
 const MIN_SENSITIVITY = 0;
+const MIN_CAP = 0;
 const NONE = 0;
 const DEFAULT_SENSITIVITY = 2.0;
 
@@ -92,7 +93,8 @@ const BRIEF_KEYS = [
 ] as const;
 
 /**
- * Validates brief caps — each known field must be a positive integer.
+ * Validates brief caps — each known field must be a non-negative
+ * integer. Zero is accepted so consumers can disable a section.
  * Strips invalid or unknown fields so downstream defaults apply.
  * @param brief - Mutable brief config bag
  * @param warnings - Accumulator for human-readable warnings
@@ -100,26 +102,19 @@ const BRIEF_KEYS = [
  * @kuralHelper
  */
 function validateBrief(brief: Bag, warnings: string[]): void {
-  const accepted: Bag = {};
-  for (const key of BRIEF_KEYS) {
-    const value = brief[key];
-    if (value === undefined) {
-      continue;
-    }
-    if (typeof value === "number" && Number.isInteger(value) && value > MIN_SENSITIVITY) {
-      accepted[key] = value;
-    } else {
-      warnings.push(`brief.${key} must be a positive integer — ignoring`);
-    }
-  }
   const known = new Set<string>(BRIEF_KEYS);
   for (const key of Object.keys(brief)) {
     if (!known.has(key)) {
       warnings.push(`brief.${key} is not a recognized cap — ignoring`);
+      Reflect.deleteProperty(brief, key);
+      continue;
     }
-    Reflect.deleteProperty(brief, key);
+    const value = brief[key];
+    if (typeof value !== "number" || !Number.isInteger(value) || value < MIN_CAP) {
+      warnings.push(`brief.${key} must be a non-negative integer — ignoring`);
+      Reflect.deleteProperty(brief, key);
+    }
   }
-  Object.assign(brief, accepted);
 }
 
 /**
