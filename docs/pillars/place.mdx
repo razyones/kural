@@ -1,0 +1,146 @@
+---
+title: Place
+description: Answers "where should this code live?" and retrieves the context an agent needs before implementing
+icon: Compass
+---
+
+Place is the roof of the four pillars — the payoff of a well-embedded, well-scored, well-audited codebase. Two commands expose it:
+
+- `kural place` — answers _"where should this new code live?"_ for a single natural-language query.
+- `kural brief` — runs placement, then retrieves the surrounding context an agent needs before writing the code.
+
+Both operate against the latest snapshot and the vector space it captures. Neither requires an AI call beyond embedding — the routing decision is deterministic, grounded in the codebase's own calibrated distributions.
+
+---
+
+## 1. `kural place` — where should this live?
+
+```bash
+kural place "writes score cards to the snapshot database"
+```
+
+The engine takes a natural-language description, embeds it, and walks the directory tree to find the most plausible parent. Output is one of two outcomes:
+
+- **add-to-directory** — a confident pick. The engine names the target directory and how it got there.
+- **ask-user** — the signal isn't strong enough to auto-place. The engine surfaces the neighborhoods it considered and frames the query as a new concept.
+
+### The four-tier decision
+
+Every query passes through the same four tiers in order. The first tier whose condition matches produces the suggestion.
+
+<Steps>
+  <Step>
+    **Chain search** — A conditional probability walk from the tree root. At every directory the
+    engine softmaxes children by blended similarity (local projection plus raw cosine), and appends
+    a virtual «create-new» sibling so the path can terminate at any depth. The geometric mean of
+    choice probabilities becomes each path's `confidence`.
+  </Step>
+  <Step>
+    **Alien detection** — Compares the query's best leaf similarity against the codebase's
+    self-calibrated `alienFence` / `hardAlienFence`. A global alien is semantically foreign to the
+    codebase. A level alien is one whose top path ends in «create-new» — the chain itself judged no
+    existing directory sufficient.
+  </Step>
+  <Step>
+    **Bridge classification** — When the top path's confidence falls below `bridgeThreshold` but the
+    query isn't alien, the engine classifies it against seven reference bridge types (orchestrator,
+    processor, presenter, resolver, gateway, adapter, entry-point) and routes by architectural
+    layer. If classification is decisive, the tier resolves to add-to-directory; otherwise it
+    escalates.
+  </Step>
+  <Step>
+    **Safety gate** — If the top confidence sits between `bridgeThreshold` and `safetyGate`, the
+    chain's own winner isn't trustworthy enough to act on. The tier escalates with the top
+    candidates as neighborhoods.
+  </Step>
+</Steps>
+
+See [Tuning § Placement confidence cascade](/docs/pillars/tuning#placement-confidence-cascade) for the exact threshold formulas.
+
+### Methods reported in the output
+
+| Method                  | Action           | When it fires                                                 |
+| :---------------------- | :--------------- | :------------------------------------------------------------ |
+| `chain-search`          | add-to-directory | Top path cleared the safety gate                              |
+| `bridge-type-routing`   | add-to-directory | Bridge type classified decisively, layer route resolved       |
+| `probe-alien-detection` | ask-user         | Best leaf similarity falls below the probe-calibrated fence   |
+| `level-alien-detection` | ask-user         | Top path terminated in «create-new» before reaching a leaf    |
+| `bridge-escalation`     | ask-user         | Bridge type uncertain, or layer route had no viable directory |
+| `safety-gate`           | ask-user         | Top confidence below the calibrated safety gate               |
+
+### When the engine escalates
+
+For ask-user outcomes the terminal heading reads **"Likely belongs in _\<parent\>_ — new concept (no exact match)"** rather than a percentage. The specific leaf the chain scored first is unreliable below the safety gate — its confidence would mislead. The parent of that leaf is the _neighborhood_ the chain confidently descended into, so the engine surfaces that instead and lets the reader (human or agent) make the final call.
+
+<Callout type="info">
+  Ask-user is not a failure mode. It's the engine's honest answer for a query whose best match sits
+  below what known-good placements achieved during calibration — often a genuinely new concept, or
+  one that deserves a new module.
+</Callout>
+
+### Flags
+
+```
+-p, --provider <name>   Embedding provider (vercel, openai, openrouter, ollama)
+-m, --model <id>        Model ID override
+-k, --apiKey <key>      API key (defaults to AI_GATEWAY_API_KEY env var)
+--json                  Emit the full PlacementResult as JSON
+```
+
+---
+
+## 2. `kural brief` — context before implementing
+
+```bash
+kural brief "render a diff of two score cards as a table"
+```
+
+`brief` answers the question an agent asks right before writing code: _"what's already here that I should look at first?"_ It runs `place` under the hood, then fans out across the tree to rank the facets an implementer would want on their desk — siblings to imitate, utilities to reuse, symbols whose signatures to match, related concepts the new code would likely depend on.
+
+### Sections
+
+| Section      | What it surfaces                                                                                                                        |
+| :----------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
+| `place`      | The placement decision from the engine. Confident picks render green with confidence; ask-user renders yellow as a new-concept framing. |
+| `lineage`    | Ancestor directories from the placement target up to (but not including) the repo root.                                                 |
+| `siblings`   | Existing peers inside the placement target, ranked against the query.                                                                   |
+| `utilities`  | Leaves from capability subtrees (`@kuralUtil` containers) the agent can reuse without cross-module pollution.                           |
+| `symbols`    | Function and type leaves anywhere in the tree, ranked by similarity — the signatures most worth imitating.                              |
+| `related`    | Concepts the new code would likely depend on, grouped by the file each lives in.                                                        |
+| `patterns`   | Other members of any `@kuralPatterns` group a surfaced symbol belongs to — expanding dedup-collapsed families.                          |
+| `companions` | Same expansion for `@kuralCompanion` groups.                                                                                            |
+
+### Ask-user lands at the parent neighborhood
+
+When `place` returns ask-user, the brief's placement target steps up one directory from the chain's top leaf pick. The rationale: the leaf score is unreliable below the safety gate, so scoping siblings and ancestors around it would surface the leaf's internals rather than its peer modules. Landing at the parent neighborhood gives the agent sibling candidates at the level where the real decision happens.
+
+### Default caps
+
+The brief is intentionally bounded — an agent's prefill has a budget. Every section has a cap you can override via `BriefCaps` in programmatic use.
+
+| Section            | Default |
+| :----------------- | :------ |
+| `siblings`         | 5       |
+| `utilities`        | 3       |
+| `symbols`          | 5       |
+| `related`          | 3       |
+| `ancestors`        | 3       |
+| `patternMembers`   | 3       |
+| `companionMembers` | 2       |
+
+### JSON mode for agents
+
+```bash
+kural brief "..." --json
+```
+
+Emits the full `Brief` object — same shape as the terminal rendering but without color or layout. This is the mode editors and agent skills should consume. Paths are node keys (prefixed with `file:` for source paths); a consumer can strip the scheme or resolve them relative to the repo root.
+
+### Flags
+
+```
+-p, --provider <name>   Embedding provider (vercel, openai, openrouter, ollama)
+-m, --model <id>        Model ID override
+-k, --apiKey <key>      API key (defaults to AI_GATEWAY_API_KEY env var)
+--json                  Emit the full Brief as JSON
+```

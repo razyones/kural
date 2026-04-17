@@ -1,5 +1,5 @@
 {
   "title": "Pillars",
   "icon": "Columns3",
-  "pages": ["scoring", "util-scoring", "audits", "tuning"]
+  "pages": ["scoring", "util-scoring", "audits", "tuning", "place"]
 }
