@@ -147,18 +147,36 @@ Every unit's description — directory KURAL.md, file-level JSDoc, function JSDo
 
 ### Kural Params
 
-Params are JSDoc annotations that declare structural realities the vector space can't capture. They directly affect which audits fire and how scores compute.
+Params are annotations that declare structural realities the vector space can't capture. They are concessions to reality, not features — reach for one only after documentation fixes fail **and** you can state, in one sentence, which structural reality you are declaring. The full specification lives in [`docs/codebase-realities/kural-params.md`](../../docs/codebase-realities/kural-params.md).
 
-| Param                         | Role in scoring                                                 |
-| :---------------------------- | :-------------------------------------------------------------- |
-| `@kuralHelper`                | Participates in scoring, excluded from audits except duplicates |
-| `@kuralUtil`                  | Excluded from domain scoring, scored in own sandbox             |
-| `@kuralPatterns`              | Deduplicated to centroid representative                         |
-| `@kuralCompanion`             | Deduplicated to centroid representative                         |
-| `@kuralResidual`              | No role in scoring, audit suppression only                      |
-| `@kuralBound inward/outward`  | Adjusted scoring + selective audit suppression                  |
-| `@kuralBorrows target "role"` | Instruction prefix for name/desc embedding + audit exclusion    |
-| `@kuralPure` / `@kuralCauses` | Influences what gets embedded, not how scores compute           |
+#### When to use — triggers, scope, and real examples
+
+| Param                           | Use when…                                                                                  | Scope              | Real example in this repo                                                                          |
+| :------------------------------ | :----------------------------------------------------------------------------------------- | :----------------- | :------------------------------------------------------------------------------------------------- |
+| `@kuralPure`                    | Function is pure computation (no I/O, no state change, no meaningful system effect).       | function           | `computeFit` in `src/analysis/scoring/metrics.ts`                                                  |
+| `@kuralCauses <desc>`           | Function has side effects the signature hides — name the effect in one line.               | function           | `writeScoreCards()` in `src/db/persist.ts` — _"persists score card rows to the snapshot database"_ |
+| `@kuralUtil`                    | Unit is domain-agnostic; comparing it to domain siblings would be meaningless.             | function/type/file | `cosineSimilarity` in `src/utils/vectors.ts`                                                       |
+| `@kuralHelper`                  | Private function inside a file that supports its exports; not a domain concept of its own. | function           | `isRecord` in `src/shell/config/validate.ts`                                                       |
+| `@kuralPatterns <group>`        | N siblings are structural repetitions of one concept at different levels/axes.             | function/type      | `computeFit` + `computeChildrenFit` both tag `@kuralPatterns fitMetric`                            |
+| `@kuralCompanion <group>`       | Two units are structurally coupled by design (read/write twins) — not template repetition. | function/type      | Reserved for paired-by-design coupling; no live usage in source yet.                               |
+| `@kuralBound inward`            | Unit's identity is derived from what it wires (barrel, router, entry point).               | file/function      | `src/cli.ts` — bootstraps the CLI router                                                           |
+| `@kuralBound outward`           | Unit IS the parent's reason to exist — it dominates the parent embedding on purpose.       | function           | `renderHero` in `src/shell/ui/hero.ts`                                                             |
+| `@kuralBorrows target "role"`   | Directory intentionally shares vocabulary with a non-sibling (typically shell → engine).   | KURAL.md only      | `src/shell/commands/place/KURAL.md` borrows from `analysis/place`                                  |
+| `@kuralResidual <audit> [hash]` | Earlier phases attempted; finding is architecturally intentional and will stay that way.   | JSDoc or KURAL.md  | `src/shell/config/loader.ts` — `@kuralResidual outliers [eb95e633]`                                |
+
+#### Disambiguation — pairs that get confused
+
+- **Helper vs Util.** Helper stays **inside a file** supporting its exports; Util is **cross-domain infrastructure** under `src/utils/`. Pick Helper if moving it would feel wrong — it only makes sense next to its callers. Pick Util if it could live anywhere a vector is computed or a path is joined.
+- **Patterns vs Companion.** Patterns groups **N near-identical** siblings generated from one template (`fit`/`childrenFit`, `uniqueness`/`childrenUniqueness`). Companion groups **2 structurally coupled** twins where the coupling — not the shape — is the point (read/write, encode/decode). Test: if you can rename your group as an English plural (`fitMetrics`), it's Patterns; if each member has a distinct role that needs the other to exist, it's Companion.
+- **Residual vs Bound.** Residual tags **one finding at one moment**, with a hash that breaks when code changes — it is an exception, not a statement about structure. Bound declares a **permanent architectural property** (inward/outward dominance) and suppresses the related audits by design. Never use Residual to silence what `@kuralBound` should own.
+- **Borrows vs Bound.** Borrows operates only on a **directory's name/description vectors** and only against the vocabulary-bleed audit's cross-pull. It does **not** cascade to files inside the directory. If a file inside a borrowing directory is flagged misplaced or outlier, fix that file's JSDoc — `@kuralBorrows` won't help it.
+
+#### Preconditions before proposing any param
+
+1. All `incomplete-docs` findings on this unit resolved (Phase 1).
+2. Description uses active voice and vocabulary exclusive to this unit (Phase 2).
+3. Snapshot regenerated and re-audited — the finding still persists.
+4. You can state, in one sentence, the structural reality the param declares. If you cannot, the right fix is a doc rewrite or a move, not a param.
 
 #### `@kuralBorrows` — Cross-Layer Vocabulary Borrowing
 
