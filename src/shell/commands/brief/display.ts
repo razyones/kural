@@ -28,16 +28,18 @@ const PERCENT_DECIMALS = 1;
 
 /**
  * Shapes the placement section as a single list item — green heading
- * for confident placements, yellow for ask-user outcomes.
+ * with confidence for confident placements, yellow heading without a
+ * percentage for ask-user outcomes (the leaf score would mislead since
+ * the brief lands at the parent neighborhood instead).
  * @param placement - Placement facet to render
  * @param root - Project root for path normalization
  * @returns One ListItem describing the placement decision
  * @kuralPure
  */
 function placementItem(placement: PlacementFacet, root: string): ListItem {
-  const confidence = `${placement.confidence.toFixed(PERCENT_DECIMALS)}%`;
   const target = relPath(placement.target, root);
   if (placement.action === "add-to-directory") {
+    const confidence = `${placement.confidence.toFixed(PERCENT_DECIMALS)}%`;
     const heading = `${colors.green(placement.name)}${COL_GAP}${colors.cyan(confidence)}${COL_GAP}${colors.dim(`via ${placement.method}`)}`;
     const details: string[] = [target];
     if (placement.bridgeType !== null) {
@@ -45,7 +47,7 @@ function placementItem(placement: PlacementFacet, root: string): ListItem {
     }
     return { heading, details };
   }
-  const heading = `${colors.yellow(placement.name)}${COL_GAP}${colors.yellow(confidence)}${COL_GAP}${colors.dim("ask-user")}`;
+  const heading = `${colors.yellow(placement.name)}${COL_GAP}${colors.dim("likely belongs here \u2014 new concept")}`;
   const details: string[] = [];
   if (placement.reason !== null) {
     details.push(placement.reason);

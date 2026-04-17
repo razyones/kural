@@ -18,19 +18,28 @@ import { place } from "../place/engine.ts";
 /**
  * Resolves the placement target key from the place engine's result.
  * For confident placements, uses the suggestion target. For ask-user
- * outcomes, falls back to the top-ranked path so brief still scopes
- * siblings and ancestors around the best available candidate.
+ * outcomes, steps up one directory from the top-ranked path so brief
+ * scopes siblings around peer modules instead of the internals of an
+ * arbitrary leaf match.
  * @param result - The placement result returned by place()
+ * @param nodes - The full node map used to resolve parent pointers
  * @returns The target directory key the brief will scope sections around
  * @kuralPure
  * @kuralHelper
  */
-function placementKey(result: PlacementResult): string {
+function placementKey(result: PlacementResult, nodes: NodeMap): string {
   if (result.suggestion.action === "add-to-directory") {
     return result.suggestion.target;
   }
   const [first] = result.topPaths;
-  return first === undefined ? "" : first.parentKey;
+  if (first === undefined) {
+    return "";
+  }
+  const candidate = nodes.get(first.parentKey);
+  if (candidate !== undefined && candidate.parentKey !== null) {
+    return candidate.parentKey;
+  }
+  return first.parentKey;
 }
 
 /**
@@ -60,14 +69,17 @@ function flattenRelated(result: PlacementResult, cap: number): RelatedFacet[] {
 }
 
 /**
- * Shapes the placement facet from the engine's result.
+ * Shapes the placement facet from the engine's result. For ask-user
+ * outcomes, the name reflects the parent directory the brief landed on
+ * rather than the leaf the chain happened to favor.
  * @param result - The placement result returned by place()
  * @param target - Resolved placement key
+ * @param nodes - The full node map used to resolve the target's name
  * @returns Placement facet ready for the brief output
  * @kuralPure
  * @kuralHelper
  */
-function toPlacementFacet(result: PlacementResult, target: string): PlacementFacet {
+function toPlacementFacet(result: PlacementResult, target: string, nodes: NodeMap): PlacementFacet {
   const s = result.suggestion;
   if (s.action === "add-to-directory") {
     return {
@@ -82,10 +94,12 @@ function toPlacementFacet(result: PlacementResult, target: string): PlacementFac
       bridgeLayer: s.bridgeLayer ?? null,
     };
   }
+  const targetNode = nodes.get(target);
+  const name = targetNode?.name ?? result.topPaths[NONE]?.parentName ?? "";
   return {
     action: "ask-user",
     target,
-    name: result.topPaths[NONE]?.parentName ?? "",
+    name,
     path: target,
     confidence: result.confidence,
     method: s.method,
@@ -128,11 +142,11 @@ async function brief(
   const caps = resolveCaps(capsOverride);
   const result = await place(queryText, nodes, embedder);
   const [queryVec] = await embedder([queryText]);
-  const target = placementKey(result);
+  const target = placementKey(result, nodes);
   const symbols: SymbolFacet[] = rankSymbols(queryVec, nodes, target, caps.symbols);
   return {
     query: queryText,
-    placement: toPlacementFacet(result, target),
+    placement: toPlacementFacet(result, target, nodes),
     ancestors: walkAncestors(target, nodes, caps.ancestors),
     siblings: rankSiblings(queryVec, target, nodes, caps.siblings),
     utilities: rankReuse(queryVec, nodes, caps.utilities),

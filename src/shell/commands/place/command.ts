@@ -5,7 +5,11 @@
  * module defines these arguments or renders this output.
  */
 
-import type { PlacementResult, PlacementSuggestion } from "../../../analysis/place/types.ts";
+import type {
+  PlacementResult,
+  PlacementSuggestion,
+  TrailEntry,
+} from "../../../analysis/place/types.ts";
 import { logBanner, logger } from "../../ui/log.ts";
 import { define } from "gunshi";
 import { renderFooter } from "../../ui/footer.ts";
@@ -13,6 +17,7 @@ import { runPlacement } from "./pipeline.ts";
 
 const JSON_INDENT = 2;
 const NONE = 0;
+const LAST_OFFSET = 1;
 
 /**
  * Prints the full placement output — suggestion, detection, paths, related.
@@ -20,17 +25,44 @@ const NONE = 0;
  * @kuralCauses writes to stdout
  */
 function printResult(result: PlacementResult): void {
-  printSuggestion(result.suggestion, result.confidence);
+  printSuggestion(result.suggestion, result.confidence, result.topPaths);
   printDetails(result);
+}
+
+/**
+ * Resolves the parent neighborhood name from the top placement path —
+ * the directory the chain confidently descended into before the leaf
+ * score collapsed. Used to frame ask-user outcomes around the broader
+ * neighborhood instead of the misleading leaf match.
+ * @param topPaths - Ranked placement paths from the engine.
+ * @returns The parent directory name or null when no trail is available.
+ * @kuralPure
+ */
+function parentNeighborhood(topPaths: PlacementResult["topPaths"]): string | null {
+  const [first] = topPaths;
+  if (first === undefined) {
+    return null;
+  }
+  const trail = first.trail;
+  if (trail.length === NONE) {
+    return null;
+  }
+  const last: TrailEntry | undefined = trail[trail.length - LAST_OFFSET];
+  return last?.node ?? null;
 }
 
 /**
  * Prints the suggestion section — auto-place or ask-user with context.
  * @param suggestion - The placement suggestion to print.
  * @param confidence - The confidence percentage for the suggestion.
+ * @param topPaths - Ranked placement paths used to derive the neighborhood.
  * @kuralCauses writes to stdout
  */
-function printSuggestion(suggestion: PlacementSuggestion, confidence: number): void {
+function printSuggestion(
+  suggestion: PlacementSuggestion,
+  confidence: number,
+  topPaths: PlacementResult["topPaths"],
+): void {
   if (suggestion.action === "add-to-directory") {
     logger.success(
       `Place in ${suggestion.name} (${String(confidence)}% confidence, via ${suggestion.method})`,
@@ -41,12 +73,18 @@ function printSuggestion(suggestion: PlacementSuggestion, confidence: number): v
       );
     }
   } else {
-    logger.warning(`Cannot auto-place: ${suggestion.reason}`);
+    const neighborhood = parentNeighborhood(topPaths);
+    if (neighborhood === null) {
+      logger.warning("Cannot auto-place \u2014 new concept");
+    } else {
+      logger.warning(`Likely belongs in ${neighborhood} \u2014 new concept (no exact match)`);
+    }
+    logger.info(`  ${suggestion.reason}`);
     logger.info(`  Method: ${suggestion.method}`);
     if (suggestion.neighborhoods !== undefined && suggestion.neighborhoods.length > NONE) {
-      logger.info("  Nearest neighborhoods:");
+      logger.info("  Nearest leaf matches:");
       for (const n of suggestion.neighborhoods) {
-        logger.info(`    ${n.name} — ${n.description} (${String(n.confidence)}%)`);
+        logger.info(`    ${n.name} \u2014 ${n.description} (${String(n.confidence)}%)`);
       }
     }
     if (suggestion.candidates !== undefined && suggestion.candidates.length > NONE) {
