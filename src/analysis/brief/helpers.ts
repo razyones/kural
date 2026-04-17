@@ -159,7 +159,9 @@ function collapseSignature(signature: string): string {
       continue;
     }
     if (ch === "}") {
-      depth--;
+      if (depth > NONE) {
+        depth--;
+      }
       continue;
     }
     if (depth === NONE) {
