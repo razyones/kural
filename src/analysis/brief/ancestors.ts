@@ -12,8 +12,8 @@ import { fullDescription } from "./helpers.ts";
 /**
  * Walks upward from the placement target toward the root, collecting
  * a capped ancestor chain. The placement target itself is excluded —
- * it appears in the placement facet — and the terminal root is skipped
- * since its description is already in CLAUDE.md.
+ * it appears in the placement facet — and the tree root is skipped
+ * since its "ancestor" framing is meaningless at the repo boundary.
  * @param placementKey - Key of the placement target
  * @param nodes - The full node map
  * @param cap - Maximum number of ancestors to return
