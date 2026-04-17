@@ -16,6 +16,7 @@ import type { ResidualEntry } from "../../src/analysis/ingestion/parse/types.ts"
 
 const HASH_LEN = 8;
 const NONE = 0;
+const FIRST_LINE = 1;
 
 /** Generates a short deterministic hash from a seed string. */
 function mockHash(seed: string): string {
@@ -51,6 +52,8 @@ function makeFunction(overrides: Partial<FunctionNode> = {}): FunctionNode {
     causes: overrides.causes ?? undefined,
     paramNames: overrides.paramNames ?? [],
     paramTypes: overrides.paramTypes ?? [],
+    startLine: overrides.startLine ?? FIRST_LINE,
+    endLine: overrides.endLine ?? FIRST_LINE,
   };
 }
 
@@ -75,6 +78,8 @@ function makeType(overrides: Partial<TypeNode> = {}): TypeNode {
     exported: overrides.exported ?? true,
     description: overrides.description ?? undefined,
     bound: overrides.bound ?? null,
+    startLine: overrides.startLine ?? FIRST_LINE,
+    endLine: overrides.endLine ?? FIRST_LINE,
   };
 }
 

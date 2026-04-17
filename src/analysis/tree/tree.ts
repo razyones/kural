@@ -50,12 +50,20 @@ type FunctionNode = BaseNode & {
   causes: string | undefined;
   paramNames: string[];
   paramTypes: string[];
+  /** 1-based line number where the function declaration begins */
+  startLine: number;
+  /** 1-based line number where the function declaration ends */
+  endLine: number;
 };
 
 /** A type node in the scoring tree. */
 type TypeNode = BaseNode & {
   kind: "type";
   childKeys: [];
+  /** 1-based line number where the type declaration begins */
+  startLine: number;
+  /** 1-based line number where the type declaration ends */
+  endLine: number;
 };
 
 /** A file node in the scoring tree. */

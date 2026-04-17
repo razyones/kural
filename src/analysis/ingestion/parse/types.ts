@@ -59,6 +59,10 @@ export type ModuleImports = {
 export type KuralType = KuralUnit & {
   /** JSDoc description of the type's purpose */
   description?: string;
+  /** 1-based line number where the declaration begins in its source file */
+  startLine: number;
+  /** 1-based line number where the declaration ends (closing brace or semicolon) */
+  endLine: number;
   /** Field names mapped to their types (e.g. { name: "string", posts: "Post[]" }) */
   fields: Record<string, string>;
   /** Whether the type is exported from its file */
@@ -87,6 +91,10 @@ export type KuralType = KuralUnit & {
 export type KuralFunction = KuralUnit & {
   /** JSDoc description of the function's behavior */
   description?: string;
+  /** 1-based line number where the declaration begins in its source file */
+  startLine: number;
+  /** 1-based line number where the declaration ends (closing brace) */
+  endLine: number;
   /** Parameter types (e.g. ["User", "string"]) */
   params: string[];
   /** Parameter names from the AST (e.g. ["name", "age"]) */

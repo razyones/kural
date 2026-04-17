@@ -130,6 +130,8 @@ async function writeTypes(collections: SnapshotCollections, types: KuralType[]):
       facetHash: t.facetHash,
       patterns: t.patterns,
       bound: t.bound,
+      startLine: t.startLine,
+      endLine: t.endLine,
     })),
   );
 }
@@ -169,6 +171,8 @@ async function writeFunctions(
       documentedParams: fn.documentedParams,
       hasReturnDoc: fn.hasReturnDoc,
       bound: fn.bound,
+      startLine: fn.startLine,
+      endLine: fn.endLine,
     })),
   );
 }

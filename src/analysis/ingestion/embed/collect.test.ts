@@ -15,6 +15,7 @@ const ARRAY_SECOND = 1;
 const SINGLE = 1;
 const PAIR = 2;
 const QUADRUPLE = 4;
+const FIRST_LINE = 1;
 
 function makeType(overrides: Partial<KuralType> & { name: string }): KuralType {
   return {
@@ -27,6 +28,8 @@ function makeType(overrides: Partial<KuralType> & { name: string }): KuralType {
     util: false,
     helper: false,
     residuals: [],
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
     ...overrides,
   };
 }
@@ -47,6 +50,8 @@ function makeFunction(overrides: Partial<KuralFunction> & { name: string }): Kur
     helper: false,
     documentedParams: NONE,
     hasReturnDoc: false,
+    startLine: FIRST_LINE,
+    endLine: FIRST_LINE,
     ...overrides,
   };
 }

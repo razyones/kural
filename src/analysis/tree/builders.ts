@@ -80,6 +80,8 @@ function functionNode(fn: KuralFunction, filePath: string): FunctionNode {
     causes: fn.causes,
     paramNames: fn.paramNames,
     paramTypes: fn.params,
+    startLine: fn.startLine,
+    endLine: fn.endLine,
   };
 }
 
@@ -108,6 +110,8 @@ function typeNode(type: KuralType, filePath: string): TypeNode {
     exported: type.exported,
     description: type.description,
     bound: type.bound ?? null,
+    startLine: type.startLine,
+    endLine: type.endLine,
   };
 }
 
