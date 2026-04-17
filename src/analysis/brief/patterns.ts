@@ -7,9 +7,7 @@
 
 import type { CodeNode, NodeMap } from "../tree/tree.ts";
 import type { CompanionMemberFacet, PatternMemberFacet, SymbolFacet } from "./types.ts";
-import { NONE, fullDescription, leafEndLine, leafStartLine, signatureOf } from "./helpers.ts";
-
-const DEFAULT_ID_UNKNOWN = "unknown";
+import { fullDescription, leafEndLine, leafStartLine, nodeKey, signatureOf } from "./helpers.ts";
 
 /**
  * Expands pattern groups for symbols that declare @kuralPatterns
@@ -185,20 +183,6 @@ function collectCompanionMembers(
       description: fullDescription(node.description),
     });
   }
-}
-
-/**
- * Builds a stable deduplication key for a node facet.
- * @param file - Parent file key, or empty string
- * @param name - Node name
- * @param kind - Node kind
- * @returns Compound key suitable for set membership
- * @kuralPure
- * @kuralHelper
- */
-function nodeKey(file: string, name: string, kind: string): string {
-  const filePart = file.length === NONE ? DEFAULT_ID_UNKNOWN : file;
-  return `${filePart}|${name}|${kind}`;
 }
 
 export { expandCompanionMembers, expandPatternMembers };

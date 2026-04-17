@@ -100,8 +100,9 @@ describe("toPlacementFacet", () => {
     expect(facet.name).toBe("auth");
     expect(facet.target).toBe("dir:/src/auth");
     expect(facet.method).toBe("chain-search");
-    expect(facet.confidence).toBe(CONFIDENCE);
-    expect(facet.reason).toBeNull();
+    if (facet.action === "add-to-directory") {
+      expect(facet.confidence).toBe(CONFIDENCE);
+    }
   });
 
   test("uses the parent neighborhood name for ask-user outcomes", () => {
@@ -124,7 +125,10 @@ describe("toPlacementFacet", () => {
     expect(facet.action).toBe("ask-user");
     expect(facet.name).toBe("analysis");
     expect(facet.target).toBe("dir:/src/analysis");
-    expect(facet.reason).toBe("low confidence");
+    if (facet.action === "ask-user") {
+      expect(facet.reason).toBe("low confidence");
+      expect("confidence" in facet).toBe(false);
+    }
   });
 
   test("falls back to the top path's parent name when the target is unknown", () => {

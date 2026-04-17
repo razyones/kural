@@ -39,7 +39,11 @@ function rankSiblings(
 }
 
 /**
- * Computes cosine similarity against a node's blended vector.
+ * Computes cosine similarity against a node's blended vector. Files
+ * and directories are structural units whose full shape — not just
+ * semantic identity — is relevant to the query, so siblings rank
+ * against the struct-plus-vocab blend rather than the pure identity
+ * vector used by the symbols and reuse rankers.
  * @param q - Query embedding vector
  * @param node - The sibling node being scored
  * @returns Similarity score, or zero when the node has no vectors

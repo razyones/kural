@@ -7,7 +7,7 @@
  */
 
 import type { Brief, BriefCaps, PlacementFacet, RelatedFacet, SymbolFacet } from "./types.ts";
-import { DEFAULT_CAPS, NONE, fullDescription, roundSim } from "./helpers.ts";
+import { DEFAULT_CAPS, NONE, fullDescription, nodeKey, roundSim } from "./helpers.ts";
 import { expandCompanionMembers, expandPatternMembers } from "./patterns.ts";
 import { rankReuse, rankSiblings, rankSymbols, walkAncestors } from "./rankers.ts";
 import type { NodeMap } from "../tree/tree.ts";
@@ -44,17 +44,27 @@ function placementKey(result: PlacementResult, nodes: NodeMap): string {
 
 /**
  * Flattens the place engine's nested related concept groups into a
- * single ranked list, capped by the caller's request.
+ * single ranked list, capped by the caller's request. Skips entries
+ * already surfaced as symbols so an agent never sees the same node
+ * twice with inconsistent field shapes.
  * @param result - The placement result containing grouped related concepts
  * @param cap - Maximum number of related facets to return
+ * @param seen - File+name keys already claimed by the symbols section
  * @returns Flat related facet list sorted by similarity
  * @kuralPure
  * @kuralHelper
  */
-function flattenRelated(result: PlacementResult, cap: number): RelatedFacet[] {
+function flattenRelated(
+  result: PlacementResult,
+  cap: number,
+  seen: ReadonlySet<string>,
+): RelatedFacet[] {
   const flat: RelatedFacet[] = [];
   for (const group of result.relatedConcepts) {
     for (const item of group.items) {
+      if (seen.has(nodeKey(group.path, item.name, item.kind))) {
+        continue;
+      }
       flat.push({
         name: item.name,
         kind: item.kind,
@@ -89,7 +99,6 @@ function toPlacementFacet(result: PlacementResult, target: string, nodes: NodeMa
       path: target,
       confidence: result.confidence,
       method: s.method,
-      reason: null,
       bridgeType: s.bridgeType ?? null,
       bridgeLayer: s.bridgeLayer ?? null,
     };
@@ -101,11 +110,9 @@ function toPlacementFacet(result: PlacementResult, target: string, nodes: NodeMa
     target,
     name,
     path: target,
-    confidence: result.confidence,
     method: s.method,
     reason: s.reason,
     bridgeType: s.bridgeType ?? null,
-    bridgeLayer: null,
   };
 }
 
@@ -145,6 +152,7 @@ async function brief(
   const queryVec = result.queryVec;
   const target = placementKey(result, nodes);
   const symbols: SymbolFacet[] = rankSymbols(queryVec, nodes, target, caps.symbols);
+  const symbolSeen = new Set<string>(symbols.map((s) => nodeKey(s.file, s.name, s.kind)));
   return {
     query: queryText,
     placement: toPlacementFacet(result, target, nodes),
@@ -152,7 +160,7 @@ async function brief(
     siblings: rankSiblings(queryVec, target, nodes, caps.siblings),
     utilities: rankReuse(queryVec, nodes, caps.utilities),
     symbols,
-    related: flattenRelated(result, caps.related),
+    related: flattenRelated(result, caps.related, symbolSeen),
     patternMembers: expandPatternMembers(symbols, nodes, caps.patternMembers),
     companionMembers: expandCompanionMembers(symbols, nodes, caps.companionMembers),
   };

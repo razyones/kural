@@ -11,6 +11,7 @@ import type { CodeNode } from "../tree/tree.ts";
 const NONE = 0;
 const NOT_FOUND = -1;
 const FIRST_AFTER_SCHEME = 1;
+const SLASH_LEN = 1;
 const FIRST_LINE = 1;
 const DEFAULT_SIBLINGS = 5;
 const DEFAULT_UTILITIES = 3;
@@ -23,6 +24,8 @@ const DECIMAL_PLACES = 4;
 const SCHEME_SEPARATOR = ":";
 const PATH_SEPARATOR = "/";
 const FILE_SCHEME = "file:";
+const KEY_SEPARATOR = "|";
+const UNKNOWN_FILE = "unknown";
 
 /** Default caps that bound each section of the brief. */
 const DEFAULT_CAPS: BriefCaps = {
@@ -132,10 +135,27 @@ function relPath(key: string, root: string): string {
   if (path.startsWith(root)) {
     path = path.slice(root.length);
     if (path.startsWith(PATH_SEPARATOR)) {
-      path = path.slice(FIRST_AFTER_SCHEME);
+      path = path.slice(SLASH_LEN);
     }
   }
   return path;
+}
+
+/**
+ * Builds the dedup key shared by every brief section that needs to
+ * recognize the same node across passes — symbols vs related, anchors
+ * vs pattern/companion expansions. The kind axis prevents collisions
+ * between a function and a type that happen to share file and name.
+ * @param file - Parent file key, or empty string when unknown
+ * @param name - Node name
+ * @param kind - Node kind
+ * @returns Compound key suitable for set membership
+ * @kuralPure
+ * @kuralHelper
+ */
+function nodeKey(file: string, name: string, kind: string): string {
+  const filePart = file.length === NONE ? UNKNOWN_FILE : file;
+  return `${filePart}${KEY_SEPARATOR}${name}${KEY_SEPARATOR}${kind}`;
 }
 
 /**
@@ -179,6 +199,7 @@ export {
   fullDescription,
   leafEndLine,
   leafStartLine,
+  nodeKey,
   relPath,
   roundSim,
   signatureOf,

@@ -87,18 +87,36 @@ type CompanionMemberFacet = {
   description: string;
 };
 
-/** Placement facet — where the new code lands plus routing metadata. */
-type PlacementFacet = {
-  action: "add-to-directory" | "ask-user";
+/** Placement facet for confident auto-placement — carries chain confidence. */
+type AddToDirectoryFacet = {
+  action: "add-to-directory";
   target: string;
   name: string;
   path: string;
   confidence: number;
   method: string;
-  reason: string | null;
   bridgeType: string | null;
   bridgeLayer: string | null;
 };
+
+/**
+ * Placement facet for ask-user outcomes — confidence is intentionally
+ * omitted because the chain score belongs to the leaf the engine
+ * rejected, not to the parent neighborhood the brief actually scopes
+ * around. Surfacing it would mislead programmatic consumers.
+ */
+type AskUserFacet = {
+  action: "ask-user";
+  target: string;
+  name: string;
+  path: string;
+  method: string;
+  reason: string | null;
+  bridgeType: string | null;
+};
+
+/** Placement facet — where the new code lands plus routing metadata. */
+type PlacementFacet = AddToDirectoryFacet | AskUserFacet;
 
 /** Per-section caps that bound the brief's output size. */
 type BriefCaps = {
