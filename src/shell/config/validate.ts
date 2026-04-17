@@ -143,7 +143,7 @@ function validateConfig(raw: unknown): { config: Bag; warnings: string[] } {
     validateBrief(sanitized, warnings);
     config.brief = sanitized;
   } else if ("brief" in config) {
-    warnings.push("brief must be an object of positive integer caps — ignoring");
+    warnings.push("brief must be an object of non-negative integer caps — ignoring");
     delete config.brief;
   }
 
