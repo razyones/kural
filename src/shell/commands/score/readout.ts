@@ -83,8 +83,8 @@ function printScoreFooter(): void {
 }
 
 /**
- * Composes the score command's hero badge and detailed breakdown
- * table into the terminal score readout for stdout.
+ * Composes the score command's overall summary and detailed
+ * breakdown sections into the terminal score readout for stdout.
  * @param root - absolute path to the project root
  * @param target - the primary node whose score is displayed as the hero
  * @param allScores - full list of loaded scores used for the breakdown table
@@ -93,6 +93,7 @@ function printScoreFooter(): void {
  * @param deltas - optional deltas to display change indicators
  * @kuralCauses writes score readout to stdout
  * @kuralPatterns commandPrinter
+ * @kuralResidual outliers [ab2ab887]
  */
 function printScore(
   root: string,

@@ -16,7 +16,7 @@ import type {
   SymbolFacet,
   UtilityFacet,
 } from "../../../analysis/brief/types.ts";
-import { COL_GAP, codeCard, headerRow, memberCard, traitTags, wrapDesc } from "./cards.ts";
+import { COL_GAP, codeCard, headerRow, memberCard, traitTags, wrapDesc } from "../../ui/cards.ts";
 import type { ListItem, ListSection } from "../../ui/list.ts";
 import { colors } from "../../ui/log.ts";
 import { printListSections } from "../../ui/list.ts";

@@ -158,44 +158,10 @@ function nodeKey(file: string, name: string, kind: string): string {
   return `${filePart}${KEY_SEPARATOR}${name}${KEY_SEPARATOR}${kind}`;
 }
 
-/**
- * Collapses block-typed params (object literal types) inside a
- * signature to "{…}" so multi-property param shapes don't wrap the
- * terminal. Outer arrow and return type are preserved.
- * @param signature - A reconstructed function signature
- * @returns A single-line signature with nested object types collapsed
- * @kuralPure
- */
-function collapseSignature(signature: string): string {
-  let depth = NONE;
-  let result = "";
-  for (let i = NONE; i < signature.length; i++) {
-    const ch = signature[i];
-    if (ch === "{") {
-      if (depth === NONE) {
-        result += "{\u2026}";
-      }
-      depth++;
-      continue;
-    }
-    if (ch === "}") {
-      if (depth > NONE) {
-        depth--;
-      }
-      continue;
-    }
-    if (depth === NONE) {
-      result += ch;
-    }
-  }
-  return result;
-}
-
 export {
   DECIMAL_PLACES,
   DEFAULT_CAPS,
   NONE,
-  collapseSignature,
   fullDescription,
   leafEndLine,
   leafStartLine,
