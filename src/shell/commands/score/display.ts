@@ -81,16 +81,19 @@ function printScoreFooter(): void {
 }
 
 /**
- * Renders the hero score and optional breakdown table.
+ * Composes the score command's hero badge and optional breakdown
+ * table into the terminal score readout for stdout, respecting the
+ * explain flag and row limit.
  * @param root - absolute path to the project root
  * @param target - the primary node whose score is displayed as the hero
  * @param allScores - full list of loaded scores used for the breakdown table
  * @param explain - whether to render the detailed breakdown table
  * @param limit - maximum number of rows to show in the breakdown table
  * @param deltas - optional deltas to display change indicators
- * @kuralCauses renders score display to stdout
+ * @kuralCauses writes score readout to stdout
+ * @kuralPatterns commandPrinter
  */
-function renderScore(
+function printScore(
   root: string,
   target: LoadedScore,
   allScores: LoadedScore[],
@@ -185,4 +188,4 @@ function printJson(
   console.log(JSON.stringify({ ...base, total, limit, breakdown }, null, JSON_INDENT));
 }
 
-export { printJson, renderScore };
+export { printJson, printScore };

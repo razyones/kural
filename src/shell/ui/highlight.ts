@@ -1,17 +1,17 @@
 /**
- * Wraps cli-highlight so the brief renders TypeScript signatures
- * with proper terminal syntax colors. It is the only module that
- * speaks to the syntax-highlighter — no other module decides which
- * library colors brief code segments.
+ * Adds inline ANSI color to single-line TypeScript source so the
+ * shared cliui palette governs how tokens look on screen. It is the
+ * only module that owns this token-to-color mapping — no other module
+ * styles inline source for terminal output.
  *
- * The library defaults to chalk for token styling, but chalk skips
- * ANSI when it can't detect TTY support — so we substitute a theme
- * built from the shared cliui color palette, which always emits.
- * @kuralHelper
- * @kuralResidual misplaced [5d082c29]
+ * The shared cliui palette feeds the theme so styling still emits
+ * when the upstream library would otherwise skip output without TTY
+ * detection. Illegal-syntax errors are swallowed so callers can pass
+ * truncated or marker-spliced source without risking a render-time
+ * throw.
  */
 
-import { colors } from "../../ui/log.ts";
+import { colors } from "./log.ts";
 import { highlight } from "cli-highlight";
 
 const HIGHLIGHT_LANG = "typescript";

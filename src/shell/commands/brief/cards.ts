@@ -11,7 +11,7 @@ import type { ListItem } from "../../ui/list.ts";
 import { collapseSignature } from "../../../analysis/brief/helpers.ts";
 import { colors } from "../../ui/log.ts";
 import { fmtPct } from "../../../utils/format.ts";
-import { highlightSignature } from "./highlight.ts";
+import { highlightSignature } from "../../ui/highlight.ts";
 
 const NONE = 0;
 const COL_GAP = "  ";

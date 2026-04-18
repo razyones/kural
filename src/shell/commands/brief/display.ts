@@ -215,12 +215,13 @@ function companionItems(members: CompanionMemberFacet[], root: string): ListItem
 }
 
 /**
- * Renders the brief as yellow-titled sections of bulleted list items,
- * matching the audit command's output shape.
+ * Composes the brief command's eight facet sections — placement,
+ * lineage, siblings, utilities, symbols, related, patterns,
+ * companions — into yellow-titled bulleted lists for stdout.
  * @param result - The brief to render
  * @param root - Absolute project root for path normalization
- * @kuralCauses writes the full brief to stdout
- * @kuralResidual outliers [2b15d76c]
+ * @kuralCauses writes brief readout to stdout
+ * @kuralPatterns commandPrinter
  */
 function printBrief(result: Brief, root: string): void {
   const sections: ListSection[] = [

@@ -16,6 +16,7 @@ const LINE_OFFSET = 1;
  * @param sourceFile - Source file used to resolve positions
  * @returns The 1-based line number of the declaration
  * @kuralPure
+ * @kuralPatterns declarationLine
  */
 function declarationStartLine(node: ts.Node, sourceFile: ts.SourceFile): number {
   const pos = node.getStart(sourceFile);
@@ -30,6 +31,7 @@ function declarationStartLine(node: ts.Node, sourceFile: ts.SourceFile): number 
  * @param sourceFile - Source file used to resolve positions
  * @returns The 1-based line number of the declaration's last token
  * @kuralPure
+ * @kuralPatterns declarationLine
  */
 function declarationEndLine(node: ts.Node, sourceFile: ts.SourceFile): number {
   const { line } = sourceFile.getLineAndCharacterOfPosition(node.getEnd());

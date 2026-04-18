@@ -5,12 +5,12 @@
  * diagnostic CLI arguments.
  */
 
-import { buildBanner, formatReport, printAuditFooter, printJson } from "./display.ts";
-import { countListItems, printListSections } from "../../ui/list.ts";
-import { logBanner, logger } from "../../ui/log.ts";
+import { buildBanner, formatReport, printAudit, printAuditFooter, printJson } from "./display.ts";
 import { clampAudits } from "../../config/validate.ts";
+import { countListItems } from "../../ui/list.ts";
 import { define } from "gunshi";
 import { loadProjectConfig } from "../../config/loader.ts";
+import { logBanner } from "../../ui/log.ts";
 import { parseAuditFlags } from "./parse-flags.ts";
 import { runAudits } from "./pipeline.ts";
 
@@ -75,12 +75,7 @@ async function runAuditCommand(values: {
 
   const total = countListItems(filtered);
   logBanner("audit", buildBanner(root, dbPath, createdAt, total, filterTerms, disabledAudits));
-  printListSections(filtered);
-
-  if (total === NONE) {
-    logger.success("No structural issues detected");
-  }
-
+  printAudit(filtered);
   printAuditFooter();
 }
 

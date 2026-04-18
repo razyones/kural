@@ -5,7 +5,7 @@
  * module defines these arguments or invokes this run handler.
  */
 
-import { printAdviseFooter, renderResults } from "./display.ts";
+import { printAdvise, printAdviseFooter } from "./display.ts";
 import { relative, resolve } from "node:path";
 import { runAdvise, runAdviseFromFile } from "./pipeline.ts";
 import type { AdviseResult } from "../../../analysis/advise/analyze.ts";
@@ -69,7 +69,7 @@ async function runAdviseCommand(values: AdviseArgs): Promise<void> {
   }
 
   logBanner("advise", banner);
-  renderResults(results);
+  printAdvise(results);
   printAdviseFooter();
 }
 
