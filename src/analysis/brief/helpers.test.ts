@@ -1,11 +1,4 @@
-import {
-  DEFAULT_CAPS,
-  collapseSignature,
-  fullDescription,
-  relPath,
-  roundSim,
-  signatureOf,
-} from "./helpers.ts";
+import { DEFAULT_CAPS, fullDescription, relPath, roundSim, signatureOf } from "./helpers.ts";
 import { describe, expect, test } from "vite-plus/test";
 import { makeFunction, makeType } from "../../../tests/helpers/audits.ts";
 
@@ -54,17 +47,6 @@ describe("relPath", () => {
 
   test("extracts the file path from a compound pattern key", () => {
     expect(relPath("pattern:file:/repo/src/foo.ts:layerRouter", "/repo")).toBe("src/foo.ts");
-  });
-});
-
-describe("collapseSignature", () => {
-  test("replaces a block param type with an ellipsis brace", () => {
-    const sig = "(values: { a?: string; b?: string }) => Promise<void>";
-    expect(collapseSignature(sig)).toBe("(values: {\u2026}) => Promise<void>");
-  });
-
-  test("leaves signatures without braces untouched", () => {
-    expect(collapseSignature("(a: number) => boolean")).toBe("(a: number) => boolean");
   });
 });
 

@@ -59,7 +59,7 @@ type DominanceEntry = {
 function collectDominanceGaps(nodes: Map<string, CodeNode>): DominanceEntry[] {
   const entries: DominanceEntry[] = [];
   for (const [key, node] of nodes) {
-    if (isLeaf(node) || node.util) {
+    if (isLeaf(node) || node.util || node.kind === "pattern") {
       continue;
     }
     if (node.leaf.length === NONE) {

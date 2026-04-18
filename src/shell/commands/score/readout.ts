@@ -1,7 +1,9 @@
 /**
- * Converts loaded scores and deltas into terminal and JSON
- * output formats. It is the only module that decides how score data
- * appears to the user — no other module formats score displays.
+ * Composes the score command's stdout output — the hero badge with
+ * delta indicators, the optional breakdown table, the footer glossary,
+ * and the machine-readable JSON emission. It is the only module that
+ * decides how score data appears to the user — no other module in this
+ * command owns the rendering.
  */
 
 import type { LoadedScore, ScoreDelta } from "./pipeline.ts";
@@ -57,9 +59,9 @@ function buildTableRows(
 }
 
 /**
- * Prints the score command footer with glossary and next steps.
+ * Renders the footer with glossary terms and next-step hints.
  * @kuralPatterns commandFooter
- * @kuralCauses writes footer glossary and next-step hints to stdout
+ * @kuralCauses writes footer to stdout
  */
 function printScoreFooter(): void {
   renderFooter(
@@ -81,16 +83,19 @@ function printScoreFooter(): void {
 }
 
 /**
- * Renders the hero score and optional breakdown table.
+ * Composes the score command's overall summary and detailed
+ * breakdown sections into the terminal score readout for stdout.
  * @param root - absolute path to the project root
  * @param target - the primary node whose score is displayed as the hero
  * @param allScores - full list of loaded scores used for the breakdown table
  * @param explain - whether to render the detailed breakdown table
  * @param limit - maximum number of rows to show in the breakdown table
  * @param deltas - optional deltas to display change indicators
- * @kuralCauses renders score display to stdout
+ * @kuralCauses writes score readout to stdout
+ * @kuralPatterns commandPrinter
+ * @kuralResidual outliers [ab2ab887]
  */
-function renderScore(
+function printScore(
   root: string,
   target: LoadedScore,
   allScores: LoadedScore[],
@@ -123,8 +128,6 @@ function renderScore(
     logger.log("");
     renderScoreTable(rows, { showing: rows.length, total });
   }
-
-  printScoreFooter();
 }
 
 /**
@@ -185,4 +188,4 @@ function printJson(
   console.log(JSON.stringify({ ...base, total, limit, breakdown }, null, JSON_INDENT));
 }
 
-export { printJson, renderScore };
+export { printJson, printScore, printScoreFooter };

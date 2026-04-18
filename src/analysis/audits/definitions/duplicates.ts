@@ -3,7 +3,6 @@
  * cross-file leaves, cross-directory files, cross-population
  * util-domain straddles, and util-to-util duplicates that exceed the
  * sibling merge fence.
- * @kuralResidual containments [bd40cfa6]
  */
 
 import type { AuditContext, Finding, FormatCtx, ListItem } from "../types.ts";

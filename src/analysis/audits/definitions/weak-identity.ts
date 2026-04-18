@@ -145,7 +145,7 @@ export default defineAudit({
     const allCandidates: WeakIdentityCandidate[] = [];
 
     for (const [, node] of nodes) {
-      if (isLeaf(node) || node.util) {
+      if (isLeaf(node) || node.util || node.kind === "pattern") {
         continue;
       }
       const candidate = measureDrift(node, nodes);

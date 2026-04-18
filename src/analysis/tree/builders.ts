@@ -1,25 +1,18 @@
 /**
- * Constructs the scored node structures that carry
- * embedding vectors, identity hashes, and placement metadata. It is the
- * only module that shapes the raw material the scoring engine evaluates —
- * no other module creates the nodes that metrics are computed over.
+ * Constructs scored node structures from parsed units — shaping
+ * functions, types, files, and directories into the typed records that
+ * carry embedding vectors, identity hashes, and placement metadata for
+ * the scoring engine. Pattern container nodes are synthesized
+ * separately by the materializer.
  */
 
-import type {
-  DirectoryNode,
-  FileNode,
-  FunctionNode,
-  NodeMap,
-  PatternNode,
-  TypeNode,
-} from "./tree.ts";
+import type { DirectoryNode, FileNode, FunctionNode, TypeNode } from "./tree.ts";
 import type {
   KuralDirectory,
   KuralFile,
   KuralFunction,
   KuralType,
 } from "../ingestion/parse/types.ts";
-import { centroid } from "../../utils/vectors.ts";
 import { sha256 } from "../ingestion/embed/hash.ts";
 
 const HASH_LENGTH = 8;
@@ -174,124 +167,4 @@ function directoryNode(dir: KuralDirectory, dirPath: string, childKeys: string[]
   };
 }
 
-/**
- * Builds a PatternNode from a pattern group.
- * @param patternId - The @kuralPatterns tag value
- * @param fileKey - The parent file's key
- * @param memberKeys - Keys of the grouped leaf nodes
- * @param nodes - The full node map for centroid computation
- * @returns A fully constructed PatternNode
- * @kuralPure
- */
-function patternNode(
-  patternId: string,
-  fileKey: string,
-  memberKeys: string[],
-  nodes: NodeMap,
-): PatternNode {
-  const identities = memberKeys
-    .map((k) => nodes.get(k)?.identity)
-    .filter((v): v is number[] => v !== undefined && v.length > NONE);
-  const leaves = memberKeys
-    .map((k) => nodes.get(k)?.leaf)
-    .filter((v): v is number[] => v !== undefined && v.length > NONE);
-  return {
-    key: `pattern:${fileKey}:${patternId}`,
-    kind: "pattern",
-    name: patternId,
-    identity: identities.length > NONE ? centroid(identities) : [],
-    leaf: leaves.length > NONE ? centroid(leaves) : [],
-    childKeys: memberKeys,
-    parentKey: fileKey,
-    patterns: null,
-    companion: null,
-    util: false,
-    helper: false,
-    residuals: [],
-    hash: sha256(["pattern", patternId, ...memberKeys].join("\0")).slice(NONE, HASH_LENGTH),
-    exported: false,
-    description: undefined,
-    bound: null,
-  };
-}
-
-const NEXT = 1;
-const MIN_GROUP = 2;
-
-/**
- * Groups children by a specific depth in their patterns array and
- * creates pattern nodes for groups with 2+ members. Recurses for
- * deeper nesting levels.
- * @param parentKey - Key of the parent node to group under
- * @param childKeys - Keys of children to consider for grouping
- * @param depth - Current nesting depth (index into the patterns array)
- * @param nodes - The flat node map to mutate
- * @returns Updated child keys with pattern nodes replacing grouped members
- * @kuralCauses inserts pattern nodes and rewires parent/child pointers
- */
-function groupAtDepth(
-  parentKey: string,
-  childKeys: string[],
-  depth: number,
-  nodes: NodeMap,
-): string[] {
-  const groups = new Map<string, string[]>();
-  const ungrouped: string[] = [];
-
-  for (const childKey of childKeys) {
-    const child = nodes.get(childKey);
-    if (child === undefined || child.patterns === null || depth >= child.patterns.length) {
-      ungrouped.push(childKey);
-      continue;
-    }
-    const tag = child.patterns[depth];
-    const bucket = groups.get(tag);
-    if (bucket) {
-      bucket.push(childKey);
-    } else {
-      groups.set(tag, [childKey]);
-    }
-  }
-
-  const result = [...ungrouped];
-  for (const [patternId, memberKeys] of groups) {
-    if (memberKeys.length < MIN_GROUP) {
-      result.push(...memberKeys);
-      continue;
-    }
-    const pNode = patternNode(patternId, parentKey, memberKeys, nodes);
-    nodes.set(pNode.key, pNode);
-
-    for (const mk of memberKeys) {
-      const member = nodes.get(mk);
-      if (member) {
-        member.parentKey = pNode.key;
-      }
-    }
-
-    const nestedKeys = groupAtDepth(pNode.key, memberKeys, depth + NEXT, nodes);
-    pNode.childKeys = nestedKeys;
-    result.push(pNode.key);
-  }
-
-  return result;
-}
-
-/**
- * Materializes pattern groups as in-memory container nodes. For each
- * file, leaves sharing a `patterns` tag are reparented under a synthetic
- * PatternNode whose identity is the centroid of its members. Supports
- * nested patterns via multiple `@kuralPatterns` tags.
- * @param nodes - The flat node map to mutate
- * @kuralCauses inserts pattern nodes and rewires parent/child pointers
- */
-function materializePatterns(nodes: NodeMap): void {
-  for (const [, node] of nodes) {
-    if (node.kind !== "file") {
-      continue;
-    }
-    node.childKeys = groupAtDepth(node.key, node.childKeys, NONE, nodes);
-  }
-}
-
-export { directoryNode, fileNode, functionNode, materializePatterns, patternNode, typeNode };
+export { directoryNode, fileNode, functionNode, typeNode };

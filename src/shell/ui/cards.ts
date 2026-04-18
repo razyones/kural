@@ -1,17 +1,16 @@
 /**
- * Lays out the row and card primitives shared by every brief
- * section — width measurement, score formatting, header rows, and the
- * multi-line code card. It is the only module that owns these layout
- * helpers — no other module composes brief rows or builds the dim
- * sub-line stack.
- * @kuralHelper
+ * Composes multi-line list items for code-symbol display — wraps long
+ * descriptions to terminal width, formats header rows with optional
+ * kind and similarity badges, prints location stamps, and assembles
+ * trait tags. It is the only module that owns these card composers —
+ * no other module stitches description, signature, location, and tags
+ * into a single list item.
  */
 
-import type { ListItem } from "../../ui/list.ts";
-import { collapseSignature } from "../../../analysis/brief/helpers.ts";
-import { colors } from "../../ui/log.ts";
-import { fmtPct } from "../../../utils/format.ts";
-import { highlightSignature } from "./highlight.ts";
+import { collapseSignature, highlightSignature } from "./highlight.ts";
+import type { ListItem } from "./list.ts";
+import { colors } from "./log.ts";
+import { fmtPct } from "../../utils/format.ts";
 
 const NONE = 0;
 const COL_GAP = "  ";
@@ -64,7 +63,7 @@ function wrapDesc(text: string, prefix: number): string[] {
 }
 
 /**
- * Builds a header row for a facet card — bold name plus optional dim
+ * Builds a header row for a card — bold name plus optional dim
  * kind tag and cyan similarity badge.
  * @param name - Bold label shown first
  * @param kind - Optional node kind (function, type, file, directory)
@@ -94,7 +93,7 @@ function headerRow(name: string, kind?: string, similarity?: number): string {
  * @param file - Relative file path
  * @param startLine - 1-based first line
  * @param endLine - 1-based last line
- * @param tags - Trait labels and pattern/companion tags, possibly empty
+ * @param tags - Trait labels and group tags, possibly empty
  * @returns One ListItem representing the card
  * @kuralPure
  */
@@ -121,9 +120,8 @@ function codeCard(
 }
 
 /**
- * Builds a member list item for pattern and companion expansions —
- * anchor-tagged heading plus wrapped description, signature, and
- * location details.
+ * Builds a member list item with an anchor-tagged heading plus wrapped
+ * description, signature, and location details.
  * @param name - Member name
  * @param kind - Node kind annotation
  * @param tagText - Already-formatted tag string (e.g. "pattern:foo · anchor bar")
@@ -178,7 +176,6 @@ function formatLocation(file: string, startLine: number, endLine: number): strin
  * @param exported - Whether the symbol is exported from its file
  * @returns Trait tags that should appear on the card
  * @kuralPure
- * @kuralHelper
  */
 function traitTags(helper: boolean, pure: boolean, exported: boolean): string[] {
   const tags: string[] = [];

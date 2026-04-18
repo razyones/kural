@@ -7,14 +7,9 @@
  */
 
 import type { BorrowsEntry, BoundDirection, ResidualEntry } from "../ingestion/parse/types.ts";
-import {
-  directoryNode,
-  fileNode,
-  functionNode,
-  materializePatterns,
-  typeNode,
-} from "./builders.ts";
+import { directoryNode, fileNode, functionNode, typeNode } from "./builders.ts";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
+import { materializePatterns } from "./patterns.ts";
 
 const NONE = 0;
 const NEXT = 1;

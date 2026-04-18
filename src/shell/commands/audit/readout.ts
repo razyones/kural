@@ -7,10 +7,11 @@
 
 import type { CodeNode, NodeMap } from "../../../analysis/tree/tree.ts";
 import { MAX_DISPLAY, findRootNode } from "../../../analysis/audits/types.ts";
+import { colors, logger } from "../../ui/log.ts";
+import { countListItems, printListSections } from "../../ui/list.ts";
 import type { AuditReport } from "../../../analysis/audits/detect.ts";
 import type { FormatCtx } from "../../../analysis/audits/types.ts";
 import type { ListSection } from "../../ui/list.ts";
-import { colors } from "../../ui/log.ts";
 import { relative } from "node:path";
 import { renderFooter } from "../../ui/footer.ts";
 import { stripKeyPrefix } from "../../../utils/paths.ts";
@@ -30,6 +31,7 @@ const KIND_LABELS: Record<string, string> = {
  * @param node - The code node to get a kind prefix for
  * @returns The human-readable kind label, or empty string if unknown
  * @kuralPure
+ * @kuralHelper
  */
 function kindPrefix(node: CodeNode): string {
   return KIND_LABELS[node.kind] ?? "";
@@ -42,6 +44,7 @@ function kindPrefix(node: CodeNode): string {
  * @param rootPath - Absolute project root path for relative display, or null for absolute paths
  * @returns A formatted label string suitable for terminal display
  * @kuralPure
+ * @kuralHelper
  */
 function nodeLabel(key: string, nodes: NodeMap, rootPath: string | null): string {
   const node = nodes.get(key);
@@ -189,6 +192,21 @@ function buildBanner(
 }
 
 /**
+ * Composes the audit command's per-rule finding sections into titled
+ * bulleted lists for stdout, emitting a success note when the report
+ * is empty.
+ * @param sections - Pre-formatted list sections from formatReport
+ * @kuralCauses writes audit readout to stdout
+ * @kuralPatterns commandPrinter
+ */
+function printAudit(sections: ListSection[]): void {
+  printListSections(sections);
+  if (countListItems(sections) === NONE) {
+    logger.success("No structural issues detected");
+  }
+}
+
+/**
  * Closes the audit output with term definitions and suggested follow-up commands.
  * @kuralPatterns commandFooter
  * @kuralCauses writes footer sections to stdout
@@ -226,4 +244,4 @@ function printAuditFooter(): void {
   );
 }
 
-export { buildBanner, formatReport, printAuditFooter, printJson };
+export { buildBanner, formatReport, printAudit, printAuditFooter, printJson };

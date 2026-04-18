@@ -16,7 +16,7 @@ import type {
   SymbolFacet,
   UtilityFacet,
 } from "../../../analysis/brief/types.ts";
-import { COL_GAP, codeCard, headerRow, memberCard, traitTags, wrapDesc } from "./cards.ts";
+import { COL_GAP, codeCard, headerRow, memberCard, traitTags, wrapDesc } from "../../ui/cards.ts";
 import type { ListItem, ListSection } from "../../ui/list.ts";
 import { colors } from "../../ui/log.ts";
 import { printListSections } from "../../ui/list.ts";
@@ -215,12 +215,13 @@ function companionItems(members: CompanionMemberFacet[], root: string): ListItem
 }
 
 /**
- * Renders the brief as yellow-titled sections of bulleted list items,
- * matching the audit command's output shape.
+ * Composes the brief command's eight facet sections — placement,
+ * lineage, siblings, utilities, symbols, related, patterns,
+ * companions — into yellow-titled bulleted lists for stdout.
  * @param result - The brief to render
  * @param root - Absolute project root for path normalization
- * @kuralCauses writes the full brief to stdout
- * @kuralResidual outliers [2b15d76c]
+ * @kuralCauses writes brief readout to stdout
+ * @kuralPatterns commandPrinter
  */
 function printBrief(result: Brief, root: string): void {
   const sections: ListSection[] = [
@@ -240,7 +241,6 @@ function printBrief(result: Brief, root: string): void {
  * Renders the brief footer with glossary and next-step hints.
  * @kuralPatterns commandFooter
  * @kuralCauses writes footer to stdout
- * @kuralResidual outliers [34ada4a6]
  */
 function printBriefFooter(): void {
   renderFooter(

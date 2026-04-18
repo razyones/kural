@@ -38,6 +38,7 @@ function pct(value: number): string {
  * @param group - The proposed group to display
  * @param index - The group number for labeling
  * @kuralCauses writes group info to stdout
+ * @kuralHelper
  */
 function printGroup(group: ProposedGroup, index: number): void {
   const label = `Group ${String(index)}`;
@@ -172,11 +173,13 @@ function printCuts(result: AdviseResult): void {
 }
 
 /**
- * Prints all engine results to stdout with step lists and threshold sections.
+ * Composes the advise command's merge-order steps and threshold-cut
+ * sections into the terminal advise readout for stdout.
  * @param results - Array of engine results to display
- * @kuralCauses writes formatted output to stdout
+ * @kuralCauses writes advise readout to stdout
+ * @kuralPatterns commandPrinter
  */
-function renderResults(results: AdviseResult[]): void {
+function printAdvise(results: AdviseResult[]): void {
   for (const result of results) {
     printDendrogram(result);
     printCuts(result);
@@ -217,4 +220,4 @@ function printAdviseFooter(): void {
   );
 }
 
-export { printAdviseFooter, renderResults };
+export { printAdvise, printAdviseFooter };
