@@ -1,27 +1,35 @@
 ---
 title: Architecture
-description: System overview — the pipeline, tiers, data model, and sync design
+description: System overview — pillars, tiers, data model, and sync design
 icon: Network
 ---
 
 ## System Overview
 
-Kural is a five-stage pipeline that transforms source code into structural health scores:
-
-<Steps>
-  <Step>
-    **Parse** — Walk the filesystem, extract functions, types, and descriptions from the AST
-  </Step>
-  <Step>**Embed** — Produce identity and leaf vectors via 7-facet embedding</Step>
-  <Step>**Score** — Compute fit, uniqueness, and subtree health for every node</Step>
-  <Step>**Store** — Persist units, scores, and metadata to a snapshot database</Step>
-  <Step>**Query** — Read snapshots for scoring, auditing, and comparison</Step>
-</Steps>
+Kural is organized around [four pillars](/docs/) — **Embed**, **Score**, **Audit**, **Place** — that cross-validate each other. This page covers the mechanics underneath: how snapshots are built and cached, what the data model looks like, and how local and server tiers sync.
 
 The system is split into two tiers:
 
 - **CLI** — scan, score, local snapshots
 - **Dashboard (web UI)** — reactive views over snapshot data
+
+## How snapshots are built and cached
+
+A snapshot is the serialized output of the Embed and Score pillars, written once per `kural snapshot generate` run. Every other command (`audit`, `score`, `place`, `brief`, `advise`) reads from a snapshot rather than rebuilding one.
+
+<Steps>
+  <Step>
+    **Walk and parse** — TypeScript-only today. The AST pass extracts functions, types, and descriptions; anything outside that surface is invisible to the rest of the system.
+  </Step>
+  <Step>
+    **Embed with cache** — each unit is keyed by `facet_hash`. Unchanged units are served from the previous `active.db`; only new or modified units hit the embedding provider. This is why first runs are slow and subsequent runs complete in seconds.
+  </Step>
+  <Step>
+    **Score and store** — fit, uniqueness, and subtree metrics are computed and written to a fresh `active.db`. The previous `active.db` is rotated into `history/<snapshot-id>.db`.
+  </Step>
+</Steps>
+
+Snapshot layout, rotation rules, and cache-invalidation keys live in [Database](/docs/infrastructure/db).
 
 ## Tech Stack
 
@@ -104,10 +112,11 @@ Turso (<user-id>.kural.io):
 
 ### Snapshot Lifecycle
 
-1. CLI generates a snapshot for the current branch
-2. Active snapshot is rotated to `history/<snapshot-id>.db`; a fresh `active.db` is created
-3. Oldest unpinned history snapshots are evicted when count exceeds 10
-4. On the server, only CI writes (via API); developers keep snapshots locally
+1. Active snapshot is rotated to `history/<snapshot-id>.db`; a fresh `active.db` is created
+2. Oldest unpinned history snapshots are evicted when count exceeds 10
+3. On the server, only CI writes (via API); developers keep snapshots locally
+
+See [How snapshots are built and cached](#how-snapshots-are-built-and-cached) for the per-run flow.
 
 ## Schema Design
 

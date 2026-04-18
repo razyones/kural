@@ -224,7 +224,7 @@ Navigate to your project root and run:
 kural snapshot generate src
 ```
 
-This walks the `src` directory, extracts types and functions from the AST, embeds them using 7 structural facets, computes fit and uniqueness scores, and stores everything in `.kural-db/`.
+This walks the `src` directory, extracts types and functions from the AST, embeds them using 7 structural facets, computes fit and uniqueness scores, and stores everything in `.kural-db/`. On subsequent runs, only new or modified units (changed `facet_hash`) are re-embedded — the rest are served from cache.
 
 <Callout type="info">
   Add `.kural-db/` to your `.gitignore`. Snapshots are local and should not be committed.
