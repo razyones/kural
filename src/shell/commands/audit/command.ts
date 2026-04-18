@@ -5,7 +5,7 @@
  * diagnostic CLI arguments.
  */
 
-import { buildBanner, formatReport, printAudit, printAuditFooter, printJson } from "./display.ts";
+import { buildBanner, formatReport, printAudit, printAuditFooter, printJson } from "./readout.ts";
 import { clampAudits } from "../../config/validate.ts";
 import { countListItems } from "../../ui/list.ts";
 import { define } from "gunshi";

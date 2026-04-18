@@ -53,7 +53,7 @@ type MisplacedRaw = {
 function collectMisplacedCandidates(nodes: Map<string, CodeNode>): MisplacedRaw[] {
   const raw: MisplacedRaw[] = [];
   for (const [key, node] of nodes) {
-    if (isLeaf(node) || node.util || node.parentKey === null) {
+    if (isLeaf(node) || node.util || node.kind === "pattern" || node.parentKey === null) {
       continue;
     }
     const parent = nodes.get(node.parentKey);

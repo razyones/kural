@@ -5,7 +5,7 @@
  * module defines these arguments or invokes this run handler.
  */
 
-import { printAdvise, printAdviseFooter } from "./display.ts";
+import { printAdvise, printAdviseFooter } from "./readout.ts";
 import { relative, resolve } from "node:path";
 import { runAdvise, runAdviseFromFile } from "./pipeline.ts";
 import type { AdviseResult } from "../../../analysis/advise/analyze.ts";

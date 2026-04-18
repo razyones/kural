@@ -1,7 +1,9 @@
 /**
- * Converts loaded scores and deltas into terminal and JSON
- * output formats. It is the only module that decides how score data
- * appears to the user — no other module formats score displays.
+ * Composes the score command's stdout output — the hero badge with
+ * delta indicators, the optional breakdown table, the footer glossary,
+ * and the machine-readable JSON emission. It is the only module that
+ * decides how score data appears to the user — no other module in this
+ * command owns the rendering.
  */
 
 import type { LoadedScore, ScoreDelta } from "./pipeline.ts";
@@ -57,9 +59,9 @@ function buildTableRows(
 }
 
 /**
- * Prints the score command footer with glossary and next steps.
+ * Renders the footer with glossary terms and next-step hints.
  * @kuralPatterns commandFooter
- * @kuralCauses writes footer glossary and next-step hints to stdout
+ * @kuralCauses writes footer to stdout
  */
 function printScoreFooter(): void {
   renderFooter(
@@ -81,9 +83,8 @@ function printScoreFooter(): void {
 }
 
 /**
- * Composes the score command's hero badge and optional breakdown
- * table into the terminal score readout for stdout, respecting the
- * explain flag and row limit.
+ * Composes the score command's hero badge and detailed breakdown
+ * table into the terminal score readout for stdout.
  * @param root - absolute path to the project root
  * @param target - the primary node whose score is displayed as the hero
  * @param allScores - full list of loaded scores used for the breakdown table
@@ -126,8 +127,6 @@ function printScore(
     logger.log("");
     renderScoreTable(rows, { showing: rows.length, total });
   }
-
-  printScoreFooter();
 }
 
 /**
@@ -188,4 +187,4 @@ function printJson(
   console.log(JSON.stringify({ ...base, total, limit, breakdown }, null, JSON_INDENT));
 }
 
-export { printJson, printScore };
+export { printJson, printScore, printScoreFooter };

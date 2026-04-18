@@ -17,7 +17,7 @@ import { createStepTracker } from "../../../ui/step-tracker.ts";
 import { define } from "gunshi";
 import { generate } from "./pipeline.ts";
 import { loadProjectConfig } from "../../../config/loader.ts";
-import { renderFooter } from "../../../ui/footer.ts";
+import { printGenerateFooter } from "./readout.ts";
 
 const NONE = 0;
 const JSON_INDENT = 2;
@@ -105,31 +105,6 @@ function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]
     });
     return vectors;
   };
-}
-
-/**
- * Closes the generate output with term definitions and suggested follow-up commands.
- * @kuralPatterns commandFooter
- * @kuralCauses writes footer sections to stdout
- */
-function printGenerateFooter(): void {
-  renderFooter(
-    [
-      { term: "fileCount", definition: "number of source files parsed" },
-      { term: "dirCount", definition: "number of directories discovered" },
-      {
-        term: "unitCount",
-        definition: "total units embedded (files + types + functions + dirs)",
-      },
-    ],
-    [
-      { command: "kural score", description: "view the overall structural score" },
-      { command: "kural score -p <path>", description: "score a specific node" },
-      { command: "kural score -e", description: "detailed score breakdown table" },
-      { command: "kural snapshot list", description: "list all snapshots" },
-      { command: "kural snapshot pin <id> <name>", description: "pin this snapshot" },
-    ],
-  );
 }
 
 /** Parsed CLI arguments for the generate command. */

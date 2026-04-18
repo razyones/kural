@@ -5,7 +5,7 @@
  * module defines these arguments or invokes this run handler.
  */
 
-import { printPlace, printPlaceFooter } from "./display.ts";
+import { printPlace, printPlaceFooter } from "./readout.ts";
 import { define } from "gunshi";
 import { logBanner } from "../../ui/log.ts";
 import { runPlacement } from "./pipeline.ts";

@@ -7,7 +7,7 @@
 
 import { computeDeltas, loadScores } from "./pipeline.ts";
 import { logBanner, logger } from "../../ui/log.ts";
-import { printJson, printScore } from "./display.ts";
+import { printJson, printScore, printScoreFooter } from "./readout.ts";
 import { relative, resolve } from "node:path";
 import type { ScoreDelta } from "./pipeline.ts";
 import { define } from "gunshi";
@@ -103,6 +103,7 @@ async function handleScore(values: ScoreArgs): Promise<void> {
 
   logBanner("score", buildBannerParams(root, values, result));
   printScore(root, target, result.scores, explain, limit, deltas);
+  printScoreFooter();
 }
 
 export default define({

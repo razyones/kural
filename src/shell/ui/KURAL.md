@@ -1,1 +1,1 @@
-Owns all composition of terminal rendering — controls the UI instance, orchestrates multi-step progress, and defines reusable patterns for score display, tables, lists, and footers. No other module decides how output is layered or styled.
+Owns the reusable terminal rendering primitives — the UI instance, multi-step progress tracker, score-table renderer, hero badge, list sectioner, footer stitcher, delta formatter, signature highlighter, and logger. No other module defines these primitives; every command readout composes from here.

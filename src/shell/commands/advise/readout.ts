@@ -38,6 +38,7 @@ function pct(value: number): string {
  * @param group - The proposed group to display
  * @param index - The group number for labeling
  * @kuralCauses writes group info to stdout
+ * @kuralHelper
  */
 function printGroup(group: ProposedGroup, index: number): void {
   const label = `Group ${String(index)}`;

@@ -241,7 +241,6 @@ function printBrief(result: Brief, root: string): void {
  * Renders the brief footer with glossary and next-step hints.
  * @kuralPatterns commandFooter
  * @kuralCauses writes footer to stdout
- * @kuralResidual outliers [34ada4a6]
  */
 function printBriefFooter(): void {
   renderFooter(

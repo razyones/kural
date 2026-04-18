@@ -559,6 +559,150 @@ describe("isLeaf — pattern nodes", () => {
   });
 });
 
+describe("materializePatterns — cross-file basic", () => {
+  it("attaches the pattern to the common directory when a tag spans two files", () => {
+    const fnA = makeFunction({ name: "a", path: "/src/one.ts", patterns: ["commandFooter"] });
+    const fnB = makeFunction({ name: "b", path: "/src/two.ts", patterns: ["commandFooter"] });
+    const fileOne = makeFile({ name: "one.ts", path: "/src/one.ts", functions: { a: fnA } });
+    const fileTwo = makeFile({ name: "two.ts", path: "/src/two.ts", functions: { b: fnB } });
+    const dir = makeDirectory({ children: ["/src/one.ts", "/src/two.ts"] });
+    const nodes = buildTree(
+      makeParseResult({ "/src/one.ts": fileOne, "/src/two.ts": fileTwo }, { "/src": dir }),
+    );
+
+    const pKey = "pattern:dir:/src:commandFooter";
+    expect(nodes.has(pKey)).toBe(true);
+    const pNode = getNode(nodes, pKey);
+    expect(pNode.parentKey).toBe("dir:/src");
+    expect(pNode.childKeys).toContain("func:/src/one.ts:a");
+    expect(pNode.childKeys).toContain("func:/src/two.ts:b");
+    expect(getNode(nodes, "dir:/src").childKeys).toContain(pKey);
+  });
+
+  it("reparents singleton members and removes them from their file childKeys", () => {
+    const fnA = makeFunction({ name: "a", path: "/src/one.ts", patterns: ["commandFooter"] });
+    const fnB = makeFunction({ name: "b", path: "/src/two.ts", patterns: ["commandFooter"] });
+    const fileOne = makeFile({ name: "one.ts", path: "/src/one.ts", functions: { a: fnA } });
+    const fileTwo = makeFile({ name: "two.ts", path: "/src/two.ts", functions: { b: fnB } });
+    const dir = makeDirectory({ children: ["/src/one.ts", "/src/two.ts"] });
+    const nodes = buildTree(
+      makeParseResult({ "/src/one.ts": fileOne, "/src/two.ts": fileTwo }, { "/src": dir }),
+    );
+
+    const pKey = "pattern:dir:/src:commandFooter";
+    expect(getNode(nodes, "func:/src/one.ts:a").parentKey).toBe(pKey);
+    expect(getNode(nodes, "func:/src/two.ts:b").parentKey).toBe(pKey);
+    expect(getNode(nodes, "file:/src/one.ts").childKeys).not.toContain("func:/src/one.ts:a");
+    expect(getNode(nodes, "file:/src/two.ts").childKeys).not.toContain("func:/src/two.ts:b");
+  });
+});
+
+describe("materializePatterns — cross-file NCA", () => {
+  it("attaches the pattern to the nearest common ancestor across subdirectories", () => {
+    const fnA = makeFunction({ name: "a", path: "/src/a/one.ts", patterns: ["commandFooter"] });
+    const fnB = makeFunction({ name: "b", path: "/src/b/two.ts", patterns: ["commandFooter"] });
+    const fileOne = makeFile({ name: "one.ts", path: "/src/a/one.ts", functions: { a: fnA } });
+    const fileTwo = makeFile({ name: "two.ts", path: "/src/b/two.ts", functions: { b: fnB } });
+    const dirA = makeDirectory({ name: "a", path: "/src/a", children: ["/src/a/one.ts"] });
+    const dirB = makeDirectory({ name: "b", path: "/src/b", children: ["/src/b/two.ts"] });
+    const dirSrc = makeDirectory({ children: ["/src/a", "/src/b"] });
+    const nodes = buildTree(
+      makeParseResult(
+        { "/src/a/one.ts": fileOne, "/src/b/two.ts": fileTwo },
+        { "/src": dirSrc, "/src/a": dirA, "/src/b": dirB },
+      ),
+    );
+
+    const pKey = "pattern:dir:/src:commandFooter";
+    expect(nodes.has(pKey)).toBe(true);
+    expect(getNode(nodes, pKey).parentKey).toBe("dir:/src");
+    expect(getNode(nodes, "dir:/src").childKeys).toContain(pKey);
+  });
+});
+
+describe("materializePatterns — cross-file negative", () => {
+  it("does not create a cross-file pattern when only one file carries the tag", () => {
+    const fnA = makeFunction({ name: "a", path: "/src/one.ts", patterns: ["commandFooter"] });
+    const fnB = makeFunction({ name: "b", path: "/src/two.ts" });
+    const fileOne = makeFile({ name: "one.ts", path: "/src/one.ts", functions: { a: fnA } });
+    const fileTwo = makeFile({ name: "two.ts", path: "/src/two.ts", functions: { b: fnB } });
+    const dir = makeDirectory({ children: ["/src/one.ts", "/src/two.ts"] });
+    const nodes = buildTree(
+      makeParseResult({ "/src/one.ts": fileOne, "/src/two.ts": fileTwo }, { "/src": dir }),
+    );
+
+    expect(nodes.has("pattern:dir:/src:commandFooter")).toBe(false);
+    expect(getNode(nodes, "func:/src/one.ts:a").parentKey).toBe("file:/src/one.ts");
+  });
+
+  it("does not create a cross-file pattern when all tagged members share one file", () => {
+    const fnA = makeFunction({ name: "a", patterns: ["fitMetric"] });
+    const fnB = makeFunction({ name: "b", patterns: ["fitMetric"] });
+    const file = makeFile({ functions: { a: fnA, b: fnB } });
+    const dir = makeDirectory({ children: ["/src/app.ts"] });
+    const nodes = buildTree(makeParseResult({ "/src/app.ts": file }, { "/src": dir }));
+
+    expect(nodes.has("pattern:dir:/src:fitMetric")).toBe(false);
+    expect(nodes.has("pattern:file:/src/app.ts:fitMetric")).toBe(true);
+  });
+});
+
+describe("materializePatterns — cross-file centroid", () => {
+  it("averages representative identity vectors into the pattern centroid", () => {
+    const fnA = makeFunction({
+      name: "a",
+      path: "/src/one.ts",
+      patterns: ["commandFooter"],
+      identityEmbedding: [TWO, FOUR],
+    });
+    const fnB = makeFunction({
+      name: "b",
+      path: "/src/two.ts",
+      patterns: ["commandFooter"],
+      identityEmbedding: [FOUR, TWO],
+    });
+    const fileOne = makeFile({ name: "one.ts", path: "/src/one.ts", functions: { a: fnA } });
+    const fileTwo = makeFile({ name: "two.ts", path: "/src/two.ts", functions: { b: fnB } });
+    const dir = makeDirectory({ children: ["/src/one.ts", "/src/two.ts"] });
+    const nodes = buildTree(
+      makeParseResult({ "/src/one.ts": fileOne, "/src/two.ts": fileTwo }, { "/src": dir }),
+    );
+
+    const THREE = 3;
+    const pNode = getNode(nodes, "pattern:dir:/src:commandFooter");
+    expect(pNode.identity).toEqual([THREE, THREE]);
+  });
+});
+
+describe("materializePatterns — cross-file mixed", () => {
+  it("uses the in-file pattern as the file representative and stacks it under the cross-file pattern", () => {
+    const fnA1 = makeFunction({ name: "a1", path: "/src/one.ts", patterns: ["commandFooter"] });
+    const fnA2 = makeFunction({ name: "a2", path: "/src/one.ts", patterns: ["commandFooter"] });
+    const fnB = makeFunction({ name: "b", path: "/src/two.ts", patterns: ["commandFooter"] });
+    const fileOne = makeFile({
+      name: "one.ts",
+      path: "/src/one.ts",
+      functions: { a1: fnA1, a2: fnA2 },
+    });
+    const fileTwo = makeFile({ name: "two.ts", path: "/src/two.ts", functions: { b: fnB } });
+    const dir = makeDirectory({ children: ["/src/one.ts", "/src/two.ts"] });
+    const nodes = buildTree(
+      makeParseResult({ "/src/one.ts": fileOne, "/src/two.ts": fileTwo }, { "/src": dir }),
+    );
+
+    const crossKey = "pattern:dir:/src:commandFooter";
+    const inFileKey = "pattern:file:/src/one.ts:commandFooter";
+    expect(nodes.has(crossKey)).toBe(true);
+    expect(nodes.has(inFileKey)).toBe(true);
+    expect(getNode(nodes, crossKey).childKeys).toContain(inFileKey);
+    expect(getNode(nodes, crossKey).childKeys).toContain("func:/src/two.ts:b");
+    expect(getNode(nodes, inFileKey).parentKey).toBe(crossKey);
+    expect(getNode(nodes, inFileKey).childKeys).toContain("func:/src/one.ts:a1");
+    expect(getNode(nodes, inFileKey).childKeys).toContain("func:/src/one.ts:a2");
+    expect(getNode(nodes, "file:/src/one.ts").childKeys).not.toContain(inFileKey);
+  });
+});
+
 describe("buildTree — integration with multiple files", () => {
   it("builds correct tree for multi-file directory", () => {
     const fnA = makeFunction({ name: "a", path: "/src/one.ts" });

@@ -5,7 +5,7 @@
  * defines these arguments or renders this output.
  */
 
-import { printBrief, printBriefFooter } from "./display.ts";
+import { printBrief, printBriefFooter } from "./readout.ts";
 import { define } from "gunshi";
 import { logBanner } from "../../ui/log.ts";
 import { runBrief } from "./pipeline.ts";
