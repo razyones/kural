@@ -8,7 +8,7 @@
            └──────────────────────────────────────
 ```
 
-Structural scoring system for TypeScript codebases — answers **"where should this code live?"**
+Structural discipline for codebases — answers **"where should this code live?"**
 
 > **Early stage project** — Kural is under active development and evolving rapidly. Check out [Projects](../../projects) for the roadmap ahead. We welcome feedback, ideas, and contributions — reach out at **hello@razyones.com** to collaborate or share your thoughts.
 
@@ -28,16 +28,16 @@ Kural embeds every type, function, file, and directory into vector space, measur
 
 AI coding agents write code. They add functions, create files, move things around. But they have no idea whether the code they just wrote landed in the right place. They can't see that the function they added to `utils/` is semantically identical to one in `core/`, or that the file they created in `commands/` drifts toward the analysis engine's vocabulary.
 
-Kural gives your codebase a structural map. **Kural skills give your AI assistant the ability to read that map.**
+Kural gives your codebase a structural map. **Kural skills teach your AI assistant the structural discipline** — the same role a type system plays for a typed-language agent. Without a type checker, an agent writes code that runs but breaks contracts. Without structural discipline, an agent writes code that works but rots the codebase.
 
-Without skills, the agent generates code blind to structure. With skills, it knows the four-phase resolution pipeline, understands why descriptions carry 50% weight in the identity vector, and can work through audit findings methodically — fixing docs before restructuring, restructuring before suppressing.
+With skills, the agent knows the four-phase resolution pipeline, understands why descriptions carry 50% weight in the identity vector, and works through audit findings methodically — fixing docs before restructuring, restructuring before suppressing. Brief is its pre-flight check; audit is its post-flight check.
 
 This is the difference between an agent that writes code and an agent that writes code **in the right place**.
 
 <Callout type="warn">
-  An AI agent without structural awareness will accumulate architectural debt faster than a human
+  An AI agent without structural discipline will accumulate architectural debt faster than a human
   developer — it produces more code per hour but has zero intuition about where that code belongs.
-  Kural skills are the structural intuition layer.
+  Kural skills are the discipline layer.
 </Callout>
 
 ## Install

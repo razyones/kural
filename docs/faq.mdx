@@ -6,9 +6,9 @@ icon: HelpCircle
 
 ## Isn't this just another linter?
 
-No. Linting checks style. Type checking checks contracts. Kural checks **structural placement** — whether code lives in the right directory, whether siblings overlap in purpose, whether a module's description matches what it actually contains.
+TypeScript isn't a linter either. Both are **discipline layers** — TypeScript checks type discipline, kural checks structural discipline. Linting checks style; type checking checks contracts; kural checks whether code lives in the right directory, whether siblings overlap in purpose, whether a module's description matches what it actually contains.
 
-You can have zero lint errors, full type safety, and still have a function that belongs in `analysis/` sitting in `utils/`, silently pulling every module that imports it toward the wrong neighborhood in vector space. That's the class of problem Kural catches.
+You can have zero lint errors, full type safety, and still have a function that belongs in `analysis/` sitting in `utils/`, silently pulling every module that imports it toward the wrong neighborhood in vector space. That's the class of problem kural catches — and the class no linter or type checker ever will, because it's structural, not syntactic.
 
 ## Doesn't the annotation burden defeat the purpose?
 
@@ -28,16 +28,16 @@ Params are a type system for the structural space. TypeScript types don't patch 
 
 ## How does an AI agent actually use Kural?
 
-The workflow is a loop the agent drives:
+The same way it uses a type checker — to verify its own work before and after writing code. **Brief is the pre-flight check; audit is the post-flight check.**
 
-1. **Before writing code**: run [`kural brief`](/docs/getting-started) `"description of what I'm about to build"` — get siblings, utilities, symbols, and patterns to reuse or imitate.
+1. **Before writing code (pre-flight)**: run [`kural brief`](/docs/getting-started) `"description of what I'm about to build"` — get siblings, utilities, symbols, and patterns to reuse or imitate. The agent sees the structural neighborhood before generating anything.
 2. **Write code** with descriptions following the skill's principles (exclusivity language, no sibling vocabulary, role-based descriptions).
-3. **After writing**: run `kural audit` — surface [findings](/docs/pillars/audits).
+3. **After writing (post-flight)**: run `kural audit` — surface [findings](/docs/pillars/audits) the way `tsc` surfaces type errors.
 4. **Resolve findings** through the four-phase pipeline: fix incomplete docs first, then documentation quality, then structural issues, then suppress with `@kuralResidual` only as a last resort.
 5. **Regenerate snapshot**: `kural snapshot generate src` — scores recalibrate, embeddings update.
 6. **Compare**: `kural score -c <old-snapshot-id>` — verify the fix improved things.
 
-Each cycle sharpens the structural map. The agent both reads and writes the map.
+The discipline runs in a loop: brief → write → audit → fix → regenerate. Each cycle sharpens the structural map. The agent both reads and writes the map.
 
 ## What about snapshot staleness during active sessions?
 
@@ -72,6 +72,8 @@ RAG retrieves text by similarity — "find me code that looks like this." Kural 
 - RAG can retrieve code. `kural brief` retrieves **with structural context** — siblings, utilities, symbols, patterns — so the agent knows not just what exists, but how it relates and whether the new code belongs nearby.
 
 Brief does retrieve, but within a scored, audited space. The retrieval is a byproduct of placement, not the other way around.
+
+There's also a cost dimension. Many RAG pipelines pay LLM-rerank or LLM-summarization costs on every query. Kural's entire pipeline runs on embedding-tier compute — orders of magnitude cheaper, locally runnable, and fast enough that an agent can call `kural brief` before every implementation without thinking about cost.
 
 ## Can Kural handle large codebases?
 

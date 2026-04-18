@@ -1,6 +1,6 @@
 ---
 title: Introduction
-description: Kural — structural scoring system for TypeScript codebases
+description: Structural discipline for codebases — answers "where should this code live?"
 icon: BookOpen
 ---
 
@@ -26,7 +26,25 @@ It is a structural framework for TypeScript codebases built on four pillars. **E
         └─────────────────────┘
 ```
 
-How well we embed, score, audit, and place is what gives meaning to Kural.
+## Why this matters
+
+AI agents now write code that compiles, passes tests, and looks reasonable. They are excellent at **one-shotting** — generating new code from scratch. But the moment a real codebase enters the picture, that competence falls apart. The function lands in `utils/` when it belonged in `core/`. A new module reinvents an existing pattern. A description drifts toward a sibling's vocabulary. The code works. The codebase decays a little each time.
+
+One-shotting and placing code into an existing codebase are not the same problem. Models have largely solved the first; the second remains open.
+
+## A discipline layer for codebases
+
+Kural introduces **structural discipline** to a codebase — what TypeScript introduced for types. TypeScript didn't catch every bug; it gave the codebase a declarable, checkable layer of structure that humans and tools could rely on. Kural does the same for placement: every unit gets a vector identity, a set of structural scores, and a set of audits that surface drift. Agents and humans place new code against that map.
+
+There will be a structure enforcer for codebases sooner or later, the way TypeScript became the type enforcer. We hope kural becomes that project.
+
+## Practical and cheap by design
+
+Kural uses embedding models, not LLMs. Placement, similarity, and drift detection are vector problems — they don't need reasoning. An embedding pass over a 50k-LOC codebase costs under a dollar at hosted rates and zero with local models. The same workload routed through a frontier LLM would cost two-to-three orders of magnitude more and couldn't run on a laptop. Reasoning is reserved for your coding agent, where it actually buys you something. Kural is the structural layer underneath — fast, local-capable, and orders of magnitude cheaper.
+
+> Today kural targets TypeScript codebases. The structural concepts — fit, uniqueness, audits, placement — are language-agnostic; the ingestion pipeline is what's TypeScript-specific.
+
+## Start here
 
 <Cards>
   <Card
@@ -35,35 +53,32 @@ How well we embed, score, audit, and place is what gives meaning to Kural.
     description="Install Kural, configure an embedding provider, and run your first structural analysis in minutes."
   />
   <Card
-    title="Configuration"
-    href="/docs/configuration"
-    description="Domain keywords, dictionary, sensitivity — the settings that shape embedding and audit behavior after setup."
-  />
-  <Card
     title="AI Code Editors"
     href="/docs/ai-editors"
-    description="A must-have for agentic coding. Give your AI assistant structural awareness so it writes code in the right place. Supports 18 editors."
+    description="A must-have for agentic coding. Teach your AI assistant the structural discipline so it writes code in the right place. Supports 18 editors."
   />
   <Card
     title="Architecture"
     href="/docs/architecture"
-    description="System overview: the pipeline, tiers, data model, and sync design."
+    description="System overview: pillars, tiers, data model, and the embeddings-not-LLMs design choice."
+  />
+  <Card
+    title="Configuration"
+    href="/docs/configuration"
+    description="Domain keywords, dictionary, sensitivity — the settings that shape embedding and audit behavior after setup."
   />
 </Cards>
 
-## Foundation
+## Deep dive
+
+The four pillars in detail, plus the foundation they rest on and the codebase realities they accommodate.
 
 <Cards>
   <Card
     title="Embedding"
     href="/docs/foundation/embedding"
-    description="Every unit becomes a vector. Facets capture name, description, and structural shape. Signals anchor them in filesystem context."
+    description="Foundation. Every unit becomes a vector. Facets capture name, description, and structural shape. Signals anchor them in filesystem context."
   />
-</Cards>
-
-## Pillars
-
-<Cards>
   <Card
     title="Scoring"
     href="/docs/pillars/scoring"
@@ -84,11 +99,6 @@ How well we embed, score, audit, and place is what gives meaning to Kural.
     href="/docs/pillars/place"
     description="Answers where new code should live, and retrieves the siblings, utilities, and symbols an agent needs before implementing."
   />
-</Cards>
-
-## Codebase Realities
-
-<Cards>
   <Card
     title="Kural Params"
     href="/docs/codebase-realities/kural-params"
@@ -104,11 +114,6 @@ How well we embed, score, audit, and place is what gives meaning to Kural.
     href="/docs/codebase-realities/bound-nodes"
     description="When a unit's identity is inseparable from its context (barrel exports, entry points, primary exports), the system adjusts rather than flagging architecture as a flaw."
   />
-</Cards>
-
-## Infrastructure
-
-<Cards>
   <Card
     title="Database"
     href="/docs/infrastructure/db"

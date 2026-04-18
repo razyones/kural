@@ -31,6 +31,12 @@ A snapshot is the serialized output of the Embed and Score pillars, written once
 
 Snapshot layout, rotation rules, and cache-invalidation keys live in [Database](/docs/infrastructure/db).
 
+## Why embeddings, not LLMs
+
+A deliberate architectural choice runs through every pillar: kural uses embedding models, not LLMs, for the work it does itself. Placement, similarity, drift detection, and clustering are vector problems — they don't need reasoning, they need a well-distributed space and statistical fences. Embeddings give exactly that, at two-to-three orders of magnitude lower cost than frontier LLMs and with the option to run fully local (BGE, Nomic, Qwen3 Embedding via Ollama).
+
+The consequence: a full embedding pass over a 50k-LOC codebase costs cents at hosted rates and zero locally. An agent can run `kural brief` before every implementation, and `kural audit` after every meaningful change, without thinking about cost. Reasoning is reserved for the user's coding agent, where it actually buys something. Kural is the structural layer underneath — fast, local-capable, and cheap enough to call repeatedly.
+
 ## Tech Stack
 
 | Layer             | Tool                                                    | Role                                   |
