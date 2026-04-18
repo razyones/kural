@@ -207,13 +207,14 @@ JSDoc annotations that declare structural realities the vector space can't captu
 
 ## How it works
 
-Kural is a five-stage pipeline:
+Kural is built on four pillars:
 
-1. **Parse** — Walk the filesystem, extract functions, types, and descriptions from the AST
-2. **Embed** — Produce identity and leaf vectors via 7-facet embedding (name, description, path, signature, causes, calls, parent context)
-3. **Score** — Compute fit, uniqueness, and subtree health for every node
-4. **Store** — Persist units, scores, and metadata to a SQLite snapshot
-5. **Query** — Read snapshots for scoring, auditing, and comparison
+1. **Embed** — place every type, function, file, and directory in vector space using 7-facet embedding (name, description, path, signature, causes, calls, parent context)
+2. **Score** — measure fit, uniqueness, and subtree health for every node
+3. **Audit** — surface specific structural issues with statistical fences calibrated from the codebase's own distributions
+4. **Place** — route new units against the well-distributed space and retrieve the surrounding context an agent needs before implementing
+
+See [Architecture](docs/architecture.mdx) for how the pillars are implemented — snapshot generation, caching, the embeddings-not-LLMs design choice, and the local/server tier split.
 
 ### Scoring metrics
 
@@ -253,12 +254,12 @@ Every node gets a score card:
 ### Topics
 
 - [Getting Started](docs/getting-started.mdx) — installation, codebase preparation, and first run
-- [Architecture](docs/architecture.mdx) — pipeline, tiers, data model, and sync design
+- [Architecture](docs/architecture.mdx) — pillars, tiers, data model, and sync design
 - [Embedding](docs/foundation/embedding.mdx) — 7-facet embedding with structural signals
 - [Scoring](docs/pillars/scoring.md) — fit, uniqueness, and subtree health metrics
 - [Audits](docs/pillars/audits.mdx) — 14 statistical checks for structural issues
 - [Kural Params](docs/codebase-realities/kural-params.md) — annotations for codebase realities
-- [Database](docs/db.md) — SQLite snapshot persistence and schema
+- [Database](docs/infrastructure/db.md) — SQLite snapshot persistence and schema
 
 ## Acknowledgments
 

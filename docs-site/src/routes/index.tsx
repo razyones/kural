@@ -101,7 +101,7 @@ function Home() {
               <ChevronRight className="w-3.5 h-3.5 text-fd-muted-foreground group-hover:text-fd-primary group-hover:translate-x-0.5 transition-all duration-300" />
             </Link>
             <p className="text-[11px] uppercase tracking-[0.08em] mb-3 text-[hsl(187,50%,35%)] dark:text-[hsl(187,40%,55%)]">
-              Structural discipline for Codebases
+              Structural discipline for codebases
             </p>
             <h1
               className="flex items-center gap-4 text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter text-fd-foreground mb-5 leading-[1.05]"
