@@ -1,0 +1,58 @@
+---
+title: kural advise
+description: Analyze a directory's structure and suggest prioritized improvements
+icon: Lightbulb
+---
+
+Analyzes one directory (or a JSON file describing a planned directory) and prints ordered recommendations: what to split, what to merge, what's misplaced, what has weak identity. Use it when `audit` has surfaced too many findings to act on — `advise` distills them into an action plan for one region.
+
+## Synopsis
+
+```bash
+kural advise <path> [flags]
+kural advise --from-file <file> [flags]
+```
+
+## Flags
+
+| Flag                 | Short | Type    | Description                                                                                    |
+| :------------------- | :---- | :------ | :--------------------------------------------------------------------------------------------- |
+| `<path>`             |       | string  | Directory to analyze (positional, required unless `--from-file` is used).                      |
+| `--from-file <file>` | `-f`  | string  | JSON file with `name`/`description` pairs — advises on a planned directory (description mode). |
+| `--leaf`             |       | boolean | Use leaf vectors instead of identity (snapshot mode only).                                     |
+| `--depth <n>`        | `-d`  | string  | Recursion depth into subdirectories. Default `1`.                                              |
+| `--provider <name>`  | `-p`  | string  | Embedding provider — for description mode only.                                                |
+| `--model <id>`       | `-m`  | string  | Model ID override — description mode only.                                                     |
+| `--api-key <key>`    | `-k`  | string  | API key — description mode only.                                                               |
+| `--json`             |       | boolean | Emit results as JSON.                                                                          |
+
+## Examples
+
+Analyze one directory in the current snapshot:
+
+```bash
+kural advise src/analysis/audits
+```
+
+Recurse two levels and use leaf vectors:
+
+```bash
+kural advise src/shell --depth 2 --leaf
+```
+
+Advise on a planned directory described in a JSON file:
+
+```bash
+kural advise --from-file proposed-layout.json
+```
+
+## When to use it
+
+- **When `audit` surfaces many findings at once** — `advise` orders them by impact and groups related ones into a single recommendation.
+- **Before splitting a directory** — description mode lets you feed a proposed layout and see how it scores before writing any code.
+- **During code review**, to produce a short, ordered list of structural issues reviewers can walk through.
+
+## Related
+
+- **Concept:** [Audits](/docs/pillars/audits) — the underlying findings that advise prioritizes.
+- **Companion:** [`kural audit`](/docs/commands/audit) — the unfiltered finding list.

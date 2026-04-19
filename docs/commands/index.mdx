@@ -1,0 +1,37 @@
+---
+title: Overview
+description: CLI reference for every kural command
+icon: Terminal
+---
+
+Each command is one page: synopsis, flags, an example, and when to reach for it. Conceptual background (why the command exists, what it computes) stays in the matching [Concepts](/docs/architecture) page — the reference pages link to it rather than repeat it.
+
+## At a glance
+
+| Command                               | When to use                                                                    |
+| :------------------------------------ | :----------------------------------------------------------------------------- |
+| [`snapshot`](/docs/commands/snapshot) | Bootstrap the repo — parse source, embed every unit, write the local database. |
+| [`brief`](/docs/commands/brief)       | _Before_ writing new code — show what already exists in the area.              |
+| [`place`](/docs/commands/place)       | _Before_ writing new code — rank directories by fit to find its home.          |
+| [`audit`](/docs/commands/audit)       | _After_ writing — list specific structural findings on the updated snapshot.   |
+| [`advise`](/docs/commands/advise)     | Prioritize findings into an ordered action plan for one directory.             |
+| [`score`](/docs/commands/score)       | Track aggregate health over time — fit, uniqueness, children fit/uniqueness.   |
+
+## Typical flow
+
+<Steps>
+  <Step>Run `kural snapshot generate src` on the repo — and again whenever source changes.</Step>
+  <Step>
+    *Before* adding code: use `kural brief` to see what exists, and `kural place` to find its home.
+  </Step>
+  <Step>
+    *After* editing: run `kural audit` for findings, then `kural advise` for a prioritized action
+    plan.
+  </Step>
+  <Step>Use `kural score` to track aggregate health over time — pin snapshots and compare.</Step>
+</Steps>
+
+<Callout type="info">
+  All analysis commands read from the snapshot database — they do not re-embed. Regenerate the
+  snapshot after meaningful code changes so findings stay current.
+</Callout>

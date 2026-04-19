@@ -1,0 +1,57 @@
+---
+title: kural score
+description: Display structural scores and deltas for codebase units
+icon: Gauge
+---
+
+Reads computed health numbers — fit, uniqueness, children fit/uniqueness — from the active snapshot and prints them grouped by level. Optionally compares against another snapshot to show deltas.
+
+## Synopsis
+
+```bash
+kural score [flags]
+```
+
+Requires an existing snapshot — generate one first with [`kural snapshot generate`](/docs/commands/snapshot).
+
+## Flags
+
+| Flag              | Short | Type    | Description                                                                             |
+| :---------------- | :---- | :------ | :-------------------------------------------------------------------------------------- |
+| `--path <prefix>` | `-p`  | string  | Restrict output to units whose path starts with `<prefix>`. Defaults to the whole tree. |
+| `--snapshot <id>` | `-s`  | string  | Snapshot ID or pin name to read. Defaults to the active snapshot.                       |
+| `--compare <id>`  | `-c`  | string  | Snapshot ID or pin name to diff against — renders per-unit deltas in the breakdown.     |
+| `--explain`       | `-e`  | boolean | Show the detailed breakdown table alongside the summary.                                |
+| `--limit <n>`     | `-l`  | string  | Max rows in the breakdown table. Default `20`; `0` for all.                             |
+| `--json`          |       | boolean | Emit the result as JSON.                                                                |
+
+## Examples
+
+Show scores for the whole active snapshot:
+
+```bash
+kural score
+```
+
+Show the detailed breakdown for one directory, top 50 rows:
+
+```bash
+kural score --path src/analysis --explain --limit 50
+```
+
+Diff the current snapshot against the `baseline` pin:
+
+```bash
+kural score --compare baseline --explain
+```
+
+## When to use it
+
+- **Before a refactor**, to know which region is lowest — it's the one that will benefit most.
+- **After a fix**, to check whether the score moved the right way. Pair with [`kural audit`](/docs/commands/audit) — a fix that drops the score but cleared a finding usually introduced a new finding elsewhere.
+- **Compared against a pinned baseline** to track structural drift over a sprint or release cycle.
+
+## Related
+
+- **Concept:** [Scoring](/docs/pillars/scoring) — the definitions of fit, uniqueness, and their children variants.
+- **Companion:** [`kural audit`](/docs/commands/audit) — the finding-level lens that cross-validates score changes.
