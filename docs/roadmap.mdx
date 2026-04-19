@@ -1,0 +1,72 @@
+---
+title: Roadmap
+description: Planned work — server tier, cloud sync, and the reactive dashboard that do not yet exist in code
+icon: Map
+---
+
+<Callout type="info">
+  Everything on this page is planned design, not shipped code. Nothing in `src/` implements a server
+  tier, cloud sync, or a reactive dashboard today — the CLI writes only to local `.kural-db/`.
+  Shipped architecture lives on the [Architecture](/docs/architecture) page.
+</Callout>
+
+## Server tier
+
+Kural today is a single-tier CLI. A server tier is planned so structural snapshots produced in CI can be archived centrally and queried by a web dashboard. Developers would keep writing locally; only CI would push.
+
+### Server Storage Layout
+
+```
+Turso (<user-id>.kural.io):
+  <project>/
+    <branch>/active.db    # live, clone-able snapshot
+    history.db            # consolidated, all branches + timestamps
+```
+
+On the server, only CI writes (via API); developers keep snapshots locally.
+
+## Sync Architecture
+
+### Write Path (CI Only)
+
+```
+CI pipeline -> POST <user-id>.kural.io/api/snapshots
+                  |
+                  v
+              API validates, deduplicates, writes to Turso:
+                - active.db (replace if newer commit)
+                - history.db (append)
+```
+
+- Developers never push to the server — local only
+- CI is the sole writer via authenticated API
+- API is the single writer to Turso — no direct client access
+
+### Concurrency Handling
+
+- Parallel CI runs for different branches: no conflict
+- Parallel CI runs for same branch, same commit: idempotent (skip duplicate)
+- Parallel CI runs for same branch, different commits: latest commit wins, stale rejected (409)
+
+### CI Failure Policy
+
+Fail silently with a warning in CI logs. The snapshot exists locally; next CI run generates a fresh one. No retries or queuing — simplicity over completeness.
+
+## Dashboard
+
+### Branch-Aware Views
+
+The planned dashboard supports multi-branch, multi-project views:
+
+| View              | Value                                                 |
+| ----------------- | ----------------------------------------------------- |
+| Single branch     | Current structural health                             |
+| Branch comparison | Health diff between branches (e.g., alpha vs release) |
+| Branch timeline   | Trend over history snapshots                          |
+| Pre-merge gate    | Feature branch health vs main                         |
+
+### Data Flow
+
+- TanStack DB (`@tanstack/react-db`) provides reactive live queries over collections
+- Collections are backed by Turso via QueryCollection
+- Live queries update the UI when new snapshots arrive
