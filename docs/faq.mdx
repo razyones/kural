@@ -30,7 +30,7 @@ Params are a type system for the structural space. TypeScript types don't patch 
 
 The same way it uses a type checker — to verify its own work before and after writing code. **Brief is the pre-flight check; audit is the post-flight check.**
 
-1. **Before writing code (pre-flight)**: run [`kural brief`](/docs/getting-started) `"description of what I'm about to build"` — get siblings, utilities, symbols, and patterns to reuse or imitate. The agent sees the structural neighborhood before generating anything.
+1. **Before writing code (pre-flight)**: run [`kural brief`](/docs/pillars/place) `"description of what I'm about to build"` — get siblings, utilities, symbols, and patterns to reuse or imitate. The agent sees the structural neighborhood before generating anything.
 2. **Write code** with descriptions following the skill's principles (exclusivity language, no sibling vocabulary, role-based descriptions).
 3. **After writing (post-flight)**: run `kural audit` — surface [findings](/docs/pillars/audits) the way `tsc` surfaces type errors.
 4. **Resolve findings** through the four-phase pipeline: fix incomplete docs first, then documentation quality, then structural issues, then suppress with `@kuralResidual` only as a last resort.
