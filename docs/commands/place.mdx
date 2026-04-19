@@ -1,0 +1,45 @@
+---
+title: kural place
+description: Find the directory where new code should live
+icon: MapPin
+---
+
+Takes a natural-language description of code you're about to write, embeds it, and ranks every directory in the snapshot by fit. Answers the core kural question — _where should this code live?_ — before you commit to a path.
+
+## Synopsis
+
+```bash
+kural place "<description>" [flags]
+```
+
+The description is a required positional argument. Quote it so the shell treats it as one argument.
+
+## Flags
+
+| Flag                | Short | Type    | Description                                                                |
+| :------------------ | :---- | :------ | :------------------------------------------------------------------------- |
+| `<description>`     |       | string  | Natural-language description of the code (positional, required).           |
+| `--provider <name>` | `-p`  | string  | Embedding provider — `openrouter`, `openai`, `vercel` (default), `ollama`. |
+| `--model <id>`      | `-m`  | string  | Model ID override.                                                         |
+| `--api-key <key>`   | `-k`  | string  | API key. Falls back to `AI_GATEWAY_API_KEY`.                               |
+| `--json`            |       | boolean | Emit ranked candidates as JSON.                                            |
+
+Use the same provider/model you used for `kural snapshot generate` — vector spaces aren't portable across models.
+
+## Examples
+
+```bash
+kural place "parses CLI flags for the audit command"
+kural place "retries failed HTTP requests with exponential backoff" --json
+```
+
+## When to use it
+
+- **Before adding a new file**, especially when several directories feel plausible.
+- **In an AI coding loop**, to give the agent a ranked list of candidate homes instead of letting it guess.
+- **When refactoring**, to sanity-check where a piece of logic has drifted — if `place` ranks a different directory first than where the code currently lives, you likely have a `misplaced` finding waiting.
+
+## Related
+
+- **Concept:** [Placement](/docs/pillars/place) — how the ranking is computed.
+- **Companion:** [`kural brief`](/docs/commands/brief) — same input, different question (_what already exists in this area?_).

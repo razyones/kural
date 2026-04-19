@@ -1,0 +1,6 @@
+{
+  "title": "Commands",
+  "icon": "Terminal",
+  "defaultOpen": true,
+  "pages": ["index", "snapshot", "brief", "place", "audit", "advise", "score"]
+}

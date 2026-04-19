@@ -1,0 +1,41 @@
+---
+title: kural brief
+description: Show existing code related to a concept before implementing it
+icon: FileSearch
+---
+
+Given a description of code you plan to write, returns the existing units in the snapshot that are closest in embedding space. Answers _"what already exists in this area?"_ so you don't duplicate behavior or borrow the wrong vocabulary.
+
+## Synopsis
+
+```bash
+kural brief "<description>" [flags]
+```
+
+## Flags
+
+| Flag                | Short | Type    | Description                                                                |
+| :------------------ | :---- | :------ | :------------------------------------------------------------------------- |
+| `<description>`     |       | string  | Description of the code you intend to write (positional, required).        |
+| `--provider <name>` | `-p`  | string  | Embedding provider — `openrouter`, `openai`, `vercel` (default), `ollama`. |
+| `--model <id>`      | `-m`  | string  | Model ID override.                                                         |
+| `--api-key <key>`   | `-k`  | string  | API key. Falls back to `AI_GATEWAY_API_KEY`.                               |
+| `--json`            |       | boolean | Emit the brief as JSON — agent-friendly.                                   |
+
+## Examples
+
+```bash
+kural brief "validate embedding provider configuration"
+kural brief "persist score cards to the snapshot database" --json
+```
+
+## When to use it
+
+- **Before an AI agent writes code**, pipe the brief into its context so it uses existing vocabulary and doesn't re-implement something that lives elsewhere.
+- **When onboarding**, to discover the handful of files that already touch a concept without grep'ing for keywords.
+- **Before opening a PR**, to sanity-check that your change isn't a near-duplicate of code that already exists.
+
+## Related
+
+- **Companion:** [`kural place`](/docs/commands/place) — same input, different question (_where should the new code go?_).
+- **Concept:** [Embedding](/docs/foundation/embedding) — what "close in embedding space" means in this system.

@@ -1,0 +1,65 @@
+---
+title: kural audit
+description: Run structural audits on a codebase snapshot and print categorized findings
+icon: SearchCheck
+---
+
+Runs the 14 statistical checks against the current snapshot and prints findings grouped by category — outliers, merge candidates, containments, misplaced nodes, duplicates, vocabulary bleed, incoherent containers, weak identities, and incomplete docs.
+
+## Synopsis
+
+```bash
+kural audit [flags]
+```
+
+`audit` reads the snapshot database in the current working directory. Generate it first with [`kural snapshot generate`](/docs/commands/snapshot).
+
+## Flags
+
+| Flag                | Short | Type    | Description                                                                                            |
+| :------------------ | :---- | :------ | :----------------------------------------------------------------------------------------------------- |
+| `--sensitivity <n>` | `-k`  | number  | Standard deviations from mean to flag a value. Default `2.0`. Higher values = stricter.                |
+| `--filter <list>`   | `-f`  | string  | Comma-separated audit categories to show (e.g. `outliers,duplicates`). Matches against section titles. |
+| `--disable <list>`  | `-d`  | string  | Comma-separated audit names to skip entirely (e.g. `incomplete-docs,vocabulary-bleed`).                |
+| `--expand`          | `-e`  | boolean | Show every finding per audit — disables the default truncation.                                        |
+| `--json`            |       | boolean | Emit machine-readable JSON instead of the formatted report.                                            |
+
+The `sensitivity` and `disable` defaults also come from `.kural/config.json` under the `audits` key — CLI flags override project config. See [Configuration](/docs/configuration).
+
+## Examples
+
+Run all audits at default sensitivity:
+
+```bash
+kural audit
+```
+
+Show only outlier and misplaced findings, with every match expanded:
+
+```bash
+kural audit --filter outliers,misplaced --expand
+```
+
+Stricter threshold, skipping documentation checks:
+
+```bash
+kural audit -k 3.0 -d incomplete-docs
+```
+
+Emit JSON for downstream tooling:
+
+```bash
+kural audit --json > audit.json
+```
+
+## When to use it
+
+- **After regenerating a snapshot**, to see what structural issues the new state introduces.
+- **Before a refactor**, to pick the highest-value target — outliers and duplicates surface move-or-merge candidates directly.
+- **In CI**, via `--json` — consume the report to fail builds on newly introduced findings.
+
+## Related
+
+- **Concept:** [Audits](/docs/pillars/audits) — what each of the 14 checks computes and why.
+- **Suppression:** [Kural Params](/docs/codebase-realities/kural-params) — `@kuralResidual`, `@kuralBound`, and `@kuralHelper` suppress specific audits by design.
+- **Companion:** [`kural score`](/docs/commands/score) — aggregate health numbers that cross-validate with audit findings.

@@ -1,0 +1,94 @@
+---
+title: kural snapshot
+description: Parse, embed, score, and store a codebase snapshot — plus manage saved snapshots
+icon: Database
+---
+
+Parses source files, embeds every unit, scores the tree, and writes the result to a local SQLite database in `.kural/`. Every other analysis command reads from this snapshot. `snapshot` is a command group with five subcommands — `generate`, `list`, `pin`, `unpin`, `delete`.
+
+## Synopsis
+
+```bash
+kural snapshot <subcommand> [args] [flags]
+```
+
+Run `kural snapshot --help` to list subcommands, or `kural snapshot <subcommand> --help` for flag details.
+
+---
+
+## `snapshot generate`
+
+Runs the full parse → embed → score → store pipeline for a directory.
+
+```bash
+kural snapshot generate <path> [flags]
+```
+
+| Flag                | Short | Type    | Description                                                                |
+| :------------------ | :---- | :------ | :------------------------------------------------------------------------- |
+| `<path>`            |       | string  | Directory to scan (positional, required).                                  |
+| `--provider <name>` | `-p`  | string  | Embedding provider — `openrouter`, `openai`, `vercel` (default), `ollama`. |
+| `--model <id>`      | `-m`  | string  | Model ID override. Uses the provider default when omitted.                 |
+| `--api-key <key>`   | `-k`  | string  | API key. Falls back to `AI_GATEWAY_API_KEY`.                               |
+| `--pin <name>`      |       | string  | Pin this snapshot under `<name>` so automatic eviction won't remove it.    |
+| `--json`            |       | boolean | Emit the result as JSON instead of the human-readable report.              |
+
+```bash
+kural snapshot generate src
+kural snapshot generate src --provider ollama --model qwen3-embedding-4b
+kural snapshot generate src --pin baseline
+```
+
+---
+
+## `snapshot list`
+
+Lists history snapshots for the current git branch with ID, timestamp, and pin name.
+
+```bash
+kural snapshot list [--json]
+```
+
+## `snapshot pin`
+
+Pins a snapshot with a name so it is exempt from automatic eviction.
+
+```bash
+kural snapshot pin <id> <name>
+```
+
+`<id>` can be a snapshot ID or an existing pin name. Both arguments are required.
+
+## `snapshot unpin`
+
+Clears the pin on a snapshot, making it evictable again.
+
+```bash
+kural snapshot unpin <id>
+```
+
+## `snapshot delete`
+
+Permanently removes a snapshot from history.
+
+```bash
+kural snapshot delete <id>
+```
+
+<Callout type="warn">
+  Deletion is immediate and cannot be undone. If the snapshot is the only one on the branch, every
+  other analysis command will have nothing to read until you run `generate` again.
+</Callout>
+
+---
+
+## When to use it
+
+- **Once per repo** to bootstrap, then **after every meaningful code change** to keep findings current.
+- **Pin** long-lived reference snapshots (e.g. `baseline`, `release-v1`) so you can compare scores against them with `kural score --compare`.
+- **Delete** or **unpin** when history clutters up — the eviction policy handles routine cleanup.
+
+## Related
+
+- **Concept:** [Embedding](/docs/foundation/embedding) — how source is turned into vectors.
+- **Companion:** [`kural audit`](/docs/commands/audit), [`kural score`](/docs/commands/score) — read the snapshot this command produces.
