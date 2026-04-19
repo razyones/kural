@@ -8,7 +8,7 @@
            └──────────────────────────────────────
 ```
 
-Structural scoring system for TypeScript codebases — answers **"where should this code live?"**
+Structural discipline for codebases — answers **"where should this code live?"**
 
 > **Early stage project** — Kural is under active development and evolving rapidly. Check out [Projects](../../projects) for the roadmap ahead. We welcome feedback, ideas, and contributions — reach out at **hello@razyones.com** to collaborate or share your thoughts.
 
@@ -28,16 +28,16 @@ Kural embeds every type, function, file, and directory into vector space, measur
 
 AI coding agents write code. They add functions, create files, move things around. But they have no idea whether the code they just wrote landed in the right place. They can't see that the function they added to `utils/` is semantically identical to one in `core/`, or that the file they created in `commands/` drifts toward the analysis engine's vocabulary.
 
-Kural gives your codebase a structural map. **Kural skills give your AI assistant the ability to read that map.**
+Kural gives your codebase a structural map. **Kural skills teach your AI assistant the structural discipline** — the same role a type system plays for a typed-language agent. Without a type checker, an agent writes code that runs but breaks contracts. Without structural discipline, an agent writes code that works but rots the codebase.
 
-Without skills, the agent generates code blind to structure. With skills, it knows the four-phase resolution pipeline, understands why descriptions carry 50% weight in the identity vector, and can work through audit findings methodically — fixing docs before restructuring, restructuring before suppressing.
+With skills, the agent knows the four-phase resolution pipeline, understands why descriptions carry 50% weight in the identity vector, and works through audit findings methodically — fixing docs before restructuring, restructuring before suppressing. Brief is its pre-flight check; audit is its post-flight check.
 
 This is the difference between an agent that writes code and an agent that writes code **in the right place**.
 
 <Callout type="warn">
-  An AI agent without structural awareness will accumulate architectural debt faster than a human
+  An AI agent without structural discipline will accumulate architectural debt faster than a human
   developer — it produces more code per hour but has zero intuition about where that code belongs.
-  Kural skills are the structural intuition layer.
+  Kural skills are the discipline layer.
 </Callout>
 
 ## Install
@@ -207,13 +207,14 @@ JSDoc annotations that declare structural realities the vector space can't captu
 
 ## How it works
 
-Kural is a five-stage pipeline:
+Kural is built on four pillars:
 
-1. **Parse** — Walk the filesystem, extract functions, types, and descriptions from the AST
-2. **Embed** — Produce identity and leaf vectors via 7-facet embedding (name, description, path, signature, causes, calls, parent context)
-3. **Score** — Compute fit, uniqueness, and subtree health for every node
-4. **Store** — Persist units, scores, and metadata to a SQLite snapshot
-5. **Query** — Read snapshots for scoring, auditing, and comparison
+1. **Embed** — place every type, function, file, and directory in vector space using 7-facet embedding (name, description, path, signature, causes, calls, parent context)
+2. **Score** — measure fit, uniqueness, and subtree health for every node
+3. **Audit** — surface specific structural issues with statistical fences calibrated from the codebase's own distributions
+4. **Place** — route new units against the well-distributed space and retrieve the surrounding context an agent needs before implementing
+
+See [Architecture](docs/architecture.mdx) for how the pillars are implemented — snapshot generation, caching, the embeddings-not-LLMs design choice, and the local/server tier split.
 
 ### Scoring metrics
 
@@ -253,12 +254,12 @@ Every node gets a score card:
 ### Topics
 
 - [Getting Started](docs/getting-started.mdx) — installation, codebase preparation, and first run
-- [Architecture](docs/architecture.mdx) — pipeline, tiers, data model, and sync design
+- [Architecture](docs/architecture.mdx) — pillars, tiers, data model, and sync design
 - [Embedding](docs/foundation/embedding.mdx) — 7-facet embedding with structural signals
 - [Scoring](docs/pillars/scoring.md) — fit, uniqueness, and subtree health metrics
 - [Audits](docs/pillars/audits.mdx) — 14 statistical checks for structural issues
 - [Kural Params](docs/codebase-realities/kural-params.md) — annotations for codebase realities
-- [Database](docs/db.md) — SQLite snapshot persistence and schema
+- [Database](docs/infrastructure/db.md) — SQLite snapshot persistence and schema
 
 ## Acknowledgments
 

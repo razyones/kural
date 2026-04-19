@@ -152,7 +152,7 @@ Known keys:
 1. Parse target path into units (files, types, functions, directories)
 2. Load embedding cache from current `active.db` (if exists and model matches)
 3. Embed uncached units (7-pass faceted embedding)
-4. Rotate current `active.db` to `history/kural-history-<snapshot-id>.db`
+4. Rotate current `active.db` to `history/<snapshot-id>.db`
 5. Create fresh `active.db`, write metadata, parsed units, and scores
 6. Evict oldest history snapshot if count exceeds 10
 

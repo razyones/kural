@@ -89,7 +89,7 @@ For GitHub Actions, consider using [`voidzero-dev/setup-vp`](https://github.com/
 
 # Project: kural
 
-Structural scoring system for TypeScript codebases — answers "where should this code live?"
+Structural discipline for codebases — answers "where should this code live?" Today targets TypeScript codebases; the structural concepts (fit, uniqueness, audits, placement) are language-agnostic and the ingestion pipeline is what's TypeScript-specific.
 
 ## Architecture
 

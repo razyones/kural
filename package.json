@@ -1,7 +1,7 @@
 {
   "name": "kural",
   "version": "0.0.1-alpha.1",
-  "description": "Structural scoring system for TypeScript codebases — answers \"where should this code live?\"",
+  "description": "Structural discipline for codebases — answers \"where should this code live?\"",
   "keywords": [
     "architecture",
     "audit",

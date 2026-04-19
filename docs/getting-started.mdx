@@ -4,6 +4,10 @@ description: Install Kural and run your first structural analysis
 icon: Rocket
 ---
 
+Kural is a discipline layer for codebases — the structural counterpart to what TypeScript does for types. It answers _"where should this code live?"_ for humans and AI agents alike, scores how well your codebase is organized, and surfaces the drift that accumulates as code is added or moved. The pipeline runs on embedding-tier compute, so a full pass over a 50k-LOC codebase costs cents at hosted rates and zero with local models.
+
+This page walks you from install to first audit. If you're here to give an AI agent structural discipline, jump to [AI Code Editors](/docs/ai-editors) after the snapshot step.
+
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) v18 or later
@@ -224,7 +228,7 @@ Navigate to your project root and run:
 kural snapshot generate src
 ```
 
-This walks the `src` directory, extracts types and functions from the AST, embeds them using 7 structural facets, computes fit and uniqueness scores, and stores everything in `.kural-db/`.
+This walks the `src` directory, extracts types and functions from the AST, embeds them using 7 structural facets, computes fit and uniqueness scores, and stores everything in `.kural-db/`. On subsequent runs, only new or modified units (changed `facet_hash`) are re-embedded — the rest are served from cache.
 
 <Callout type="info">
   Add `.kural-db/` to your `.gitignore`. Snapshots are local and should not be committed.

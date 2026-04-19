@@ -2,8 +2,7 @@ import type { DocsConfig } from "./src/lib/config";
 
 const config: DocsConfig = {
   name: "Kural",
-  description:
-    'Structural scoring system for TypeScript codebases — answers "where should this code live?"',
+  description: 'Structural discipline for codebases — answers "where should this code live?"',
   url: "https://razyones.github.io/kural",
   content: "../docs",
   nav: {

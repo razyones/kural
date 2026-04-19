@@ -6,7 +6,7 @@ argument-hint: [audit-name or path]
 
 ## Resolve Audit
 
-Help the user study and resolve kural audit findings. Kural detects structural issues in TypeScript codebases — misplaced code, duplicates, poor naming, vocabulary bleed, missing docs, and more.
+Help the user study and resolve kural audit findings. Kural detects structural issues in codebases — misplaced code, duplicates, poor naming, vocabulary bleed, missing docs, and more.
 
 ### Arguments
 
