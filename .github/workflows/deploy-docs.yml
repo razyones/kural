@@ -61,6 +61,7 @@ jobs:
         run: pnpm run --filter kural-docs build
         env:
           BASE_PATH: ${{ steps.base.outputs.path }}
+          DOCS_BRANCH: ${{ github.ref_name }}
 
       - name: Generate SPA fallback 404
         run: |
