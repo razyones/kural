@@ -137,7 +137,9 @@ async function renderPageMarkdown(absPath: string): Promise<string> {
     if (titleMatch) title = unwrap(titleMatch[1].trim());
     if (descMatch) description = unwrap(descMatch[1].trim());
   }
-  body = body.replaceAll(/^import\s+.*$/gm, "").replace(/^\n+/, "");
+  body = body
+    .replaceAll(/^import\s+(?:[\s\S]*?from\s+)?['"][^'"]+['"];?/gm, "")
+    .replace(/^\n+/, "");
   const heading = title ? `# ${title}\n\n` : "";
   const desc = description ? `${description}\n\n` : "";
   return `${heading}${desc}${body}`;
@@ -150,6 +152,8 @@ async function renderPageMarkdown(absPath: string): Promise<string> {
  */
 function pageMarkdownPlugin(): Plugin {
   const MARKDOWN_HEADERS = { "content-type": "text/markdown; charset=utf-8" };
+  // Cached for the lifetime of the dev server. Restart dev to pick up new pages.
+  let pagesCache: Record<string, string> | null = null;
   return {
     name: "page-markdown",
     configureServer(server) {
@@ -161,8 +165,8 @@ function pageMarkdownPlugin(): Plugin {
           return;
         }
         const slug = match[1] ?? "";
-        const pages = await collectDocPages();
-        const file = pages[slug];
+        pagesCache ??= await collectDocPages();
+        const file = pagesCache[slug];
         if (!file) {
           next();
           return;
@@ -344,7 +348,7 @@ function docsDataPlugin(): Plugin {
       // Build search entries with structured data (headings + content)
       function stripMarkdown(text: string): string {
         return text
-          .replaceAll(/^import\s+.*$/gm, "")
+          .replaceAll(/^import\s+(?:[\s\S]*?from\s+)?['"][^'"]+['"];?/gm, "")
           .replaceAll(/<[^>]+>/g, " ")
           .replaceAll(/```[\s\S]*?```/g, " ")
           .replaceAll(/\[([^\]]*)\]\([^)]*\)/g, "$1")
@@ -448,8 +452,13 @@ function docsDataPlugin(): Plugin {
   };
 }
 
+const DOCS_BRANCH = process.env.DOCS_BRANCH ?? "alpha";
+
 export default defineConfig({
   base: process.env.BASE_PATH ?? "/",
+  define: {
+    "process.env.DOCS_BRANCH": JSON.stringify(DOCS_BRANCH),
+  },
   server: {
     port: 3000,
   },
