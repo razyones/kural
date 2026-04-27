@@ -1,7 +1,14 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import browserCollections from "collections/browser";
-import { DocsBody, DocsDescription, DocsPage, DocsTitle } from "fumadocs-ui/layouts/docs/page";
+import {
+  DocsBody,
+  DocsDescription,
+  DocsPage,
+  DocsTitle,
+  MarkdownCopyButton,
+  ViewOptionsPopover,
+} from "fumadocs-ui/layouts/docs/page";
 import { deserializePageTree } from "fumadocs-core/source/client";
 import { Suspense } from "react";
 import { NavLogo } from "@/components/nav-logo";
@@ -12,6 +19,9 @@ import { pageMeta, pathMap, pageTree as staticPageTree } from "virtual:docs-data
 
 const base = import.meta.env.BASE_URL ?? "/";
 const siteUrl = new URL(base, config.url).href.replace(/\/$/, "");
+const baseHref = base.replace(/\/$/, "");
+const REPO_URL = "https://github.com/razyones/kural";
+const REPO_BRANCH = "alpha";
 
 type PageMeta = Record<string, { title: string; description: string }>;
 
@@ -26,9 +36,13 @@ export const Route = createFileRoute("/docs/$")({
     const meta = (pageMeta as PageMeta)[slugKey];
     await clientLoader.preload(path);
     const slug = slugKey === "" ? "" : `/${slugKey}`;
+    const markdownUrl = slugKey === "" ? `${baseHref}/docs.mdx` : `${baseHref}/docs/${slugKey}.mdx`;
+    const githubUrl = `${REPO_URL}/blob/${REPO_BRANCH}/docs/${path}`;
     return {
       path,
       slug,
+      markdownUrl,
+      githubUrl,
       title: meta?.title ?? config.name,
       description: meta?.description ?? "",
     };
@@ -60,10 +74,15 @@ const mdxComponents = getMDXComponents();
 
 const clientLoader = browserCollections.docs.createClientLoader({
   component({ frontmatter, default: MDX, toc }) {
+    const { markdownUrl, githubUrl } = Route.useLoaderData();
     return (
       <DocsPage toc={toc}>
         <DocsTitle>{frontmatter.title}</DocsTitle>
         <DocsDescription>{frontmatter.description}</DocsDescription>
+        <div className="flex flex-row flex-wrap items-center gap-2 -mt-6 mb-6 pb-6 border-b border-fd-border">
+          <MarkdownCopyButton markdownUrl={markdownUrl} />
+          <ViewOptionsPopover markdownUrl={markdownUrl} githubUrl={githubUrl} />
+        </div>
         <DocsBody>
           <MDX components={mdxComponents} />
         </DocsBody>

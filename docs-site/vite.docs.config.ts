@@ -91,6 +91,107 @@ function robotsTxtPlugin(): Plugin {
 }
 
 /**
+ * Walks `../docs/` and returns slug → absolute file path. Slug "" is the
+ * root `/docs` page (e.g. `index.mdx`); other slugs are the URL fragment
+ * after `/docs/`.
+ */
+async function collectDocPages(): Promise<Record<string, string>> {
+  const { readdirSync, statSync } = await import("node:fs");
+  const { join, relative } = await import("node:path");
+  const docsDir = join(import.meta.dirname, "../docs");
+  const result: Record<string, string> = {};
+  function walk(dir: string): void {
+    for (const entry of readdirSync(dir)) {
+      if (entry === "meta.json") continue;
+      const full = join(dir, entry);
+      if (statSync(full).isDirectory()) {
+        walk(full);
+      } else if (/\.mdx?$/.test(entry)) {
+        const rel = relative(docsDir, full);
+        const slug = rel.replace(/\.mdx?$/, "").replace(/\/index$/, "");
+        const key = slug === "index" ? "" : slug;
+        result[key] = full;
+      }
+    }
+  }
+  walk(docsDir);
+  return result;
+}
+
+/** Reads an .mdx file and returns LLM-friendly markdown with a title heading. */
+async function renderPageMarkdown(absPath: string): Promise<string> {
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync(absPath, "utf-8");
+  const fmMatch = /^---\s*\n([\s\S]*?)\n---\n?/.exec(src);
+  let title = "";
+  let description = "";
+  let body = src;
+  if (fmMatch) {
+    body = src.slice(fmMatch[0].length);
+    const titleMatch = /^title:\s*(.+)$/m.exec(fmMatch[1]);
+    const descMatch = /^description:\s*(.+)$/m.exec(fmMatch[1]);
+    const unwrap = (s: string): string => {
+      const m = /^(["'])(.*)\1$/.exec(s);
+      return m ? m[2] : s;
+    };
+    if (titleMatch) title = unwrap(titleMatch[1].trim());
+    if (descMatch) description = unwrap(descMatch[1].trim());
+  }
+  body = body.replaceAll(/^import\s+.*$/gm, "").replace(/^\n+/, "");
+  const heading = title ? `# ${title}\n\n` : "";
+  const desc = description ? `${description}\n\n` : "";
+  return `${heading}${desc}${body}`;
+}
+
+/**
+ * Serves and prerenders per-page markdown at `${pageUrl}.mdx`. Powers the
+ * docs page's "Copy Markdown" / "View as Markdown" actions on a static
+ * host where server functions don't exist at runtime.
+ */
+function pageMarkdownPlugin(): Plugin {
+  const MARKDOWN_HEADERS = { "content-type": "text/markdown; charset=utf-8" };
+  return {
+    name: "page-markdown",
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        const url = req.url ?? "";
+        const match = /^\/docs(?:\/(.+?))?\.mdx(?:\?.*)?$/.exec(url);
+        if (!match) {
+          next();
+          return;
+        }
+        const slug = match[1] ?? "";
+        const pages = await collectDocPages();
+        const file = pages[slug];
+        if (!file) {
+          next();
+          return;
+        }
+        const md = await renderPageMarkdown(file);
+        res.writeHead(200, MARKDOWN_HEADERS);
+        res.end(md);
+      });
+    },
+    closeBundle: {
+      sequential: true,
+      async handler() {
+        const { mkdirSync, writeFileSync } = await import("node:fs");
+        const { dirname, join } = await import("node:path");
+        const publicDir = join(import.meta.dirname, ".output/public");
+        const pages = await collectDocPages();
+        for (const [slug, file] of Object.entries(pages)) {
+          const md = await renderPageMarkdown(file);
+          const target =
+            slug === "" ? join(publicDir, "docs.mdx") : join(publicDir, "docs", `${slug}.mdx`);
+          mkdirSync(dirname(target), { recursive: true });
+          writeFileSync(target, md);
+        }
+      },
+    },
+  };
+}
+
+/**
  * Generates a virtual module `virtual:docs-data` that embeds the
  * slug-to-path mapping at build time. This lets the SPA resolve
  * page paths on static hosting without server functions.
@@ -368,6 +469,7 @@ export default defineConfig({
     react(),
     nitro(),
     docsDataPlugin(),
+    pageMarkdownPlugin(),
     sitemapPlugin(),
     robotsTxtPlugin(),
   ],
