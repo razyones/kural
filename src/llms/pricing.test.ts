@@ -2,18 +2,11 @@ import { SONNET_PRICES, resolvePricing } from "./pricing.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { FREE_PRICES } from "./gateways/ollama.ts";
 import { ModelNotFoundError } from "./gateways/http.ts";
+import { jsonResponse } from "../../tests/helpers/http.ts";
 
 const VERCEL_BASE = "https://ai-gateway.vercel.sh/v1";
 const MINIMAX_INPUT = 0.3;
 const NONE = 0;
-const HTTP_OK = 200;
-
-function jsonResponse(body: unknown, status: number = HTTP_OK): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 describe("resolvePricing", () => {
   const fetchMock = vi.fn<typeof fetch>();

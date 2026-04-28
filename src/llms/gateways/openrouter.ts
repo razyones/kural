@@ -8,7 +8,7 @@
 
 import type { CatalogEntry, NormalizedThroughput, PricePerMillionTokens } from "./http.ts";
 import type { CatalogFetchParams, GatewayAdapter } from "./registry.ts";
-import { fetchJson, modelNotFound, parsePerToken, readFirstEndpoint } from "./http.ts";
+import { ModelNotFoundError, fetchJson, parsePerToken, readFirstEndpoint } from "./http.ts";
 import { isRecord } from "../../utils/record.ts";
 
 const OPENROUTER_ID = "openrouter";
@@ -102,22 +102,22 @@ async function fetchCatalog(
   params: CatalogFetchParams,
   apiKey?: string,
 ): Promise<CatalogEntry | undefined> {
-  const pricingBody = await fetchJson(`${params.baseURL}${MODELS_PATH}`);
+  const pricingRequest = fetchJson(`${params.baseURL}${MODELS_PATH}`);
+  const endpointsRequest =
+    apiKey === undefined
+      ? Promise.resolve()
+      : fetchJson(`${params.baseURL}${MODELS_PATH}/${params.modelId}${ENDPOINTS_SUFFIX}`, {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        });
+  const [pricingBody, endpointsBody] = await Promise.all([pricingRequest, endpointsRequest]);
   if (pricingBody === undefined) {
     return undefined;
   }
   const pricingRecord = findPricing(pricingBody, params.modelId);
   if (pricingRecord === undefined) {
-    throw modelNotFound(OPENROUTER_ID, params.modelId);
+    throw new ModelNotFoundError(OPENROUTER_ID, params.modelId);
   }
   const price = adaptPrice(pricingRecord);
-  if (apiKey === undefined) {
-    return { price };
-  }
-  const endpointsBody = await fetchJson(
-    `${params.baseURL}${MODELS_PATH}/${params.modelId}${ENDPOINTS_SUFFIX}`,
-    { headers: { Authorization: `Bearer ${apiKey}` } },
-  );
   const firstEndpoint = endpointsBody === undefined ? undefined : readFirstEndpoint(endpointsBody);
   const throughput = firstEndpoint === undefined ? undefined : adaptThroughput(firstEndpoint);
   return throughput === undefined ? { price } : { price, throughput };

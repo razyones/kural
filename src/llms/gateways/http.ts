@@ -62,18 +62,6 @@ class ModelNotFoundError extends Error {
 }
 
 /**
- * Builds a ModelNotFoundError with the canonical message.
- * @param gateway - Resolved gateway id
- * @param modelId - Model id the user asked for
- * @returns The fail-fast error for unknown model ids
- * @kuralPure
- * @kuralHelper
- */
-function modelNotFound(gateway: string, modelId: string): ModelNotFoundError {
-  return new ModelNotFoundError(gateway, modelId);
-}
-
-/**
  * Converts a gateway's per-token USD price into the per-million number
  * the plan's cost math expects. Treats empty, negative, or non-numeric
  * values as zero so gateways that omit cache fields degrade cleanly.
@@ -140,5 +128,5 @@ function readFirstEndpoint(body: unknown): Record<string, unknown> | undefined {
   return isRecord(first) ? first : undefined;
 }
 
-export { ModelNotFoundError, fetchJson, modelNotFound, parsePerToken, readFirstEndpoint };
+export { ModelNotFoundError, fetchJson, parsePerToken, readFirstEndpoint };
 export type { CatalogEntry, NormalizedThroughput, PricePerMillionTokens };

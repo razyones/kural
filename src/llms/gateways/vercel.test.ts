@@ -1,6 +1,7 @@
 import { adaptPrice, adaptThroughput, vercel } from "./vercel.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { ModelNotFoundError } from "./http.ts";
+import { jsonResponse } from "../../../tests/helpers/http.ts";
 
 const VERCEL_BASE = "https://ai-gateway.vercel.sh/v1";
 const EXPECTED_INPUT = 3;
@@ -12,16 +13,8 @@ const MINIMAX_OUTPUT = 1.2;
 const EXPECTED_TTFT = 0.85;
 const EXPECTED_TPS = 72;
 const MS_TTFT = 850;
-const HTTP_OK = 200;
 const HTTP_ERROR = 500;
 const NONE = 0;
-
-function jsonResponse(body: unknown, status: number = HTTP_OK): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 describe("adaptPrice", () => {
   it("converts per-token strings into per-million numbers using Vercel field names", () => {

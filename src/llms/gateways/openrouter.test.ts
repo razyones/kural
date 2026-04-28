@@ -1,6 +1,7 @@
 import { adaptPrice, adaptThroughput, openrouter } from "./openrouter.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { ModelNotFoundError } from "./http.ts";
+import { jsonResponse } from "../../../tests/helpers/http.ts";
 
 const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
 const MINIMAX_INPUT = 0.3;
@@ -10,17 +11,9 @@ const EXPECTED_TTFT = 0.85;
 const EXPECTED_TPS = 72;
 const MS_TTFT = 850;
 const API_KEY = "test-key";
-const HTTP_OK = 200;
 const NONE = 0;
 const ONE_CALL = 1;
 const SECOND_CALL = 1;
-
-function jsonResponse(body: unknown, status: number = HTTP_OK): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 describe("adaptPrice", () => {
   it("maps prompt/completion to input/output and converts units", () => {

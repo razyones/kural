@@ -97,51 +97,32 @@ function priceForModel(gateway: string, modelId: string): PricePerMillionTokens 
   return SONNET_PRICES;
 }
 
-/**
- * Returns the conservative TTFT + streaming-rate pair the plan uses when
- * no gateway reports live throughput.
- * @returns Fallback throughput pair
- * @kuralPure
- */
-function fallbackThroughput(): NormalizedThroughput {
-  return {
-    ttftSeconds: FALLBACK_TTFT_SECONDS,
-    tokensPerSecond: FALLBACK_TOKENS_PER_SECOND,
-  };
-}
+/** Conservative TTFT + streaming-rate pair the plan uses when no gateway reports live throughput. */
+const FALLBACK_THROUGHPUT: NormalizedThroughput = {
+  ttftSeconds: FALLBACK_TTFT_SECONDS,
+  tokensPerSecond: FALLBACK_TOKENS_PER_SECOND,
+};
+
+/** Why the resolver fell back to family prices instead of a live catalog entry. */
+type FallbackReason = "unknown-gateway" | "catalog-unavailable";
 
 /**
- * Returns the PriceResolution used when no gateway adapter is registered —
- * family fallback prices plus conservative throughput.
+ * Returns the PriceResolution used when the resolver can't get a live
+ * catalog entry — family fallback prices plus conservative throughput,
+ * labeled with the reason so the readout can show why.
  * @param input - Resolver input with gateway id + model id
- * @returns Fallback resolution labeled with the gateway id
+ * @param reason - Why the catalog was skipped
+ * @returns Fallback resolution annotated with the reason
  * @kuralPure
  * @kuralHelper
  */
-function unknownGatewayFallback(input: PriceResolverInput): PriceResolution {
+function familyFallback(input: PriceResolverInput, reason: FallbackReason): PriceResolution {
+  const suffix = reason === "catalog-unavailable" ? " (catalog unavailable)" : "";
   return {
     price: priceForModel(input.gateway, input.modelId),
-    throughput: fallbackThroughput(),
+    throughput: FALLBACK_THROUGHPUT,
     source: "fallback",
-    sourceLabel: `${input.gateway} family fallback`,
-  };
-}
-
-/**
- * Returns the PriceResolution used when a registered adapter's catalog
- * call fails transiently — family fallback prices with a label that
- * explains the catalog was unavailable.
- * @param input - Resolver input with gateway id + model id
- * @returns Fallback resolution annotated for an unavailable catalog
- * @kuralPure
- * @kuralHelper
- */
-function unavailableCatalogFallback(input: PriceResolverInput): PriceResolution {
-  return {
-    price: priceForModel(input.gateway, input.modelId),
-    throughput: fallbackThroughput(),
-    source: "fallback",
-    sourceLabel: `${input.gateway} family fallback (catalog unavailable)`,
+    sourceLabel: `${input.gateway} family fallback${suffix}`,
   };
 }
 
@@ -161,7 +142,7 @@ function toResolution(adapter: GatewayAdapter, entry: CatalogEntry): PriceResolu
     adapter.kind === "local" ? `${adapter.id} local (no billing)` : `${adapter.id} catalog`;
   const resolution: PriceResolution = {
     price: entry.price,
-    throughput: entry.throughput ?? fallbackThroughput(),
+    throughput: entry.throughput ?? FALLBACK_THROUGHPUT,
     source,
     sourceLabel,
   };
@@ -184,7 +165,7 @@ function toResolution(adapter: GatewayAdapter, entry: CatalogEntry): PriceResolu
 async function resolvePricing(input: PriceResolverInput): Promise<PriceResolution> {
   const adapter = findGateway(input.gateway);
   if (adapter === undefined) {
-    return unknownGatewayFallback(input);
+    return familyFallback(input, "unknown-gateway");
   }
   const { apiKey } = resolveGatewayApiKey(adapter, input.overrides);
   try {
@@ -193,22 +174,22 @@ async function resolvePricing(input: PriceResolverInput): Promise<PriceResolutio
       apiKey,
     );
     if (entry === undefined) {
-      return unavailableCatalogFallback(input);
+      return familyFallback(input, "catalog-unavailable");
     }
     return toResolution(adapter, entry);
   } catch (err) {
     if (err instanceof ModelNotFoundError) {
       throw err;
     }
-    return unavailableCatalogFallback(input);
+    return familyFallback(input, "catalog-unavailable");
   }
 }
 
 export {
+  FALLBACK_THROUGHPUT,
   HAIKU_PRICES,
   OPUS_PRICES,
   SONNET_PRICES,
-  fallbackThroughput,
   priceForModel,
   resolvePricing,
 };

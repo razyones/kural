@@ -9,7 +9,7 @@
 
 import type { CatalogEntry, NormalizedThroughput, PricePerMillionTokens } from "./http.ts";
 import type { CatalogFetchParams, GatewayAdapter } from "./registry.ts";
-import { fetchJson, modelNotFound, parsePerToken, readFirstEndpoint } from "./http.ts";
+import { ModelNotFoundError, fetchJson, parsePerToken, readFirstEndpoint } from "./http.ts";
 import { isRecord } from "../../utils/record.ts";
 
 const VERCEL_ID = "vercel";
@@ -115,23 +115,23 @@ async function fetchCatalog(
   params: CatalogFetchParams,
   _apiKey?: string,
 ): Promise<CatalogEntry | undefined> {
-  const pricingBody = await fetchJson(`${params.baseURL}${MODELS_PATH}`);
+  const [pricingBody, endpointsBody] = await Promise.all([
+    fetchJson(`${params.baseURL}${MODELS_PATH}`),
+    fetchJson(`${params.baseURL}${MODELS_PATH}/${params.modelId}${ENDPOINTS_SUFFIX}`),
+  ]);
   if (pricingBody === undefined) {
     return undefined;
   }
   const modelRecord = findModelRecord(pricingBody, params.modelId);
   if (modelRecord === undefined) {
-    throw modelNotFound(VERCEL_ID, params.modelId);
+    throw new ModelNotFoundError(VERCEL_ID, params.modelId);
   }
   const { pricing } = modelRecord;
   if (!isRecord(pricing)) {
-    throw modelNotFound(VERCEL_ID, params.modelId);
+    throw new ModelNotFoundError(VERCEL_ID, params.modelId);
   }
   const price = adaptPrice(pricing);
   const isReasoning = hasReasoningTag(modelRecord);
-  const endpointsBody = await fetchJson(
-    `${params.baseURL}${MODELS_PATH}/${params.modelId}${ENDPOINTS_SUFFIX}`,
-  );
   const firstEndpoint = endpointsBody === undefined ? undefined : readFirstEndpoint(endpointsBody);
   const throughput = firstEndpoint === undefined ? undefined : adaptThroughput(firstEndpoint);
   return buildEntry(price, throughput, isReasoning);

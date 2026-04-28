@@ -1,18 +1,11 @@
-import { ModelNotFoundError, fetchJson, modelNotFound, parsePerToken } from "./http.ts";
+import { ModelNotFoundError, fetchJson, parsePerToken } from "./http.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
+import { jsonResponse } from "../../../tests/helpers/http.ts";
 
 const PER_MILLION_INPUT = 0.0000003;
 const EXPECTED_PER_MILLION = 0.3;
 const ZERO = 0;
-const HTTP_OK = 200;
 const HTTP_ERROR = 500;
-
-function jsonResponse(body: unknown, status: number = HTTP_OK): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
 
 describe("parsePerToken", () => {
   it("multiplies a numeric string into per-million units", () => {
@@ -33,8 +26,7 @@ describe("parsePerToken", () => {
 
 describe("ModelNotFoundError", () => {
   it("names the gateway and model id in its message", () => {
-    const err = modelNotFound("vercel", "missing/model");
-    expect(err).toBeInstanceOf(ModelNotFoundError);
+    const err = new ModelNotFoundError("vercel", "missing/model");
     expect(err.message).toContain("missing/model");
     expect(err.message).toContain("vercel");
     expect(err.name).toBe("ModelNotFoundError");

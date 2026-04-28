@@ -15,6 +15,7 @@ const DEFAULT_BATCH_SIZE = 25;
 const DEFAULT_RETRIES = 2;
 const DEFAULT_CONCURRENCY = 25;
 const NONE = 0;
+const LOCAL_API_KEY_SENTINEL = "ollama";
 
 /** A function that embeds a single batch of strings into vectors. */
 type RawEmbedFn = (values: string[]) => Promise<number[][]>;
@@ -52,6 +53,31 @@ type EmbedBatchOptions = {
 };
 
 /**
+ * Picks the API key by precedence — explicit config override beats the
+ * resolved env var, which beats the local sentinel for gateways that
+ * don't authenticate at all.
+ * @param config - Embeddings config with optional inline apiKey
+ * @param envKey - Env var value resolved by resolveLLMApiKey
+ * @param apiKeyOptional - True for local gateways with no auth (e.g. ollama)
+ * @returns The chosen apiKey, or undefined when nothing is available
+ * @kuralPure
+ * @kuralHelper
+ */
+function pickApiKey(
+  config: KuralConfig["embeddings"],
+  envKey: string | undefined,
+  apiKeyOptional: boolean,
+): string | undefined {
+  if (config.apiKey !== undefined) {
+    return config.apiKey;
+  }
+  if (envKey !== undefined) {
+    return envKey;
+  }
+  return apiKeyOptional ? LOCAL_API_KEY_SENTINEL : undefined;
+}
+
+/**
  * Creates a raw embed function and model ID from gateway configuration.
  * @param config - Embeddings configuration with gateway, model, and API key
  * @param overrides - Optional per-id env-var overrides from kural.config.json
@@ -74,8 +100,7 @@ function createEmbeddingModel(
 
   const baseURL = config.baseURL ?? defaults.baseURL;
   const { envName, apiKey: envKey } = resolveLLMApiKey(config.gateway, overrides);
-  const apiKey =
-    config.apiKey ?? envKey ?? (defaults.apiKeyOptional === true ? "ollama" : undefined);
+  const apiKey = pickApiKey(config, envKey, defaults.apiKeyOptional === true);
 
   if (apiKey === undefined) {
     throw new Error(
