@@ -60,11 +60,13 @@ function adaptThroughput(endpoint: Record<string, unknown>): NormalizedThroughpu
 }
 
 /**
- * Scans /v1/models' `data` array for the matching model id and returns
- * its pricing sub-record.
+ * Scans /v1/models' `data` array for the matching model id. Returns the
+ * full model record so the caller can distinguish "model not in catalog"
+ * (undefined) from "model present but pricing sub-record incomplete"
+ * (record returned, pricing field missing).
  * @param body - Parsed JSON body from the /v1/models response
  * @param modelId - Exact model id to look up
- * @returns Pricing record when found, otherwise undefined
+ * @returns Model record when found, otherwise undefined
  * @kuralPure
  * @kuralHelper
  */
