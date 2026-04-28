@@ -58,15 +58,17 @@ function adaptThroughput(endpoint: Record<string, unknown>): NormalizedThroughpu
 }
 
 /**
- * Scans /v1/models' `data` array for the matching model id and returns
- * its pricing sub-record.
+ * Scans /v1/models' `data` array for the matching model id. Returns the
+ * full model record so the caller can distinguish "model not in catalog"
+ * (undefined) from "model present but pricing sub-record incomplete"
+ * (record returned, pricing field missing).
  * @param body - Parsed JSON body from the /v1/models response
  * @param modelId - Exact model id to look up
- * @returns Pricing record when found, otherwise undefined
+ * @returns Model record when found, otherwise undefined
  * @kuralPure
  * @kuralHelper
  */
-function findPricing(body: unknown, modelId: string): Record<string, unknown> | undefined {
+function findModelRecord(body: unknown, modelId: string): Record<string, unknown> | undefined {
   if (!isRecord(body)) {
     return undefined;
   }
@@ -75,12 +77,8 @@ function findPricing(body: unknown, modelId: string): Record<string, unknown> | 
     return undefined;
   }
   for (const entry of data) {
-    if (!isRecord(entry) || entry["id"] !== modelId) {
-      continue;
-    }
-    const { pricing } = entry;
-    if (isRecord(pricing)) {
-      return pricing;
+    if (isRecord(entry) && entry["id"] === modelId) {
+      return entry;
     }
   }
   return undefined;
@@ -113,11 +111,15 @@ async function fetchCatalog(
   if (pricingBody === undefined) {
     return undefined;
   }
-  const pricingRecord = findPricing(pricingBody, params.modelId);
-  if (pricingRecord === undefined) {
+  const modelRecord = findModelRecord(pricingBody, params.modelId);
+  if (modelRecord === undefined) {
     throw new ModelNotFoundError(OPENROUTER_ID, params.modelId);
   }
-  const price = adaptPrice(pricingRecord);
+  const { pricing } = modelRecord;
+  if (!isRecord(pricing)) {
+    return undefined;
+  }
+  const price = adaptPrice(pricing);
   const firstEndpoint = endpointsBody === undefined ? undefined : readFirstEndpoint(endpointsBody);
   const throughput = firstEndpoint === undefined ? undefined : adaptThroughput(firstEndpoint);
   return throughput === undefined ? { price } : { price, throughput };

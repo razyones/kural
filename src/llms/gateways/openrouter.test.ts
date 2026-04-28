@@ -117,6 +117,16 @@ describe("openrouter.fetchCatalog", () => {
     ).rejects.toBeInstanceOf(ModelNotFoundError);
   });
 
+  it("returns undefined when the model is listed but has no pricing sub-record", async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ data: [{ id: "minimax/minimax-m2.7" }] }));
+    const entry = await openrouter.fetchCatalog({
+      gateway: "openrouter",
+      baseURL: OPENROUTER_BASE,
+      modelId: "minimax/minimax-m2.7",
+    });
+    expect(entry).toBeUndefined();
+  });
+
   it("returns price without throughput when the endpoints body is an unexpected shape", async () => {
     fetchMock
       .mockResolvedValueOnce(
