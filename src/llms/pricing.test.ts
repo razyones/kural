@@ -1,8 +1,8 @@
-import { SONNET_PRICES, resolvePricing } from "./pricing.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { FREE_PRICES } from "./gateways/ollama.ts";
 import { ModelNotFoundError } from "./gateways/http.ts";
 import { jsonResponse } from "../../tests/helpers/http.ts";
+import { resolvePricing } from "./pricing.ts";
 
 const VERCEL_BASE = "https://ai-gateway.vercel.sh/v1";
 const MINIMAX_INPUT = 0.3;
@@ -31,13 +31,18 @@ describe("resolvePricing", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("falls back to family table for gateways without a registered adapter (openai)", async () => {
-    const result = await resolvePricing({
+  it("throws PricingResolutionError(unknown-gateway) when no adapter is registered", async () => {
+    await expect(
+      resolvePricing({
+        gateway: "openai",
+        baseURL: "https://api.openai.com/v1",
+        modelId: "gpt-4o",
+      }),
+    ).rejects.toMatchObject({
+      name: "PricingResolutionError",
+      reason: "unknown-gateway",
       gateway: "openai",
-      baseURL: "https://api.openai.com/v1",
-      modelId: "gpt-4o",
     });
-    expect(result.source).toBe("fallback");
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -66,16 +71,19 @@ describe("resolvePricing", () => {
     expect(result.price.input).toBeCloseTo(MINIMAX_INPUT);
   });
 
-  it("falls back with an unavailable label when the catalog fetch fails", async () => {
+  it("throws PricingResolutionError(catalog-unavailable) when the catalog fetch fails", async () => {
     fetchMock.mockRejectedValue(new Error("network down"));
-    const result = await resolvePricing({
+    await expect(
+      resolvePricing({
+        gateway: "vercel",
+        baseURL: VERCEL_BASE,
+        modelId: "anthropic/claude-sonnet-4-5",
+      }),
+    ).rejects.toMatchObject({
+      name: "PricingResolutionError",
+      reason: "catalog-unavailable",
       gateway: "vercel",
-      baseURL: VERCEL_BASE,
-      modelId: "anthropic/claude-sonnet-4-5",
     });
-    expect(result.source).toBe("fallback");
-    expect(result.sourceLabel).toContain("catalog unavailable");
-    expect(result.price).toEqual(SONNET_PRICES);
   });
 
   it("propagates ModelNotFoundError so missing ids fail fast", async () => {
