@@ -21,10 +21,10 @@ export default define({
       description: "Text description of the code to place",
       required: true,
     },
-    provider: {
+    gateway: {
       type: "string" as const,
-      short: "p",
-      description: "Embedding provider (openrouter, openai, vercel, ollama)",
+      short: "g",
+      description: "Embedding gateway (openrouter, openai, vercel, ollama)",
     },
     model: {
       type: "string" as const,
@@ -34,7 +34,7 @@ export default define({
     apiKey: {
       type: "string" as const,
       short: "k",
-      description: "API key (defaults to AI_GATEWAY_API_KEY env var)",
+      description: "API key (falls back to the gateway's env var from kural config)",
     },
     json: {
       type: "boolean" as const,
@@ -43,20 +43,20 @@ export default define({
   },
   run: async (ctx) => {
     const root = process.cwd();
-    const provider = ctx.values.provider ?? "vercel";
+    const gateway = ctx.values.gateway ?? "vercel";
     const jsonMode = ctx.values.json === true;
 
     if (!jsonMode) {
       logBanner("place", {
         query: ctx.values.description,
-        provider,
+        gateway,
       });
     }
 
     const result = await runPlacement(
       root,
       ctx.values.description,
-      provider,
+      gateway,
       ctx.values.model,
       ctx.values.apiKey,
     );

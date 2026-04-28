@@ -1,5 +1,5 @@
-import { describe, expect, test } from "vite-plus/test";
-import { num, str } from "./record.ts";
+import { describe, expect, it, test } from "vite-plus/test";
+import { isRecord, num, str } from "./record.ts";
 
 const NONE = 0;
 const FORTY_TWO = 42;
@@ -99,5 +99,18 @@ describe("str — fallback to empty string", () => {
 
   test("returns empty string when record is undefined", () => {
     expect(str(undefined, "key")).toBe("");
+  });
+});
+
+describe("isRecord", () => {
+  it("accepts plain objects", () => {
+    expect(isRecord({})).toBe(true);
+    expect(isRecord({ a: 1 })).toBe(true);
+  });
+
+  it("rejects arrays, null, and primitives", () => {
+    expect(isRecord([])).toBe(false);
+    expect(isRecord(null)).toBe(false);
+    expect(isRecord("x")).toBe(false);
   });
 });

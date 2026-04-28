@@ -20,7 +20,7 @@ const NONE = 0;
  * Runs the brief pipeline: open snapshot → build tree → embed → brief.
  * @param root - Absolute path to the project root
  * @param description - Text description of the code the agent plans to write
- * @param provider - Embedding provider name
+ * @param gateway - Embedding gateway id
  * @param model - Optional model override
  * @param apiKey - Optional API key override
  * @returns The complete brief for the description
@@ -29,7 +29,7 @@ const NONE = 0;
 async function runBrief(
   root: string,
   description: string,
-  provider: string,
+  gateway: string,
   model?: string,
   apiKey?: string,
 ): Promise<Brief> {
@@ -45,7 +45,7 @@ async function runBrief(
     const nodes = buildTree(result);
     const projectConfig = loadProjectConfig(root);
 
-    const { embed } = createEmbeddingModel({ provider, model, apiKey });
+    const { embed } = createEmbeddingModel({ gateway, model, apiKey }, projectConfig.gateways);
     const embedder = async (texts: string[]): Promise<number[][]> => {
       if (texts.length === NONE) {
         return [];

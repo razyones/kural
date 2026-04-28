@@ -26,8 +26,10 @@ type JSDocInfo = {
 };
 
 const NONE = 0;
+const FIRST = 0;
 const AUDIT_NAME = 0;
 const AUDIT_HASH = 1;
+const LAST_BLOCK_OFFSET = 1;
 
 /**
  * Parses a @kuralResidual tag into a ResidualEntry and appends it.
@@ -100,15 +102,13 @@ function processTag(tag: ts.JSDocTag, info: JSDocInfo): void {
 }
 
 /**
- * Extracts kural-specific JSDoc tags and description from an AST node.
- * Reads @kuralPure, @kuralUtil, @kuralResidual, @kuralCauses, @kuralBound, @param, and @returns.
- * @param node - The AST node to inspect for JSDoc comments
- * @returns Parsed JSDoc info with description, kural tags, and doc completeness
+ * Builds an empty JSDocInfo accumulator with all flags off.
+ * @returns Fresh JSDocInfo with no description and no tags
  * @kuralPure
+ * @kuralHelper
  */
-function getJSDoc(node: ts.Node): JSDocInfo {
-  const jsDocNodes = ts.getJSDocCommentsAndTags(node);
-  const info: JSDocInfo = {
+function emptyInfo(): JSDocInfo {
+  return {
     pure: false,
     util: false,
     helper: false,
@@ -116,19 +116,75 @@ function getJSDoc(node: ts.Node): JSDocInfo {
     documentedParams: NONE,
     hasReturnDoc: false,
   };
+}
 
-  for (const jsdoc of jsDocNodes) {
-    if (ts.isJSDoc(jsdoc)) {
-      if (typeof jsdoc.comment === "string") {
-        info.description = jsdoc.comment;
-      }
-      for (const tag of jsdoc.tags ?? []) {
-        processTag(tag, info);
-      }
-    }
+/** Narrowed view of the @internal jsDoc array TypeScript hangs on AST nodes. */
+type WithJSDoc = ts.Node & { jsDoc?: readonly ts.Node[] };
+
+/**
+ * Reads every JSDoc block attached to a node in source order. Reaches
+ * past the public ts.getJSDocCommentsAndTags helper, which collapses
+ * stacked blocks into the closest one — the underlying jsDoc array
+ * preserves them, which is what callers here need to tell file-level
+ * comments apart from declaration-level ones.
+ * @param node - The AST node to read leading JSDoc blocks from
+ * @returns Array of JSDoc blocks in source order, empty when none
+ * @kuralPure
+ * @kuralHelper
+ */
+function jsDocBlocks(node: ts.Node): ts.JSDoc[] {
+  const blocks = (node as WithJSDoc).jsDoc ?? [];
+  return blocks.filter((b): b is ts.JSDoc => ts.isJSDoc(b));
+}
+
+/**
+ * Reads the description and kural tags from one JSDoc block into a fresh
+ * JSDocInfo. Returns an empty accumulator when the block is undefined.
+ * @param jsdoc - The single JSDoc block to read, or undefined
+ * @returns Parsed JSDoc info derived from this block alone
+ * @kuralPure
+ * @kuralHelper
+ */
+function infoFromJSDoc(jsdoc: ts.JSDoc | undefined): JSDocInfo {
+  const info = emptyInfo();
+  if (jsdoc === undefined) {
+    return info;
   }
-
+  if (typeof jsdoc.comment === "string") {
+    info.description = jsdoc.comment;
+  }
+  for (const tag of jsdoc.tags ?? []) {
+    processTag(tag, info);
+  }
   return info;
+}
+
+/**
+ * Extracts kural-specific JSDoc tags and description for a declaration.
+ * When multiple JSDoc blocks attach to the same node — which happens
+ * when a file-level comment sits directly above the first declaration —
+ * the block closest to the declaration wins so file metadata never
+ * leaks into the declaration's identity.
+ * @param node - The declaration node to inspect for JSDoc comments
+ * @returns Parsed JSDoc info for the declaration's own block
+ * @kuralPure
+ */
+function getJSDoc(node: ts.Node): JSDocInfo {
+  const blocks = jsDocBlocks(node);
+  return infoFromJSDoc(blocks[blocks.length - LAST_BLOCK_OFFSET]);
+}
+
+/**
+ * Extracts the file-level JSDoc anchored on the first statement. When
+ * the first statement is itself a JSDoc'd declaration the top-of-file
+ * comment is the earlier of the two attached blocks; this picks that
+ * one so the file description never collapses into the declaration's.
+ * @param node - The first statement node of the source file
+ * @returns Parsed JSDoc info for the top-of-file block
+ * @kuralPure
+ */
+function getFileJSDoc(node: ts.Node): JSDocInfo {
+  return infoFromJSDoc(jsDocBlocks(node)[FIRST]);
 }
 
 /**
@@ -167,5 +223,5 @@ function isUtilModule(filePath: string, fileJSDoc: JSDocInfo): boolean {
   );
 }
 
-export { getJSDoc, hasExportModifier, isUtilModule };
+export { getFileJSDoc, getJSDoc, hasExportModifier, isUtilModule };
 export type { JSDocInfo };

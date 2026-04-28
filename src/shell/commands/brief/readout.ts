@@ -258,7 +258,7 @@ function printBriefFooter(): void {
       },
     ],
     [
-      { command: "kural brief -p <provider>", description: "use a specific embedding provider" },
+      { command: "kural brief -g <gateway>", description: "use a specific embedding gateway" },
       { command: "kural brief --json", description: "output brief as JSON for agent consumption" },
       { command: "kural place", description: "ask only where the new code should live" },
       { command: "kural audit", description: "check structural health after changes" },

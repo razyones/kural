@@ -64,20 +64,20 @@ function buildCallbacks(): GenerateCallbacks {
 /**
  * Serializes the generation outcome into a machine-readable JSON report for programmatic consumers.
  * @param targetPath - Absolute path to the scanned directory
- * @param provider - Embedding provider name
+ * @param gateway - Embedding gateway id
  * @param modelId - Resolved embedding model ID
  * @param result - Completed generation result with counts and paths
  * @kuralCauses writes JSON to stdout
  */
 function printJson(
   targetPath: string,
-  provider: string,
+  gateway: string,
   modelId: string,
   result: GenerateResult,
 ): void {
   const output = {
     path: relative(process.cwd(), targetPath) || ".",
-    provider,
+    gateway,
     model: modelId,
     branch: result.branch,
     snapshotId: result.snapshotId,
@@ -110,7 +110,7 @@ function createTrackedEmbedder(embedFn: (values: string[]) => Promise<number[][]
 /** Parsed CLI arguments for the generate command. */
 type GenerateArgs = {
   path: string;
-  provider?: string;
+  gateway?: string;
   model?: string;
   apiKey?: string;
   json?: boolean;
@@ -118,31 +118,34 @@ type GenerateArgs = {
 };
 
 /**
- * Orchestrates the full generate flow — resolves the embedding provider, runs the pipeline, and renders either human or JSON output.
+ * Orchestrates the full generate flow — resolves the embedding gateway, runs the pipeline, and renders either human or JSON output.
  * @param values - Parsed CLI arguments for the generate command
  * @returns Resolves when generation and output have completed
  * @kuralCauses orchestrates the full parse-embed-score-store pipeline with I/O
  */
 async function handleGenerate(values: GenerateArgs): Promise<void> {
   const targetPath = resolve(values.path);
-  const provider = values.provider ?? "vercel";
+  const gateway = values.gateway ?? "vercel";
   const jsonMode = values.json === true;
 
-  const { embed: embedFn, modelId } = createEmbeddingModel({
-    provider,
-    model: values.model,
-    apiKey: values.apiKey,
-  });
+  const projectConfig = loadProjectConfig();
+  const { embed: embedFn, modelId } = createEmbeddingModel(
+    {
+      gateway,
+      model: values.model,
+      apiKey: values.apiKey,
+    },
+    projectConfig.gateways,
+  );
 
   if (!jsonMode) {
     logBanner("snapshot generate", {
       path: relative(process.cwd(), targetPath) || ".",
-      provider,
+      gateway,
       model: modelId,
     });
   }
 
-  const projectConfig = loadProjectConfig();
   const embedOptions: EmbedOptions = {
     rootPath: targetPath,
     domainKeywords: projectConfig.domainKeywords ?? [],
@@ -162,7 +165,7 @@ async function handleGenerate(values: GenerateArgs): Promise<void> {
   );
 
   if (jsonMode) {
-    printJson(targetPath, provider, modelId, result);
+    printJson(targetPath, gateway, modelId, result);
     return;
   }
 
@@ -178,20 +181,20 @@ export default define({
       description: "Path to the codebase directory",
       required: true,
     },
-    provider: {
+    gateway: {
       type: "string" as const,
-      short: "p",
-      description: "Embedding provider (openrouter, openai, vercel, ollama)",
+      short: "g",
+      description: "Embedding gateway (openrouter, openai, vercel, ollama)",
     },
     model: {
       type: "string" as const,
       short: "m",
-      description: "Model ID override (uses provider default if omitted)",
+      description: "Model ID override (uses gateway default if omitted)",
     },
     apiKey: {
       type: "string" as const,
       short: "k",
-      description: "API key (defaults to AI_GATEWAY_API_KEY env var)",
+      description: "API key (falls back to the gateway's env var from kural config)",
     },
     json: {
       type: "boolean" as const,

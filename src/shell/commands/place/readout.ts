@@ -157,7 +157,7 @@ function printPlaceFooter(): void {
       },
     ],
     [
-      { command: "kural place -p <provider>", description: "use a specific embedding provider" },
+      { command: "kural place -g <gateway>", description: "use a specific embedding gateway" },
       { command: "kural place --json", description: "output result as JSON" },
       { command: "kural score", description: "view the overall structural score" },
       { command: "kural audit", description: "run structural audits" },

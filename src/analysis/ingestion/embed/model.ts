@@ -5,19 +5,22 @@
  * directly.
  */
 
+import type { GatewayOverrides } from "../../../llms/apiKey.ts";
 import type { KuralConfig } from "../../../shell/config/schema.ts";
 import { createOpenAI } from "@ai-sdk/openai";
 import { embedMany } from "ai";
+import { resolveLLMApiKey } from "../../../llms/apiKey.ts";
 
 const DEFAULT_BATCH_SIZE = 25;
 const DEFAULT_RETRIES = 2;
 const DEFAULT_CONCURRENCY = 25;
 const NONE = 0;
+const LOCAL_GATEWAY_DUMMY_KEY = "local";
 
 /** A function that embeds a single batch of strings into vectors. */
 type RawEmbedFn = (values: string[]) => Promise<number[][]>;
 
-const PROVIDER_DEFAULTS: Record<
+const GATEWAY_DEFAULTS: Record<
   string,
   { baseURL?: string; model: string; apiKeyOptional?: boolean }
 > = {
@@ -50,39 +53,66 @@ type EmbedBatchOptions = {
 };
 
 /**
- * Creates a raw embed function and model ID from provider configuration.
- * @param config - Embeddings configuration with provider, model, and API key
- * @returns An object with a batch embed function and the resolved model ID
- * @kuralCauses initializes a remote embedding connection from provider config
+ * Picks the API key by precedence — explicit config override beats the
+ * resolved env var, which beats the local sentinel for gateways that
+ * don't authenticate at all.
+ * @param config - Embeddings config with optional inline apiKey
+ * @param envKey - Env var value resolved by resolveLLMApiKey
+ * @param apiKeyOptional - True for local gateways with no auth (e.g. ollama)
+ * @returns The chosen apiKey, or undefined when nothing is available
+ * @kuralPure
+ * @kuralHelper
  */
-function createEmbeddingModel(config: KuralConfig["embeddings"]): {
+function pickApiKey(
+  config: KuralConfig["embeddings"],
+  envKey: string | undefined,
+  apiKeyOptional: boolean,
+): string | undefined {
+  if (config.apiKey !== undefined) {
+    return config.apiKey;
+  }
+  if (envKey !== undefined) {
+    return envKey;
+  }
+  return apiKeyOptional ? LOCAL_GATEWAY_DUMMY_KEY : undefined;
+}
+
+/**
+ * Creates a raw embed function and model ID from gateway configuration.
+ * @param config - Embeddings configuration with gateway, model, and API key
+ * @param overrides - Optional per-id env-var overrides from kural.config.json
+ * @returns An object with a batch embed function and the resolved model ID
+ * @kuralCauses initializes a remote embedding connection from gateway config
+ */
+function createEmbeddingModel(
+  config: KuralConfig["embeddings"],
+  overrides?: GatewayOverrides,
+): {
   embed: RawEmbedFn;
   modelId: string;
 } {
-  if (!(config.provider in PROVIDER_DEFAULTS)) {
-    const supported = Object.keys(PROVIDER_DEFAULTS).join(", ");
-    throw new Error(`Unsupported embedding provider "${config.provider}". Supported: ${supported}`);
+  if (!(config.gateway in GATEWAY_DEFAULTS)) {
+    const supported = Object.keys(GATEWAY_DEFAULTS).join(", ");
+    throw new Error(`Unsupported embedding gateway "${config.gateway}". Supported: ${supported}`);
   }
-  const defaults = PROVIDER_DEFAULTS[config.provider];
+  const defaults = GATEWAY_DEFAULTS[config.gateway];
   const modelId = config.model ?? defaults.model;
 
   const baseURL = config.baseURL ?? defaults.baseURL;
-  const apiKey =
-    config.apiKey ??
-    process.env.AI_GATEWAY_API_KEY ??
-    (defaults.apiKeyOptional === true ? "ollama" : undefined);
+  const { envName, apiKey: envKey } = resolveLLMApiKey(config.gateway, overrides);
+  const apiKey = pickApiKey(config, envKey, defaults.apiKeyOptional === true);
 
   if (apiKey === undefined) {
     throw new Error(
-      `No API key for provider "${config.provider}". Set AI_GATEWAY_API_KEY or pass --api-key`,
+      `No API key for gateway "${config.gateway}". Set ${envName ?? "the gateway's env var"} or pass --api-key`,
     );
   }
 
-  const provider = createOpenAI({
+  const client = createOpenAI({
     ...(baseURL !== undefined && baseURL !== "" ? { baseURL } : {}),
     ...(apiKey === "" ? {} : { apiKey }),
   });
-  const model = provider.embedding(modelId);
+  const model = client.embedding(modelId);
 
   return {
     embed: async (values: string[]) => {
@@ -95,7 +125,7 @@ function createEmbeddingModel(config: KuralConfig["embeddings"]): {
         return embeddings;
       } catch (err) {
         throw new Error(
-          `Embedding API call failed (provider: ${config.provider}, model: ${modelId}): ${err instanceof Error ? err.message : String(err)}`,
+          `Embedding API call failed (gateway: ${config.gateway}, model: ${modelId}): ${err instanceof Error ? err.message : String(err)}`,
           { cause: err },
         );
       }

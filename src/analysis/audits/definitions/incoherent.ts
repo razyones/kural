@@ -14,6 +14,7 @@ import { isSuppressed } from "../context.ts";
 import { num } from "../../../utils/record.ts";
 
 const NONE = 0;
+const MIN_CHILDREN = 2;
 
 /**
  * Renders the label-fit deficit showing how far a container's declared identity strays from its actual content.
@@ -55,7 +56,7 @@ function collectLabelFits(
       continue;
     }
     const children = getChildren(node, nodes);
-    if (children.length === NONE) {
+    if (children.length < MIN_CHILDREN) {
       continue;
     }
     entries.push({

@@ -2,7 +2,7 @@
 
 import type { ExtractedFile, KuralFunction, KuralType, ModuleImports } from "./types.ts";
 import { declarationEndLine, declarationStartLine } from "./positions.ts";
-import { getJSDoc, hasExportModifier, isUtilModule } from "./jsdoc.ts";
+import { getFileJSDoc, getJSDoc, hasExportModifier, isUtilModule } from "./jsdoc.ts";
 import type { JSDocInfo } from "./jsdoc.ts";
 import { basename } from "node:path";
 import { readFileSync } from "node:fs";
@@ -274,8 +274,8 @@ function extractFile(filePath: string): ExtractedFile {
   }
   const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true);
   const imports = extractImports(sourceFile);
-  const fileJSDoc =
-    sourceFile.statements.length === FIRST ? EMPTY_JSDOC : getJSDoc(sourceFile.statements[FIRST]);
+  const firstStmt = sourceFile.statements[FIRST];
+  const fileJSDoc = firstStmt === undefined ? EMPTY_JSDOC : getFileJSDoc(firstStmt);
   const { functions, types } = collectDeclarations(sourceFile, filePath, imports, fileJSDoc);
 
   const isBarrelExport =

@@ -194,9 +194,10 @@ describe("incoherent trigger", () => {
 
     const coherentNames = ["a.ts", "b.ts", "c.ts", "d.ts", "e.ts"];
     const coherentFiles = coherentNames.map((f) => file(`${p}/${f}`, f, [E09, E01, E0]));
-    const coherentFns = coherentNames.map((f) =>
-      fn(`${p}/${f}`, `fn_${f.replace(".ts", "")}`, [E088, E012, E0]),
-    );
+    const coherentFns = coherentNames.flatMap((f) => [
+      fn(`${p}/${f}`, `fn_${f.replace(".ts", "")}_a`, [E088, E012, E0]),
+      fn(`${p}/${f}`, `fn_${f.replace(".ts", "")}_b`, [E088, E012, E0]),
+    ]);
 
     const data: SeedData = {
       directories: [
@@ -209,7 +210,11 @@ describe("incoherent trigger", () => {
           identityEmbedding: [E1, E0, E0],
         },
       ],
-      functions: [...coherentFns, fn(`${p}/bad.ts`, "fn_bad", [E0, E0, E1])],
+      functions: [
+        ...coherentFns,
+        fn(`${p}/bad.ts`, "fn_bad_a", [E0, E0, E1]),
+        fn(`${p}/bad.ts`, "fn_bad_b", [E0, E0, E1]),
+      ],
     };
     await seedFullActiveSnapshot(tmpRoot, "main", data);
     expectAudit(auditJson(tmpRoot), "incoherent");
@@ -331,9 +336,10 @@ describe("incoherent-utils trigger", () => {
     // All functions are util → tree builder propagates util to files
     const coherentNames = ["a.ts", "b.ts", "c.ts", "d.ts", "e.ts"];
     const coherentFiles = coherentNames.map((f) => file(`${p}/${f}`, f, [E09, E01, E0]));
-    const coherentFns = coherentNames.map((f) =>
-      fn(`${p}/${f}`, `fn_${f.replace(".ts", "")}`, [E088, E012, E0], { util: true }),
-    );
+    const coherentFns = coherentNames.flatMap((f) => [
+      fn(`${p}/${f}`, `fn_${f.replace(".ts", "")}_a`, [E088, E012, E0], { util: true }),
+      fn(`${p}/${f}`, `fn_${f.replace(".ts", "")}_b`, [E088, E012, E0], { util: true }),
+    ]);
 
     const data: SeedData = {
       directories: [
@@ -346,7 +352,11 @@ describe("incoherent-utils trigger", () => {
           identityEmbedding: [E1, E0, E0],
         },
       ],
-      functions: [...coherentFns, fn(`${p}/bad.ts`, "fn_bad", [E0, E0, E1], { util: true })],
+      functions: [
+        ...coherentFns,
+        fn(`${p}/bad.ts`, "fn_bad_a", [E0, E0, E1], { util: true }),
+        fn(`${p}/bad.ts`, "fn_bad_b", [E0, E0, E1], { util: true }),
+      ],
     };
     await seedFullActiveSnapshot(tmpRoot, "main", data);
     expectAudit(auditJson(tmpRoot), "incoherent-utils");

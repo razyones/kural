@@ -1,1 +1,1 @@
-Houses sensitivity dials for diagnostics, provider connection shapes, and the disk reader that loads them at startup. It is the only module that owns declarative tuning and reference data — no other module defines detection thresholds, provider shapes, or the file-loading contract.
+Houses sensitivity dials for diagnostics, gateway connection shapes, and the disk reader that loads them at startup. It is the only module that owns declarative tuning and reference data — no other module defines detection thresholds, gateway shapes, or the file-loading contract.
