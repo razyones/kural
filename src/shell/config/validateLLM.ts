@@ -40,7 +40,7 @@ function validateLLM(llm: Bag, warnings: string[]): boolean {
   }
   for (const key of LLM_OPTIONAL_STRING_KEYS) {
     if (key in llm && typeof llm[key] !== "string") {
-      warnings.push(`llm.${key} must be a string — ignoring`);
+      warnings.push(`llm.${key} must be a string — removing field`);
       Reflect.deleteProperty(llm, key);
     }
   }

@@ -29,6 +29,7 @@ const NONE = 0;
 const FIRST = 0;
 const AUDIT_NAME = 0;
 const AUDIT_HASH = 1;
+const LAST_BLOCK_OFFSET = 1;
 
 /**
  * Parses a @kuralResidual tag into a ResidualEntry and appends it.
@@ -170,7 +171,7 @@ function infoFromJSDoc(jsdoc: ts.JSDoc | undefined): JSDocInfo {
  */
 function getJSDoc(node: ts.Node): JSDocInfo {
   const blocks = jsDocBlocks(node);
-  return infoFromJSDoc(blocks[blocks.length - AUDIT_HASH]);
+  return infoFromJSDoc(blocks[blocks.length - LAST_BLOCK_OFFSET]);
 }
 
 /**

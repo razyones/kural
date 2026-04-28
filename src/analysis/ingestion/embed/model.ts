@@ -15,7 +15,7 @@ const DEFAULT_BATCH_SIZE = 25;
 const DEFAULT_RETRIES = 2;
 const DEFAULT_CONCURRENCY = 25;
 const NONE = 0;
-const LOCAL_API_KEY_SENTINEL = "ollama";
+const LOCAL_GATEWAY_DUMMY_KEY = "local";
 
 /** A function that embeds a single batch of strings into vectors. */
 type RawEmbedFn = (values: string[]) => Promise<number[][]>;
@@ -74,7 +74,7 @@ function pickApiKey(
   if (envKey !== undefined) {
     return envKey;
   }
-  return apiKeyOptional ? LOCAL_API_KEY_SENTINEL : undefined;
+  return apiKeyOptional ? LOCAL_GATEWAY_DUMMY_KEY : undefined;
 }
 
 /**
