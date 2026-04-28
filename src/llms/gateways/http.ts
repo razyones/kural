@@ -82,8 +82,8 @@ function parsePerToken(raw: unknown): number {
 /**
  * Fetches a URL and returns its parsed JSON body on success, or undefined
  * on any transient failure — network error, non-2xx status, or invalid
- * JSON. The resolver treats undefined as "catalog unavailable" and falls
- * back to family prices.
+ * JSON. The resolver translates undefined into a catalog-unavailable
+ * PricingResolutionError so callers see a typed transient failure.
  * @param url - Endpoint URL to GET
  * @param init - Optional fetch init (for auth headers)
  * @returns Parsed JSON body, or undefined on any failure

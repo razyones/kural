@@ -128,7 +128,7 @@ async function fetchCatalog(
   }
   const { pricing } = modelRecord;
   if (!isRecord(pricing)) {
-    throw new ModelNotFoundError(VERCEL_ID, params.modelId);
+    return undefined;
   }
   const price = adaptPrice(pricing);
   const isReasoning = hasReasoningTag(modelRecord);
@@ -138,13 +138,16 @@ async function fetchCatalog(
 }
 
 /**
- * Composes the canonical CatalogEntry, dropping optional fields when the
- * gateway didn't report them so downstream code can distinguish "gateway
- * didn't say" from "gateway said false".
+ * Composes the canonical CatalogEntry. Throughput is dropped when the
+ * gateway didn't report it (undefined ≠ "gateway said zero"); isReasoning
+ * is always propagated because Vercel's tags array is the authoritative
+ * signal for this gateway — absence of the "reasoning" tag is a positive
+ * `false`, distinct from gateways that don't expose a reasoning signal at
+ * all.
  * @param price - Resolved per-million price table
  * @param throughput - Latency and streaming rate, undefined when unreported
  * @param isReasoning - Whether the gateway flagged the model as reasoning
- * @returns CatalogEntry with only reported fields populated
+ * @returns CatalogEntry with throughput optional and isReasoning always set
  * @kuralPure
  * @kuralHelper
  */
@@ -153,12 +156,9 @@ function buildEntry(
   throughput: NormalizedThroughput | undefined,
   isReasoning: boolean,
 ): CatalogEntry {
-  const entry: CatalogEntry = { price };
+  const entry: CatalogEntry = { price, isReasoning };
   if (throughput !== undefined) {
     entry.throughput = throughput;
-  }
-  if (isReasoning) {
-    entry.isReasoning = true;
   }
   return entry;
 }

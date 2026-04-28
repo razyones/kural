@@ -106,6 +106,16 @@ describe("vercel.fetchCatalog", () => {
     ).rejects.toBeInstanceOf(ModelNotFoundError);
   });
 
+  it("returns undefined when the model is listed but has no pricing sub-record", async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ data: [{ id: "minimax/minimax-m2.7" }] }));
+    const entry = await vercel.fetchCatalog({
+      gateway: "vercel",
+      baseURL: VERCEL_BASE,
+      modelId: "minimax/minimax-m2.7",
+    });
+    expect(entry).toBeUndefined();
+  });
+
   it("returns undefined when the /models call returns a non-ok status", async () => {
     fetchMock.mockResolvedValue(jsonResponse({}, HTTP_ERROR));
     const entry = await vercel.fetchCatalog({
@@ -204,16 +214,16 @@ describe("vercel.fetchCatalog reasoning flag", () => {
     expect(entry?.isReasoning).toBe(true);
   });
 
-  it("omits isReasoning when the tags array lacks 'reasoning'", async () => {
+  it("sets isReasoning=false when the tags array lacks 'reasoning'", async () => {
     mockCatalog({ ...BASE_RECORD, tags: ["tool-use"] });
     const entry = await vercel.fetchCatalog(FETCH_PARAMS);
-    expect(entry?.isReasoning).toBeUndefined();
+    expect(entry?.isReasoning).toBe(false);
   });
 
-  it("omits isReasoning when tags is absent from the record", async () => {
+  it("sets isReasoning=false when tags is absent from the record", async () => {
     mockCatalog(BASE_RECORD);
     const entry = await vercel.fetchCatalog(FETCH_PARAMS);
-    expect(entry?.isReasoning).toBeUndefined();
+    expect(entry?.isReasoning).toBe(false);
   });
 });
 
