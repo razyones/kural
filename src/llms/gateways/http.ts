@@ -103,6 +103,33 @@ async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
 }
 
 /**
+ * Scans /v1/models' `data` array for the matching model id. Returns the
+ * full model record so the caller can distinguish "model not in catalog"
+ * (undefined) from "model present but pricing sub-record incomplete"
+ * (record returned, pricing field missing).
+ * @param body - Parsed JSON body from the /v1/models response
+ * @param modelId - Exact model id to look up
+ * @returns Model record when found, otherwise undefined
+ * @kuralPure
+ * @kuralUtil
+ */
+function findModelRecord(body: unknown, modelId: string): Record<string, unknown> | undefined {
+  if (!isRecord(body)) {
+    return undefined;
+  }
+  const { data } = body;
+  if (!Array.isArray(data)) {
+    return undefined;
+  }
+  for (const entry of data) {
+    if (isRecord(entry) && entry["id"] === modelId) {
+      return entry;
+    }
+  }
+  return undefined;
+}
+
+/**
  * Reads the first endpoint record from a /v1/models/{id}/endpoints response
  * so a gateway adapter's throughput reader can pull its p50 fields. Returns
  * undefined when the wrapper, the endpoints array, or its first item are
@@ -128,5 +155,5 @@ function readFirstEndpoint(body: unknown): Record<string, unknown> | undefined {
   return isRecord(first) ? first : undefined;
 }
 
-export { ModelNotFoundError, fetchJson, parsePerToken, readFirstEndpoint };
+export { ModelNotFoundError, fetchJson, findModelRecord, parsePerToken, readFirstEndpoint };
 export type { CatalogEntry, NormalizedThroughput, PricePerMillionTokens };

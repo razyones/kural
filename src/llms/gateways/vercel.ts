@@ -9,7 +9,13 @@
 
 import type { CatalogEntry, NormalizedThroughput, PricePerMillionTokens } from "./http.ts";
 import type { CatalogFetchParams, GatewayAdapter } from "./registry.ts";
-import { ModelNotFoundError, fetchJson, parsePerToken, readFirstEndpoint } from "./http.ts";
+import {
+  ModelNotFoundError,
+  fetchJson,
+  findModelRecord,
+  parsePerToken,
+  readFirstEndpoint,
+} from "./http.ts";
 import { isRecord } from "../../utils/record.ts";
 
 const VERCEL_ID = "vercel";
@@ -57,33 +63,6 @@ function adaptThroughput(endpoint: Record<string, unknown>): NormalizedThroughpu
     return undefined;
   }
   return { ttftSeconds: ttftMs / MS_PER_SECOND, tokensPerSecond: tps };
-}
-
-/**
- * Scans /v1/models' `data` array for the matching model id. Returns the
- * full model record so the caller can distinguish "model not in catalog"
- * (undefined) from "model present but pricing sub-record incomplete"
- * (record returned, pricing field missing).
- * @param body - Parsed JSON body from the /v1/models response
- * @param modelId - Exact model id to look up
- * @returns Model record when found, otherwise undefined
- * @kuralPure
- * @kuralHelper
- */
-function findModelRecord(body: unknown, modelId: string): Record<string, unknown> | undefined {
-  if (!isRecord(body)) {
-    return undefined;
-  }
-  const { data } = body;
-  if (!Array.isArray(data)) {
-    return undefined;
-  }
-  for (const entry of data) {
-    if (isRecord(entry) && entry["id"] === modelId) {
-      return entry;
-    }
-  }
-  return undefined;
 }
 
 /**
