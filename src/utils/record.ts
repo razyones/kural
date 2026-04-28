@@ -8,6 +8,16 @@
 const NONE = 0;
 
 /**
+ * Narrows an unknown value to a string-keyed record.
+ * @param value - Value to classify
+ * @returns True when value is a plain object record
+ * @kuralPure
+ */
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+/**
  * Safely extracts a numeric value from an untyped record.
  * @param record - Record with unknown value types
  * @param key - Property name to extract
@@ -31,4 +41,4 @@ function str(record: Record<string, unknown> | undefined, key: string): string {
   return typeof v === "string" ? v : "";
 }
 
-export { num, str };
+export { isRecord, num, str };

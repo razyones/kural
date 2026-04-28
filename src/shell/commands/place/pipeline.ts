@@ -10,6 +10,7 @@ import type { PlacementResult } from "../../../analysis/place/types.ts";
 import { buildTree } from "../../../analysis/tree/tree.ts";
 import { createEmbeddingModel } from "../../../analysis/ingestion/embed/model.ts";
 import { existsSync } from "node:fs";
+import { loadProjectConfig } from "../../config/loader.ts";
 import { place } from "../../../analysis/place/engine.ts";
 import { rebuildParseResult } from "../../../db/rebuild.ts";
 
@@ -17,7 +18,7 @@ import { rebuildParseResult } from "../../../db/rebuild.ts";
  * Runs the placement pipeline: open snapshot → build tree → embed → place.
  * @param root - Absolute path to the project root
  * @param description - Text description of the code to place
- * @param provider - Embedding provider name
+ * @param gateway - Embedding gateway id
  * @param model - Optional model override
  * @param apiKey - Optional API key override
  * @returns The complete placement result
@@ -26,7 +27,7 @@ import { rebuildParseResult } from "../../../db/rebuild.ts";
 async function runPlacement(
   root: string,
   description: string,
-  provider: string,
+  gateway: string,
   model?: string,
   apiKey?: string,
 ): Promise<PlacementResult> {
@@ -41,7 +42,8 @@ async function runPlacement(
     const result = rebuildParseResult(snapshot.collections);
     const nodes = buildTree(result);
 
-    const { embed } = createEmbeddingModel({ provider, model, apiKey });
+    const projectConfig = loadProjectConfig(root);
+    const { embed } = createEmbeddingModel({ gateway, model, apiKey }, projectConfig.gateways);
     const embedder = async (texts: string[]): Promise<number[][]> => {
       if (texts.length === NONE) {
         return [];

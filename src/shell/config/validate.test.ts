@@ -201,3 +201,134 @@ describe("validateConfig — brief caps", () => {
     expect(briefField(config, "mystery")).toBeUndefined();
   });
 });
+
+/** Reads a field from the sanitized llm sub-object without type assertion. */
+function llmField(config: Record<string, unknown>, key: string): unknown {
+  const llm = config.llm;
+  if (typeof llm !== "object" || llm === null || Array.isArray(llm)) {
+    return undefined;
+  }
+  return Object.getOwnPropertyDescriptor(llm, key)?.value;
+}
+
+describe("validateConfig — llm", () => {
+  it("strips non-object llm and warns", () => {
+    const { config, warnings } = validateConfig({ llm: "oops" });
+    expect(warnings[ZERO]).toContain("llm must be an object");
+    expect(config.llm).toBeUndefined();
+  });
+
+  it("strips llm missing gateway and warns", () => {
+    const { config, warnings } = validateConfig({ llm: { model: "anthropic/claude-sonnet-4-5" } });
+    expect(warnings[ZERO]).toContain("llm.gateway is required");
+    expect(config.llm).toBeUndefined();
+  });
+
+  it("strips llm with unknown gateway and warns", () => {
+    const { config, warnings } = validateConfig({ llm: { gateway: "bogus" } });
+    expect(warnings[ZERO]).toContain("llm.gateway must be one of");
+    expect(config.llm).toBeUndefined();
+  });
+
+  it("strips llm with non-string gateway and warns", () => {
+    const { config, warnings } = validateConfig({ llm: { gateway: NON_OBJECT_VALUE } });
+    expect(warnings[ZERO]).toContain("llm.gateway must be one of");
+    expect(config.llm).toBeUndefined();
+  });
+
+  it("keeps a valid minimal llm config", () => {
+    const { config, warnings } = validateConfig({ llm: { gateway: "vercel" } });
+    expect(warnings).toHaveLength(ZERO);
+    expect(llmField(config, "gateway")).toBe("vercel");
+  });
+
+  it("keeps a fully-populated valid llm config", () => {
+    const full = {
+      gateway: "openrouter",
+      model: "anthropic/claude-sonnet-4.5",
+      baseURL: "https://openrouter.ai/api/v1",
+      apiKey: "sk-test",
+    };
+    const { config, warnings } = validateConfig({ llm: full });
+    expect(warnings).toHaveLength(ZERO);
+    expect(llmField(config, "model")).toBe(full.model);
+    expect(llmField(config, "baseURL")).toBe(full.baseURL);
+    expect(llmField(config, "apiKey")).toBe(full.apiKey);
+  });
+
+  it("strips non-string model and warns but keeps rest", () => {
+    const { config, warnings } = validateConfig({
+      llm: { gateway: "vercel", model: NON_OBJECT_VALUE },
+    });
+    expect(warnings[ZERO]).toContain("llm.model must be a string");
+    expect(llmField(config, "gateway")).toBe("vercel");
+    expect(llmField(config, "model")).toBeUndefined();
+  });
+
+  it("strips non-string baseURL and warns", () => {
+    const { config, warnings } = validateConfig({
+      llm: { gateway: "vercel", baseURL: NON_OBJECT_VALUE },
+    });
+    expect(warnings[ZERO]).toContain("llm.baseURL must be a string");
+    expect(llmField(config, "baseURL")).toBeUndefined();
+  });
+
+  it("strips non-string apiKey and warns", () => {
+    const { config, warnings } = validateConfig({
+      llm: { gateway: "vercel", apiKey: NON_OBJECT_VALUE },
+    });
+    expect(warnings[ZERO]).toContain("llm.apiKey must be a string");
+    expect(llmField(config, "apiKey")).toBeUndefined();
+  });
+
+  it("accepts every supported gateway", () => {
+    for (const gateway of ["openrouter", "openai", "vercel", "ollama"] as const) {
+      const { config, warnings } = validateConfig({ llm: { gateway } });
+      expect(warnings).toHaveLength(ZERO);
+      expect(llmField(config, "gateway")).toBe(gateway);
+    }
+  });
+});
+
+/** Reads a per-id override from the top-level gateways map without type assertion. */
+function gatewayOverride(config: Record<string, unknown>, id: string): unknown {
+  const gateways = config.gateways;
+  if (typeof gateways !== "object" || gateways === null || Array.isArray(gateways)) {
+    return undefined;
+  }
+  return Object.getOwnPropertyDescriptor(gateways, id)?.value;
+}
+
+describe("validateConfig — gateways", () => {
+  it("keeps a valid top-level gateways block with per-id apiKeyEnv overrides", () => {
+    const { config, warnings } = validateConfig({
+      gateways: { vercel: { apiKeyEnv: "VERCEL_KEY" } },
+    });
+    expect(warnings).toHaveLength(ZERO);
+    expect(gatewayOverride(config, "vercel")).toEqual({ apiKeyEnv: "VERCEL_KEY" });
+  });
+
+  it("strips a non-object gateways value and warns", () => {
+    const { config, warnings } = validateConfig({ gateways: "oops" });
+    expect(warnings[ZERO]).toContain("gateways must be an object");
+    expect(config.gateways).toBeUndefined();
+  });
+
+  it("skips individual entries that aren't objects and warns", () => {
+    const { config, warnings } = validateConfig({ gateways: { vercel: "oops" } });
+    expect(warnings[ZERO]).toContain("gateways.vercel must be an object");
+    expect(gatewayOverride(config, "vercel")).toBeUndefined();
+  });
+
+  it("strips non-string apiKeyEnv on one entry while keeping valid siblings", () => {
+    const { config, warnings } = validateConfig({
+      gateways: {
+        vercel: { apiKeyEnv: NON_OBJECT_VALUE },
+        openrouter: { apiKeyEnv: "OR_KEY" },
+      },
+    });
+    expect(warnings[ZERO]).toContain("gateways.vercel.apiKeyEnv must be a string");
+    expect(gatewayOverride(config, "vercel")).toEqual({});
+    expect(gatewayOverride(config, "openrouter")).toEqual({ apiKeyEnv: "OR_KEY" });
+  });
+});

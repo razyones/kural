@@ -241,5 +241,34 @@ function isLeaf(node: CodeNode): boolean {
   return node.kind === "type" || node.kind === "function";
 }
 
-export { buildTree, getChildren, getEligibleChildren, isLeaf };
+/**
+ * Resolves a node's parent chain to CodeNode instances by walking
+ * parent pointers upward. Excludes the start node and the tree root.
+ * @param startKey - Key of the node whose parent chain to resolve
+ * @param nodes - The flat node map to look up parents in
+ * @param cap - Maximum number of ancestors to return
+ * @returns Array of resolved ancestor CodeNode instances, nearest parent first
+ * @kuralPure
+ */
+function getAncestors(startKey: string, nodes: NodeMap, cap: number): CodeNode[] {
+  const result: CodeNode[] = [];
+  const start = nodes.get(startKey);
+  if (start === undefined) {
+    return result;
+  }
+  let currentKey = start.parentKey;
+  while (currentKey !== null && result.length < cap) {
+    const node = nodes.get(currentKey);
+    if (node === undefined) {
+      break;
+    }
+    if (node.parentKey !== null) {
+      result.push(node);
+    }
+    currentKey = node.parentKey;
+  }
+  return result;
+}
+
+export { buildTree, getAncestors, getChildren, getEligibleChildren, isLeaf };
 export type { CodeNode, DirectoryNode, FileNode, FunctionNode, NodeMap, PatternNode, TypeNode };

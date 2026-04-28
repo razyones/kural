@@ -12,6 +12,7 @@ import { analyzeFromDescriptions, analyzeFromTree } from "../../../analysis/advi
 import { buildTree, getChildren } from "../../../analysis/tree/tree.ts";
 import { existsSync, readFileSync } from "node:fs";
 import { createEmbeddingModel } from "../../../analysis/ingestion/embed/model.ts";
+import { loadProjectConfig } from "../../config/loader.ts";
 import { rebuildParseResult } from "../../../db/rebuild.ts";
 import { resolve } from "node:path";
 
@@ -209,26 +210,30 @@ async function runAdvise(
  * Reads a JSON file of named descriptions, embeds them, and delegates
  * to the engine in description mode (no snapshot required).
  * @param filePath - Absolute path to the JSON description file
- * @param provider - Embedding provider name (e.g. "openai", "openrouter")
+ * @param gateway - Embedding gateway id (e.g. "openai", "openrouter")
  * @param model - Optional model ID override
- * @param apiKey - Optional API key for the provider
+ * @param apiKey - Optional API key for the gateway
  * @returns A single AdviseResult from the embedded descriptions
  * @kuralCauses reads file, calls embedding API, runs analysis
  */
 async function runAdviseFromFile(
   filePath: string,
-  provider?: string,
+  gateway?: string,
   model?: string,
   apiKey?: string,
 ): Promise<AdviseResult> {
   const entries = readDescriptionFile(filePath);
-  const defaultProvider = provider ?? "openrouter";
+  const defaultGateway = gateway ?? "openrouter";
+  const projectConfig = loadProjectConfig();
 
-  const { embed } = createEmbeddingModel({
-    provider: defaultProvider,
-    ...(model === undefined ? {} : { model }),
-    ...(apiKey === undefined ? {} : { apiKey }),
-  });
+  const { embed } = createEmbeddingModel(
+    {
+      gateway: defaultGateway,
+      ...(model === undefined ? {} : { model }),
+      ...(apiKey === undefined ? {} : { apiKey }),
+    },
+    projectConfig.gateways,
+  );
 
   const descriptions = entries.map((e) => e.description);
   const embeddings = await embed(descriptions);

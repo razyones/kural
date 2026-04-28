@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { getJSDoc, isUtilModule } from "./jsdoc.ts";
+import { getFileJSDoc, getJSDoc, isUtilModule } from "./jsdoc.ts";
 import type { JSDocInfo } from "./jsdoc.ts";
 import ts from "typescript";
 
@@ -30,6 +30,12 @@ const UTIL_TAG: JSDocInfo = {
 function jsdocFrom(source: string): JSDocInfo {
   const sf = ts.createSourceFile("test.ts", source, ts.ScriptTarget.Latest, true);
   return getJSDoc(sf.statements[FIRST_STATEMENT]);
+}
+
+/** Parses source text and returns the file-level JSDoc anchored on the first statement. */
+function fileJSDocFrom(source: string): JSDocInfo {
+  const sf = ts.createSourceFile("test.ts", source, ts.ScriptTarget.Latest, true);
+  return getFileJSDoc(sf.statements[FIRST_STATEMENT]);
 }
 
 describe("getJSDoc @kuralResidual parsing", () => {
@@ -214,5 +220,55 @@ describe("isUtilModule combined", () => {
 
   it("returns false when neither path nor tag match", () => {
     expect(isUtilModule("/project/src/domain/service.ts", NO_TAGS)).toBe(false);
+  });
+});
+
+describe("getFileJSDoc with multiple JSDoc blocks on the first statement", () => {
+  const SOURCE = [
+    "/**",
+    " * file-level description",
+    " * @kuralUtil",
+    " */",
+    "",
+    "/**",
+    " * type-level description",
+    " * @kuralPure",
+    " */",
+    "type Foo = { x: number };",
+  ].join("\n");
+
+  it("picks the first block as the file description", () => {
+    const info = fileJSDocFrom(SOURCE);
+    expect(info.description).toBe("file-level description");
+  });
+
+  it("picks file-level tags only — declaration tags do not bleed in", () => {
+    const info = fileJSDocFrom(SOURCE);
+    expect(info.util).toBe(true);
+    expect(info.pure).toBe(false);
+  });
+
+  it("picks the last block as the declaration's own description", () => {
+    const info = jsdocFrom(SOURCE);
+    expect(info.description).toBe("type-level description");
+  });
+
+  it("picks declaration-level tags only — file tags do not bleed in", () => {
+    const info = jsdocFrom(SOURCE);
+    expect(info.pure).toBe(true);
+    expect(info.util).toBe(false);
+  });
+});
+
+describe("getFileJSDoc with a single JSDoc block", () => {
+  it("returns that block when only the file JSDoc is present (import as first stmt)", () => {
+    const source = `/**\n * file-only description\n */\nimport x from "y";`;
+    expect(fileJSDocFrom(source).description).toBe("file-only description");
+  });
+
+  it("returns the only block on the first statement when no separation exists", () => {
+    const source = `/**\n * shared description\n */\ntype Foo = { x: number };`;
+    expect(fileJSDocFrom(source).description).toBe("shared description");
+    expect(jsdocFrom(source).description).toBe("shared description");
   });
 });

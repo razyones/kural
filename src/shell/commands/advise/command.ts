@@ -23,7 +23,7 @@ type AdviseArgs = {
   leaf?: boolean;
   json?: boolean;
   depth?: string;
-  provider?: string;
+  gateway?: string;
   model?: string;
   apiKey?: string;
 };
@@ -43,7 +43,7 @@ async function runAdviseCommand(values: AdviseArgs): Promise<void> {
 
   if (isFileMode) {
     const filePath = resolve(values.fromFile ?? "");
-    const result = await runAdviseFromFile(filePath, values.provider, values.model, values.apiKey);
+    const result = await runAdviseFromFile(filePath, values.gateway, values.model, values.apiKey);
     results = [result];
     banner = {
       source: relative(process.cwd(), filePath) || filePath,
@@ -100,10 +100,10 @@ export default define({
       short: "d",
       description: "Recursion depth (default: 1)",
     },
-    provider: {
+    gateway: {
       type: "string" as const,
-      short: "p",
-      description: "Embedding provider (for description mode)",
+      short: "g",
+      description: "Embedding gateway (for description mode)",
     },
     model: {
       type: "string" as const,

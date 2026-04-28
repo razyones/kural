@@ -4,8 +4,9 @@ import type {
   KuralFunction,
   KuralType,
 } from "../ingestion/parse/types.ts";
-import { buildTree, getChildren, getEligibleChildren, isLeaf } from "./tree.ts";
+import { buildTree, getAncestors, getChildren, getEligibleChildren, isLeaf } from "./tree.ts";
 import { describe, expect, it } from "vite-plus/test";
+import { makeDir, toNodeMap } from "../../../tests/helpers/audits.ts";
 import type { ParseResult } from "../ingestion/parse/pipeline.ts";
 
 const NONE = 0;
@@ -410,6 +411,45 @@ describe("isLeaf", () => {
     const dir = makeDirectory({ children: [] });
     const nodes = buildTree(makeParseResult({}, { "/src": dir }));
     expect(isLeaf(getNode(nodes, "dir:/src"))).toBe(false);
+  });
+});
+
+describe("getAncestors", () => {
+  const CAP = 3;
+
+  it("walks parent pointers upward, excluding the start and the root", () => {
+    const root = makeDir({ key: "dir:/src", name: "src", parentKey: null });
+    const analysis = makeDir({
+      key: "dir:/src/analysis",
+      name: "analysis",
+      parentKey: "dir:/src",
+    });
+    const place = makeDir({
+      key: "dir:/src/analysis/place",
+      name: "place",
+      parentKey: "dir:/src/analysis",
+    });
+    const nodes = toNodeMap(root, analysis, place);
+
+    const result = getAncestors("dir:/src/analysis/place", nodes, CAP);
+
+    expect(result.length).toBe(ONE);
+    expect(result[NONE].name).toBe("analysis");
+  });
+
+  it("respects the cap", () => {
+    const root = makeDir({ key: "dir:/", name: "/", parentKey: null });
+    const a = makeDir({ key: "dir:/a", name: "a", parentKey: "dir:/" });
+    const b = makeDir({ key: "dir:/a/b", name: "b", parentKey: "dir:/a" });
+    const c = makeDir({ key: "dir:/a/b/c", name: "c", parentKey: "dir:/a/b" });
+    const nodes = toNodeMap(root, a, b, c);
+
+    expect(getAncestors("dir:/a/b/c", nodes, ONE).length).toBe(ONE);
+    expect(getAncestors("dir:/a/b/c", nodes, TWO).length).toBe(TWO);
+  });
+
+  it("returns empty when the start key is missing", () => {
+    expect(getAncestors("dir:/missing", toNodeMap(), CAP).length).toBe(NONE);
   });
 });
 

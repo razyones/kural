@@ -6,13 +6,21 @@
  * ancestors, patterns, and companions together.
  */
 
-import type { Brief, BriefCaps, PlacementFacet, RelatedFacet, SymbolFacet } from "./types.ts";
+import type {
+  AncestorFacet,
+  Brief,
+  BriefCaps,
+  PlacementFacet,
+  RelatedFacet,
+  SymbolFacet,
+} from "./types.ts";
 import { DEFAULT_CAPS, NONE, fullDescription, nodeKey, roundSim } from "./helpers.ts";
 import { expandCompanionMembers, expandPatternMembers } from "./patterns.ts";
-import { rankReuse, rankSiblings, rankSymbols, walkAncestors } from "./rankers.ts";
+import { rankReuse, rankSiblings, rankSymbols } from "./rankers.ts";
 import type { NodeMap } from "../tree/tree.ts";
 import type { PlacementEmbedder } from "../place/helpers.ts";
 import type { PlacementResult } from "../place/types.ts";
+import { getAncestors } from "../tree/tree.ts";
 import { place } from "../place/engine.ts";
 
 /**
@@ -117,6 +125,23 @@ function toPlacementFacet(result: PlacementResult, target: string, nodes: NodeMa
 }
 
 /**
+ * Shapes the ancestor chain into facets ready for the brief output.
+ * @param target - Resolved placement key
+ * @param nodes - The full node map used to walk parent pointers
+ * @param cap - Maximum number of ancestors to return
+ * @returns Ordered ancestor facets from nearest to furthest parent
+ * @kuralPure
+ * @kuralHelper
+ */
+function toAncestorFacets(target: string, nodes: NodeMap, cap: number): AncestorFacet[] {
+  return getAncestors(target, nodes, cap).map((node) => ({
+    name: node.name,
+    path: node.key,
+    description: fullDescription(node.description),
+  }));
+}
+
+/**
  * Resolves caps by overlaying optional user overrides on the defaults.
  * @param overrides - Partial caps from config or CLI flags
  * @returns Fully populated caps ready for the rankers
@@ -156,7 +181,7 @@ async function brief(
   return {
     query: queryText,
     placement: toPlacementFacet(result, target, nodes),
-    ancestors: walkAncestors(target, nodes, caps.ancestors),
+    ancestors: toAncestorFacets(target, nodes, caps.ancestors),
     siblings: rankSiblings(queryVec, target, nodes, caps.siblings),
     utilities: rankReuse(queryVec, nodes, caps.utilities),
     symbols,

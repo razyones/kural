@@ -7,6 +7,8 @@
  */
 
 import type { AuditsConfig } from "./audits.ts";
+import { isRecord } from "../../utils/record.ts";
+import { validateLLMBlock } from "./validateLLM.ts";
 
 const MIN_SENSITIVITY = 0;
 const MIN_CAP = 0;
@@ -14,17 +16,6 @@ const NONE = 0;
 const DEFAULT_SENSITIVITY = 2.0;
 
 type Bag = Record<string, unknown>;
-
-/**
- * Type guard that narrows an unknown value to a string-keyed record.
- * @param value - Value to narrow
- * @returns True when value is a plain object
- * @kuralPure
- * @kuralHelper
- */
-function isRecord(value: unknown): value is Bag {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 /**
  * Checks whether a sensitivity value is positive.
@@ -91,6 +82,45 @@ const BRIEF_KEYS = [
   "patternMembers",
   "companionMembers",
 ] as const;
+
+const GATEWAY_OVERRIDE_STRING_KEYS = ["apiKeyEnv"] as const;
+
+/**
+ * Validates the top-level gateways override map — each entry must be a
+ * record whose apiKeyEnv (when present) is a string. Invalid entries
+ * are stripped so adapters fall back to their declared defaults.
+ * @param config - Mutable top-level config bag
+ * @param warnings - Accumulator for human-readable warnings
+ * @kuralPure
+ * @kuralHelper
+ */
+function validateGateways(config: Bag, warnings: string[]): void {
+  if (!("gateways" in config)) {
+    return;
+  }
+  if (!isRecord(config.gateways)) {
+    warnings.push("gateways must be an object keyed by gateway id — ignoring");
+    delete config.gateways;
+    return;
+  }
+  const result: Bag = {};
+  for (const id of Object.keys(config.gateways)) {
+    const override = config.gateways[id];
+    if (!isRecord(override)) {
+      warnings.push(`gateways.${id} must be an object — ignoring`);
+      continue;
+    }
+    const sanitized: Bag = { ...override };
+    for (const key of GATEWAY_OVERRIDE_STRING_KEYS) {
+      if (key in sanitized && typeof sanitized[key] !== "string") {
+        warnings.push(`gateways.${id}.${key} must be a string — ignoring`);
+        Reflect.deleteProperty(sanitized, key);
+      }
+    }
+    result[id] = sanitized;
+  }
+  config.gateways = result;
+}
 
 /**
  * Validates brief caps — each known field must be a non-negative
@@ -160,6 +190,9 @@ function validateConfig(raw: unknown): { config: Bag; warnings: string[] } {
   } else if (isRecord(config.dictionary) && Object.keys(config.dictionary).length === NONE) {
     warnings.push("dictionary is empty — prose signatures will lack domain enrichment");
   }
+
+  validateLLMBlock(config, warnings);
+  validateGateways(config, warnings);
 
   return { config, warnings };
 }
