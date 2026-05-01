@@ -24,7 +24,7 @@ export default define({
     gateway: {
       type: "string" as const,
       short: "g",
-      description: "Embedding gateway (openrouter, openai, vercel, ollama)",
+      description: "Embedding gateway (vercel, openrouter, ollama)",
     },
     model: {
       type: "string" as const,

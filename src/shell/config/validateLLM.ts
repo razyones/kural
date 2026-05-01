@@ -6,13 +6,12 @@
  * the audits and brief block validators.
  */
 
-import { LLM_GATEWAYS } from "../../llms/apiKey.ts";
 import { isRecord } from "../../utils/record.ts";
+import { listGateways } from "../../llms/gateways/registry.ts";
 
 type Bag = Record<string, unknown>;
 
 const LLM_OPTIONAL_STRING_KEYS = ["model", "baseURL", "apiKey"] as const;
-const VALID_GATEWAYS: readonly string[] = LLM_GATEWAYS;
 
 /**
  * Validates the llm block — gateway must be a recognized id; optional
@@ -26,16 +25,17 @@ const VALID_GATEWAYS: readonly string[] = LLM_GATEWAYS;
  * @kuralHelper
  */
 function validateLLM(llm: Bag, warnings: string[]): boolean {
+  const validGateways = listGateways();
   if (typeof llm.gateway !== "string") {
     if ("gateway" in llm) {
-      warnings.push(`llm.gateway must be one of ${LLM_GATEWAYS.join(", ")} — ignoring llm`);
+      warnings.push(`llm.gateway must be one of ${validGateways.join(", ")} — ignoring llm`);
     } else {
       warnings.push("llm.gateway is required — ignoring llm");
     }
     return false;
   }
-  if (!VALID_GATEWAYS.includes(llm.gateway)) {
-    warnings.push(`llm.gateway must be one of ${LLM_GATEWAYS.join(", ")} — ignoring llm`);
+  if (!validGateways.includes(llm.gateway)) {
+    warnings.push(`llm.gateway must be one of ${validGateways.join(", ")} — ignoring llm`);
     return false;
   }
   for (const key of LLM_OPTIONAL_STRING_KEYS) {

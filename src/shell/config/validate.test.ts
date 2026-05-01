@@ -282,7 +282,7 @@ describe("validateConfig — llm", () => {
   });
 
   it("accepts every supported gateway", () => {
-    for (const gateway of ["openrouter", "openai", "vercel", "ollama"] as const) {
+    for (const gateway of ["openrouter", "vercel", "ollama"] as const) {
       const { config, warnings } = validateConfig({ llm: { gateway } });
       expect(warnings).toHaveLength(ZERO);
       expect(llmField(config, "gateway")).toBe(gateway);

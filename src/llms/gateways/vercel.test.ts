@@ -1,4 +1,4 @@
-import { adaptPrice, adaptThroughput, vercel } from "./vercel.ts";
+import { adaptPrice, vercel } from "./vercel.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { ModelNotFoundError } from "./http.ts";
 import { jsonResponse } from "../../../tests/helpers/http.ts";
@@ -34,22 +34,6 @@ describe("adaptPrice", () => {
     const price = adaptPrice({ input: "0.0000003", output: "0.0000012" });
     expect(price.cacheRead).toBe(NONE);
     expect(price.cacheWrite).toBe(NONE);
-  });
-});
-
-describe("adaptThroughput", () => {
-  it("reads latency_last_1h.p50 (ms) and throughput_last_1h.p50 into canonical units", () => {
-    const throughput = adaptThroughput({
-      latency_last_1h: { p50: MS_TTFT },
-      throughput_last_1h: { p50: EXPECTED_TPS },
-    });
-    expect(throughput?.ttftSeconds).toBeCloseTo(EXPECTED_TTFT);
-    expect(throughput?.tokensPerSecond).toBeCloseTo(EXPECTED_TPS);
-  });
-
-  it("returns undefined when either field is missing", () => {
-    expect(adaptThroughput({ latency_last_1h: { p50: MS_TTFT } })).toBeUndefined();
-    expect(adaptThroughput({ throughput_last_1h: { p50: EXPECTED_TPS } })).toBeUndefined();
   });
 });
 
@@ -224,17 +208,6 @@ describe("vercel.fetchCatalog reasoning flag", () => {
     mockCatalog(BASE_RECORD);
     const entry = await vercel.fetchCatalog(FETCH_PARAMS);
     expect(entry?.isReasoning).toBe(false);
-  });
-});
-
-describe("adaptThroughput edge cases", () => {
-  it("returns undefined when latency/throughput fields are non-numeric", () => {
-    expect(
-      adaptThroughput({
-        latency_last_1h: { p50: "nope" },
-        throughput_last_1h: { p50: EXPECTED_TPS },
-      }),
-    ).toBeUndefined();
   });
 });
 

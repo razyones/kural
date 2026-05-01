@@ -1,9 +1,12 @@
-import { ModelNotFoundError, fetchJson, parsePerToken } from "./http.ts";
+import { ModelNotFoundError, adaptThroughput, fetchJson, parsePerToken } from "./http.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { jsonResponse } from "../../../tests/helpers/http.ts";
 
 const PER_MILLION_INPUT = 0.0000003;
 const EXPECTED_PER_MILLION = 0.3;
+const EXPECTED_TTFT = 0.85;
+const EXPECTED_TPS = 72;
+const MS_TTFT = 850;
 const ZERO = 0;
 const HTTP_ERROR = 500;
 
@@ -66,5 +69,31 @@ describe("fetchJson", () => {
     await fetchJson("https://example.com/json", { headers: { Authorization: "Bearer test" } });
     const [, init] = fetchMock.mock.calls[ZERO] ?? [];
     expect(init?.headers).toMatchObject({ Authorization: "Bearer test" });
+  });
+});
+
+describe("adaptThroughput", () => {
+  it("reads p50 latency (ms) and streaming rate into canonical units", () => {
+    const throughput = adaptThroughput(
+      { lat: { p50: MS_TTFT }, tps: { p50: EXPECTED_TPS } },
+      "lat",
+      "tps",
+    );
+    expect(throughput?.ttftSeconds).toBeCloseTo(EXPECTED_TTFT);
+    expect(throughput?.tokensPerSecond).toBeCloseTo(EXPECTED_TPS);
+  });
+
+  it("returns undefined when either field is missing", () => {
+    expect(adaptThroughput({ lat: { p50: MS_TTFT } }, "lat", "tps")).toBeUndefined();
+    expect(adaptThroughput({ tps: { p50: EXPECTED_TPS } }, "lat", "tps")).toBeUndefined();
+  });
+
+  it("returns undefined when the p50 fields are non-numeric", () => {
+    const throughput = adaptThroughput(
+      { lat: { p50: "nope" }, tps: { p50: EXPECTED_TPS } },
+      "lat",
+      "tps",
+    );
+    expect(throughput).toBeUndefined();
   });
 });

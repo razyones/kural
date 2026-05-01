@@ -9,7 +9,7 @@ import { activePath, closeSnapshot, currentBranch, openSnapshot } from "../../..
 import type { Brief } from "../../../analysis/brief/types.ts";
 import { brief } from "../../../analysis/brief/engine.ts";
 import { buildTree } from "../../../analysis/tree/tree.ts";
-import { createEmbeddingModel } from "../../../analysis/ingestion/embed/model.ts";
+import { createEmbeddingModel } from "../../../llms/embedding.ts";
 import { existsSync } from "node:fs";
 import { loadProjectConfig } from "../../config/loader.ts";
 import { rebuildParseResult } from "../../../db/rebuild.ts";

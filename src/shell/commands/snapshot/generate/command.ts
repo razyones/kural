@@ -7,14 +7,12 @@
 
 import type { EmbedOptions, Embedder } from "../../../../analysis/ingestion/embed/pipeline.ts";
 import type { GenerateCallbacks, GenerateResult } from "./pipeline.ts";
-import {
-  createEmbeddingModel,
-  embedSignatures,
-} from "../../../../analysis/ingestion/embed/model.ts";
 import { logBanner, logger } from "../../../ui/log.ts";
 import { relative, resolve } from "node:path";
+import { createEmbeddingModel } from "../../../../llms/embedding.ts";
 import { createStepTracker } from "../../../ui/step-tracker.ts";
 import { define } from "gunshi";
+import { embedSignatures } from "../../../../analysis/ingestion/embed/batch.ts";
 import { generate } from "./pipeline.ts";
 import { loadProjectConfig } from "../../../config/loader.ts";
 import { printGenerateFooter } from "./readout.ts";
@@ -184,7 +182,7 @@ export default define({
     gateway: {
       type: "string" as const,
       short: "g",
-      description: "Embedding gateway (openrouter, openai, vercel, ollama)",
+      description: "Embedding gateway (vercel, openrouter, ollama)",
     },
     model: {
       type: "string" as const,

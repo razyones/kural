@@ -6,22 +6,18 @@
  * JSON field names or that its stats endpoint is gated behind bearer auth.
  */
 
-import type { CatalogEntry, NormalizedThroughput, PricePerMillionTokens } from "./http.ts";
-import type { CatalogFetchParams, GatewayAdapter } from "./registry.ts";
-import {
-  ModelNotFoundError,
-  fetchJson,
-  findModelRecord,
-  parsePerToken,
-  readFirstEndpoint,
-} from "./http.ts";
-import { isRecord } from "../../utils/record.ts";
+import type { CatalogEntry, CatalogFetchParams, PricePerMillionTokens } from "./http.ts";
+import type { GatewayAdapter } from "./registry.ts";
+import type { OpenAIStyleCatalogSpec } from "./catalogFetch.ts";
+import { fetchOpenAIStyleCatalog } from "./catalogFetch.ts";
+import { parsePerToken } from "./http.ts";
 
 const OPENROUTER_ID = "openrouter";
+const DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
+const DEFAULT_EMBEDDING_MODEL = "google/gemini-embedding-001";
 const DEFAULT_ENV = "OPENROUTER_API_KEY";
-const MODELS_PATH = "/models";
-const ENDPOINTS_SUFFIX = "/endpoints";
-const MS_PER_SECOND = 1000;
+const LATENCY_KEY = "latency_last_30m";
+const THROUGHPUT_KEY = "throughput_last_30m";
 
 /**
  * Reads one OpenRouter pricing object into the canonical PricePerMillionTokens.
@@ -40,77 +36,40 @@ function adaptPrice(pricing: Record<string, unknown>): PricePerMillionTokens {
   };
 }
 
-/**
- * Reads one OpenRouter endpoint record's p50 latency and streaming rate
- * into the canonical NormalizedThroughput. OpenRouter exposes a 30-minute
- * window; Vercel exposes a 1-hour window.
- * @param endpoint - One endpoint record from /v1/models/{id}/endpoints
- * @returns Normalized throughput, or undefined when the data is absent
- * @kuralPure
- * @kuralHelper
- */
-function adaptThroughput(endpoint: Record<string, unknown>): NormalizedThroughput | undefined {
-  const latency = endpoint["latency_last_30m"];
-  const throughput = endpoint["throughput_last_30m"];
-  if (!isRecord(latency) || !isRecord(throughput)) {
-    return undefined;
-  }
-  const ttftMs = latency["p50"];
-  const tps = throughput["p50"];
-  if (typeof ttftMs !== "number" || typeof tps !== "number") {
-    return undefined;
-  }
-  return { ttftSeconds: ttftMs / MS_PER_SECOND, tokensPerSecond: tps };
-}
+const SPEC: OpenAIStyleCatalogSpec = {
+  gatewayId: OPENROUTER_ID,
+  adaptPrice,
+  latencyKey: LATENCY_KEY,
+  throughputKey: THROUGHPUT_KEY,
+  endpointsAuth: "bearer-or-skip",
+};
 
 /**
- * Fetches OpenRouter's catalog entry for one model. The /models call is
- * unauthed; the /endpoints call is gated behind bearer auth, so the
- * throughput half is silently skipped when the apiKey is absent.
- * Returns undefined when the /models call is transiently unavailable.
- * Throws ModelNotFoundError when the catalog is reachable but doesn't
- * list the requested model id.
+ * Delegates to the shared OpenAI-style catalog flow with OpenRouter's spec.
+ * The /endpoints call is gated behind bearer auth, so the throughput half
+ * is silently skipped when apiKey is absent.
  * @param params - Gateway, base URL, and resolved model id
  * @param apiKey - OpenRouter API key; only required for throughput
  * @returns Canonical CatalogEntry, or undefined when unavailable
  * @kuralCauses fetches /v1/models and /v1/models/{id}/endpoints over the network
+ * @kuralHelper
  */
 async function fetchCatalog(
   params: CatalogFetchParams,
   apiKey?: string,
 ): Promise<CatalogEntry | undefined> {
-  const pricingRequest = fetchJson(`${params.baseURL}${MODELS_PATH}`);
-  const endpointsRequest =
-    apiKey === undefined
-      ? Promise.resolve()
-      : fetchJson(`${params.baseURL}${MODELS_PATH}/${params.modelId}${ENDPOINTS_SUFFIX}`, {
-          headers: { Authorization: `Bearer ${apiKey}` },
-        });
-  const [pricingBody, endpointsBody] = await Promise.all([pricingRequest, endpointsRequest]);
-  if (pricingBody === undefined) {
-    return undefined;
-  }
-  const modelRecord = findModelRecord(pricingBody, params.modelId);
-  if (modelRecord === undefined) {
-    throw new ModelNotFoundError(OPENROUTER_ID, params.modelId);
-  }
-  const { pricing } = modelRecord;
-  if (!isRecord(pricing)) {
-    return undefined;
-  }
-  const price = adaptPrice(pricing);
-  const firstEndpoint = endpointsBody === undefined ? undefined : readFirstEndpoint(endpointsBody);
-  const throughput = firstEndpoint === undefined ? undefined : adaptThroughput(firstEndpoint);
-  return throughput === undefined ? { price } : { price, throughput };
+  const entry = await fetchOpenAIStyleCatalog(SPEC, params, apiKey);
+  return entry;
 }
 
 /** OpenRouter adapter — live catalog with bearer-authed stats endpoint. */
 const openrouter: GatewayAdapter = {
   id: OPENROUTER_ID,
+  baseURL: DEFAULT_BASE_URL,
+  defaultEmbeddingModel: DEFAULT_EMBEDDING_MODEL,
   defaultApiKeyEnv: DEFAULT_ENV,
   kind: "live",
-  catalogRequiresAuth: true,
   fetchCatalog,
 };
 
-export { adaptPrice, adaptThroughput, openrouter };
+export { adaptPrice, openrouter };

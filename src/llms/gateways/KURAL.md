@@ -1,5 +1,1 @@
-One file per AI gateway plus the shared registry and plumbing every
-adapter reuses — each adapter turns a gateway's catalog JSON into
-the canonical CatalogEntry shape its caller consumes. It is the only
-directory where per-gateway URL paths, field renames, and auth
-policies live — their shape never leaks into the resolver.
+One file per AI gateway plus the shared registry, HTTP plumbing, and OpenAI-style catalog pipeline every adapter reuses — each adapter declares its identity (id, baseURL, default API-key env, default embedding model, kind), its pricing-field map, and its endpoints-auth strategy, then inherits the parallel /models + /endpoints fetch flow that turns gateway JSON into the canonical CatalogEntry the text-side dispatcher consumes. It is the only directory where per-gateway URL paths, field renames, and auth policies live — their shape never leaks into the embedding client or the pricing dispatcher.

@@ -5,9 +5,9 @@
  * usage counts into dollars.
  */
 
+import { PER_MILLION } from "./gateways/http.ts";
 import type { PricePerMillionTokens } from "./gateways/http.ts";
 
-const PER_MILLION = 1_000_000;
 const NONE = 0;
 
 /** Token usage shape returned by an OpenAI-compatible chat-completions response. */
