@@ -75,6 +75,7 @@ const directorySchema = z.object({
   facetHash: z.string().optional(),
   residuals: z.array(z.object({ audit: z.string(), hash: z.string().optional() })),
   borrows: z.object({ target: z.string().optional(), role: z.string() }).optional(),
+  util: z.boolean().default(false),
 });
 
 const scoreSchema = z.object({

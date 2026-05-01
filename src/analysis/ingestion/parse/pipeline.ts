@@ -18,6 +18,7 @@ import { walk } from "./walk.ts";
 
 const RESIDUAL_PREFIX = "@kuralResidual";
 const BORROWS_PREFIX = "@kuralBorrows";
+const UTIL_TAG = "@kuralUtil";
 const AUDIT_NAME = 0;
 const AUDIT_HASH = 1;
 const AFTER_QUOTE = 1;
@@ -50,19 +51,21 @@ function parseBorrowsLine(rest: string): BorrowsEntry | null {
 }
 
 /**
- * Parses @kuralResidual and @kuralBorrows lines from KURAL.md content.
+ * Parses @kuralResidual, @kuralBorrows, and @kuralUtil lines from KURAL.md content.
  * @param content - The raw KURAL.md text
- * @returns Object with description, residual entries, and optional borrows
+ * @returns Object with description, residual entries, optional borrows, and util flag
  * @kuralPure
  */
 function parseKuralMdDirectives(content: string): {
   description: string;
   residuals: ResidualEntry[];
   borrows?: BorrowsEntry;
+  util: boolean;
 } {
   const residuals: ResidualEntry[] = [];
   const descLines: string[] = [];
   let borrows: BorrowsEntry | undefined;
+  let util = false;
   for (const line of content.split("\n")) {
     const trimmed = line.trim();
     if (trimmed.startsWith(RESIDUAL_PREFIX)) {
@@ -78,22 +81,27 @@ function parseKuralMdDirectives(content: string): {
       if (parsed !== null) {
         borrows = parsed;
       }
+    } else if (trimmed === UTIL_TAG) {
+      util = true;
     } else {
       descLines.push(line);
     }
   }
-  return { description: descLines.join("\n").trim(), residuals, borrows };
+  return { description: descLines.join("\n").trim(), residuals, borrows, util };
 }
 
 /**
  * Reads the KURAL.md file from a directory if it exists.
  * @param dirPath - Absolute path to the directory
- * @returns The description and residual entries, or defaults if absent
+ * @returns Description, residual entries, optional borrows, and util flag, or defaults if absent
  * @kuralCauses Reads a KURAL.md file from disk
  */
-async function readKuralMd(
-  dirPath: string,
-): Promise<{ description?: string; residuals: ResidualEntry[]; borrows?: BorrowsEntry }> {
+async function readKuralMd(dirPath: string): Promise<{
+  description?: string;
+  residuals: ResidualEntry[];
+  borrows?: BorrowsEntry;
+  util: boolean;
+}> {
   try {
     const content = await readFile(join(dirPath, "KURAL.md"), "utf-8");
     const parsed = parseKuralMdDirectives(content);
@@ -101,9 +109,10 @@ async function readKuralMd(
       description: parsed.description || undefined,
       residuals: parsed.residuals,
       borrows: parsed.borrows,
+      util: parsed.util,
     };
   } catch {
-    return { description: undefined, residuals: [] };
+    return { description: undefined, residuals: [], util: false };
   }
 }
 
@@ -171,6 +180,7 @@ async function parse(dir: string): Promise<ParseResult> {
       description: kural.description,
       residuals: kural.residuals,
       borrows: kural.borrows,
+      util: kural.util,
     };
   }
 

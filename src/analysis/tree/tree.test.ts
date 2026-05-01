@@ -96,6 +96,7 @@ function makeDirectory(overrides: Partial<KuralDirectory> = {}): KuralDirectory 
     children: [],
     residuals: [],
     description: undefined,
+    util: false,
     ...overrides,
   };
 }

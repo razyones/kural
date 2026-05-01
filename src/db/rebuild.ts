@@ -150,6 +150,7 @@ function rebuildParseResult(collections: SnapshotCollections): ParseResult {
       description: row.description,
       residuals: row.residuals,
       borrows: row.borrows,
+      util: row.util,
     };
   });
 

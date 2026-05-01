@@ -86,6 +86,7 @@ function makeParseResult(): ParseResult {
     children: ["/src/models/user.ts"],
     description: "Model directory",
     residuals: [],
+    util: false,
   };
 
   return {

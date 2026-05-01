@@ -75,6 +75,7 @@ function makeDirectory(overrides: Partial<KuralDirectory> & { name: string }): K
     leafEmbedding: EMPTY,
     children: [],
     residuals: [],
+    util: false,
     ...overrides,
   };
 }

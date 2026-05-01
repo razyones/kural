@@ -7,7 +7,11 @@ const ARRAY_SECOND = 1;
 const SINGLE = 1;
 const PAIR = 2;
 
-const fixturesDir = resolve(import.meta.dirname, "../../../../tests/fixtures/sample-project");
+const FIXTURES_ROOT = resolve(import.meta.dirname, "../../../../tests/fixtures");
+const fixturesDir = resolve(FIXTURES_ROOT, "sample-project");
+const edgeFixturesDir = resolve(FIXTURES_ROOT, "pipeline-edge");
+const borrowsFixturesDir = resolve(FIXTURES_ROOT, "borrows-project");
+const utilFixturesDir = resolve(FIXTURES_ROOT, "util-project");
 
 describe("parse structure", () => {
   it("returns files keyed by path", async () => {
@@ -86,12 +90,6 @@ describe("parse metadata", () => {
   });
 });
 
-const edgeFixturesDir = resolve(import.meta.dirname, "../../../../tests/fixtures/pipeline-edge");
-const borrowsFixturesDir = resolve(
-  import.meta.dirname,
-  "../../../../tests/fixtures/borrows-project",
-);
-
 describe("parse edge cases", () => {
   it("skips @kuralResidual lines with empty audit name", async () => {
     const result = await parse(edgeFixturesDir);
@@ -108,6 +106,45 @@ describe("parse edge cases", () => {
 
     // All lines are @kuralResidual, so description should be undefined
     expect(root.description).toBeUndefined();
+  });
+});
+
+describe("parse @kuralUtil on directories", () => {
+  it("flags a directory whose KURAL.md contains a standalone @kuralUtil line", async () => {
+    const result = await parse(utilFixturesDir);
+    const utils = result.directories[resolve(utilFixturesDir, "utils")];
+
+    expect(utils.util).toBe(true);
+  });
+
+  it("strips the @kuralUtil line from the directory description", async () => {
+    const result = await parse(utilFixturesDir);
+    const utils = result.directories[resolve(utilFixturesDir, "utils")];
+
+    expect(utils.description).toBe(
+      "Cross-domain helpers shared by every other directory in this fixture.",
+    );
+  });
+
+  it("leaves util false when KURAL.md has no directive", async () => {
+    const result = await parse(utilFixturesDir);
+    const root = result.directories[utilFixturesDir];
+
+    expect(root.util).toBe(false);
+  });
+
+  it("does not flip util on prose mentions of @kuralUtil mid-line", async () => {
+    const result = await parse(utilFixturesDir);
+    const blankTag = result.directories[resolve(utilFixturesDir, "blank-tag")];
+
+    expect(blankTag.util).toBe(false);
+  });
+
+  it("leaves util false when no KURAL.md exists at all", async () => {
+    const result = await parse(fixturesDir);
+    const root = result.directories[fixturesDir];
+
+    expect(root.util).toBe(false);
   });
 });
 

@@ -135,6 +135,7 @@ function makeAuditProject(root: string): SeedData {
       identityEmbedding: [E1, E0],
       leafEmbedding: [E1, E0],
       residuals: [],
+      util: false,
     },
   ];
   const files: FileRow[] = [
@@ -256,6 +257,7 @@ describe("visual: audit", () => {
           identityEmbedding: [E1, E0],
           leafEmbedding: [E1, E0],
           residuals: [],
+          util: false,
         },
       ],
       files: [
