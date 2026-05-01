@@ -166,6 +166,13 @@ export type KuralDirectory = KuralUnit & {
   residuals: ResidualEntry[];
   /** Cross-layer borrowing declaration from @kuralBorrows */
   borrows?: BorrowsEntry;
+  /**
+   * Whether the directory is declared cross-domain infrastructure via a
+   * standalone @kuralUtil line in KURAL.md. File-level @kuralUtil is handled
+   * separately — it propagates through extract.ts to functions/types and the
+   * file node is then elevated by propagateUtil's child-consensus rule.
+   */
+  util: boolean;
 };
 
 /** Parsed codebase: files and directories keyed by absolute path. */

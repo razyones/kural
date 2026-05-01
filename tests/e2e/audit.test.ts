@@ -54,6 +54,7 @@ function makeProjectData(root: string): SeedData {
       identityEmbedding: [E09, E01, E01, E0],
       leafEmbedding: [E08, E02, E01, E01],
       residuals: [],
+      util: false,
     },
   ];
 

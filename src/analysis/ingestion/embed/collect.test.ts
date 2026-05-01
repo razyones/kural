@@ -85,6 +85,7 @@ function makeDir(name: string, children: string[], description?: string): KuralD
     children,
     description,
     residuals: [],
+    util: false,
   };
 }
 

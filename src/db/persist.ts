@@ -201,6 +201,7 @@ async function writeDirectories(
       facetHash: d.facetHash,
       residuals: d.residuals,
       borrows: d.borrows,
+      util: d.util,
     })),
   );
 }

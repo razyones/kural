@@ -171,6 +171,7 @@ function twoFileResult(): ParseResult {
         leafEmbedding: LEAF_VEC,
         children: ["src/a.ts", "src/b.ts"],
         residuals: [],
+        util: false,
       },
     },
   };
@@ -297,6 +298,7 @@ function adversarialResult(): ParseResult {
         leafEmbedding: [...POS_X],
         children: ["src/a.ts", "src/b.ts"],
         residuals: [],
+        util: false,
       },
     },
   };

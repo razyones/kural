@@ -127,6 +127,7 @@ function dir(
     identityEmbedding: identity,
     leafEmbedding: leaf ?? identity,
     residuals: [],
+    util: false,
   };
 }
 

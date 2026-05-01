@@ -95,6 +95,7 @@ function makeParseResult(): ParseResult {
         children: ["/src/models/user.ts"],
         description: "Model directory",
         residuals: [],
+        util: false,
       },
     },
   };
@@ -155,6 +156,7 @@ describe("embed root path signal", () => {
           children: ["/src/models"],
           description: "Source root",
           residuals: [],
+          util: false,
         },
       },
     };

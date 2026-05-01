@@ -156,7 +156,7 @@ function directoryNode(dir: KuralDirectory, dirPath: string, childKeys: string[]
     parentKey: null,
     patterns: null,
     companion: null,
-    util: false,
+    util: dir.util,
     helper: false,
     residuals: dir.residuals,
     hash: unitHash(dir),
