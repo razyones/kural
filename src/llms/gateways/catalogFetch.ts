@@ -8,7 +8,7 @@
  * fetch flow instead of repeating it.
  */
 
-import type { CatalogEntry, CatalogFetchParams, PricePerMillionTokens } from "./http.ts";
+import type { CatalogEntry, PricePerMillionTokens } from "./http.ts";
 import {
   ModelNotFoundError,
   adaptThroughput,
@@ -17,6 +17,7 @@ import {
   findModelRecord,
   readFirstEndpoint,
 } from "./http.ts";
+import type { CatalogFetchParams } from "./registry.ts";
 import { isRecord } from "../../utils/record.ts";
 
 const MODELS_PATH = "/models";

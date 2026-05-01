@@ -6,9 +6,10 @@
  * gets touched. It is the only module that defines what an adapter
  * looks like and that enumerates the set of supported gateways at
  * runtime.
+ * @kuralBound inward
  */
 
-import type { CatalogEntry, CatalogFetchParams } from "./http.ts";
+import type { CatalogEntry } from "./http.ts";
 import { ollama } from "./ollama.ts";
 import { openrouter } from "./openrouter.ts";
 import { vercel } from "./vercel.ts";
@@ -19,6 +20,13 @@ import { vercel } from "./vercel.ts";
  * embedding client uses it to allow a placeholder API key for local gateways.
  */
 type GatewayKind = "live" | "local";
+
+/** Canonical input shape every adapter's catalog fetch receives — gateway id, base URL, and resolved model id. */
+type CatalogFetchParams = {
+  gateway: string;
+  baseURL: string;
+  modelId: string;
+};
 
 /**
  * Contract every gateway adapter implements — one module per gateway
@@ -80,4 +88,4 @@ function listGateways(): readonly string[] {
 }
 
 export { GATEWAYS, findGateway, listGateways };
-export type { GatewayAdapter, GatewayKind };
+export type { CatalogFetchParams, GatewayAdapter, GatewayKind };

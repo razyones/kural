@@ -6,8 +6,8 @@
  * JSON field names or that its stats endpoint is gated behind bearer auth.
  */
 
-import type { CatalogEntry, CatalogFetchParams, PricePerMillionTokens } from "./http.ts";
-import type { GatewayAdapter } from "./registry.ts";
+import type { CatalogEntry, PricePerMillionTokens } from "./http.ts";
+import type { CatalogFetchParams, GatewayAdapter } from "./registry.ts";
 import type { OpenAIStyleCatalogSpec } from "./catalogFetch.ts";
 import { fetchOpenAIStyleCatalog } from "./catalogFetch.ts";
 import { parsePerToken } from "./http.ts";
@@ -26,6 +26,7 @@ const THROUGHPUT_KEY = "throughput_last_30m";
  * @returns Per-million USD rates
  * @kuralPure
  * @kuralHelper
+ * @kuralPatterns gatewayPricingAdapter
  */
 function adaptPrice(pricing: Record<string, unknown>): PricePerMillionTokens {
   return {

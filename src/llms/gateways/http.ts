@@ -52,13 +52,6 @@ type CatalogEntry = {
   isReasoning?: boolean;
 };
 
-/** Inputs an adapter's catalog fetch needs — gateway id, base URL, and resolved model id. */
-type CatalogFetchParams = {
-  gateway: string;
-  baseURL: string;
-  modelId: string;
-};
-
 /**
  * Thrown when the configured model id is not offered by the gateway.
  * Fail-fast — the resolver surfaces this to the user rather than
@@ -234,4 +227,4 @@ export {
   parsePerToken,
   readFirstEndpoint,
 };
-export type { CatalogEntry, CatalogFetchParams, NormalizedThroughput, PricePerMillionTokens };
+export type { CatalogEntry, NormalizedThroughput, PricePerMillionTokens };
