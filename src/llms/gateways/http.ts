@@ -71,7 +71,6 @@ class ModelNotFoundError extends Error {
  * @param raw - Price value as the gateway returned it
  * @returns USD per million tokens
  * @kuralPure
- * @kuralUtil
  */
 function parsePerToken(raw: unknown): number {
   const value =
@@ -91,7 +90,6 @@ function parsePerToken(raw: unknown): number {
  * @param init - Optional fetch init (for auth headers)
  * @returns Parsed JSON body, or undefined on any failure
  * @kuralCauses opens a network connection to the given URL
- * @kuralUtil
  */
 async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
   try {
@@ -114,7 +112,6 @@ async function fetchJson(url: string, init?: RequestInit): Promise<unknown> {
  * @param modelId - Exact model id to look up
  * @returns Model record when found, otherwise undefined
  * @kuralPure
- * @kuralUtil
  */
 function findModelRecord(body: unknown, modelId: string): Record<string, unknown> | undefined {
   if (!isRecord(body)) {
@@ -140,7 +137,6 @@ function findModelRecord(body: unknown, modelId: string): Record<string, unknown
  * @param body - Parsed JSON body from the endpoints response
  * @returns First endpoint record, or undefined when the shape is unexpected
  * @kuralPure
- * @kuralUtil
  */
 function readFirstEndpoint(body: unknown): Record<string, unknown> | undefined {
   if (!isRecord(body)) {
@@ -169,7 +165,6 @@ function readFirstEndpoint(body: unknown): Record<string, unknown> | undefined {
  * @param throughputKey - Field name on the endpoint that wraps the p50 streaming rate
  * @returns Normalized throughput, or undefined when the data is absent
  * @kuralPure
- * @kuralUtil
  */
 function adaptThroughput(
   endpoint: Record<string, unknown>,
@@ -200,7 +195,6 @@ function adaptThroughput(
  * @param isReasoning - Authoritative reasoning flag, undefined when the gateway has no signal
  * @returns CatalogEntry with optional fields included only when set
  * @kuralPure
- * @kuralUtil
  */
 function buildCatalogEntry(
   price: PricePerMillionTokens,

@@ -25,7 +25,6 @@ const THROUGHPUT_KEY = "throughput_last_30m";
  * @param pricing - OpenRouter catalog pricing record
  * @returns Per-million USD rates
  * @kuralPure
- * @kuralHelper
  * @kuralPatterns gatewayPricingAdapter
  */
 function adaptPrice(pricing: Record<string, unknown>): PricePerMillionTokens {
@@ -53,7 +52,6 @@ const SPEC: OpenAIStyleCatalogSpec = {
  * @param apiKey - OpenRouter API key; only required for throughput
  * @returns Canonical CatalogEntry, or undefined when unavailable
  * @kuralCauses fetches /v1/models and /v1/models/{id}/endpoints over the network
- * @kuralHelper
  */
 async function fetchCatalog(
   params: CatalogFetchParams,

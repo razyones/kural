@@ -31,7 +31,6 @@ const STATIC_ENTRY: CatalogEntry = { price: FREE_PRICES };
  * and no API key is consulted.
  * @returns Canonical CatalogEntry with all-zero prices
  * @kuralPure
- * @kuralHelper
  */
 async function fetchCatalog(): Promise<CatalogEntry> {
   await Promise.resolve();

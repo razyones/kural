@@ -27,7 +27,6 @@ const REASONING_TAG = "reasoning";
  * @param pricing - Vercel catalog pricing record
  * @returns Per-million USD rates
  * @kuralPure
- * @kuralHelper
  * @kuralPatterns gatewayPricingAdapter
  */
 function adaptPrice(pricing: Record<string, unknown>): PricePerMillionTokens {
@@ -71,7 +70,6 @@ const SPEC: OpenAIStyleCatalogSpec = {
  * @param apiKey - Ignored by Vercel; the catalog endpoints are unauthed
  * @returns Canonical CatalogEntry, or undefined when unavailable
  * @kuralCauses fetches /v1/models and /v1/models/{id}/endpoints over the network
- * @kuralHelper
  */
 async function fetchCatalog(
   params: CatalogFetchParams,
