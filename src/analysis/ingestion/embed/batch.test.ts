@@ -1,5 +1,5 @@
-import { createEmbeddingModel, embedSignatures } from "./model.ts";
 import { describe, expect, it, vi } from "vite-plus/test";
+import { embedSignatures } from "./batch.ts";
 
 const NONE = 0;
 const ARRAY_SECOND = 1;
@@ -15,64 +15,6 @@ async function testEmbed(values: string[]): Promise<number[][]> {
   });
   return result;
 }
-
-describe("createEmbeddingModel gateways", () => {
-  it("throws for unsupported gateway", () => {
-    expect(() => createEmbeddingModel({ gateway: "unknown" })).toThrow(
-      "Unsupported embedding gateway",
-    );
-  });
-
-  it("returns default model id for known gateway", () => {
-    const { modelId } = createEmbeddingModel({ gateway: "openrouter", apiKey: "test" });
-    expect(modelId).toBe("google/gemini-embedding-001");
-  });
-
-  it("uses config model override", () => {
-    const { modelId } = createEmbeddingModel({
-      gateway: "openai",
-      model: "text-embedding-3-large",
-      apiKey: "test",
-    });
-    expect(modelId).toBe("text-embedding-3-large");
-  });
-
-  it("uses ollama defaults without requiring apiKey", () => {
-    const { modelId } = createEmbeddingModel({ gateway: "ollama" });
-    expect(modelId).toBe("qwen3-embedding:latest");
-  });
-
-  it("returns default model id for vercel gateway", () => {
-    const { modelId } = createEmbeddingModel({ gateway: "vercel", apiKey: "test" });
-    expect(modelId).toBe("google/gemini-embedding-2");
-  });
-});
-
-describe("createEmbeddingModel config options", () => {
-  it("omits baseURL when empty string", () => {
-    const { modelId } = createEmbeddingModel({ gateway: "openai", baseURL: "", apiKey: "test" });
-    expect(modelId).toBe("text-embedding-3-small");
-  });
-
-  it("omits apiKey when empty string", () => {
-    const { modelId } = createEmbeddingModel({ gateway: "openai", apiKey: "" });
-    expect(modelId).toBe("text-embedding-3-small");
-  });
-
-  it("uses custom baseURL when provided", () => {
-    const { modelId } = createEmbeddingModel({
-      gateway: "openai",
-      baseURL: "https://custom.api.example.com/v1",
-      apiKey: "test",
-    });
-    expect(modelId).toBe("text-embedding-3-small");
-  });
-
-  it("returns an embed function", () => {
-    const { embed } = createEmbeddingModel({ gateway: "openai", apiKey: "test" });
-    expect(typeof embed).toBe("function");
-  });
-});
 
 describe("embedSignatures empty input", () => {
   it("returns empty array and skips embed call", async () => {

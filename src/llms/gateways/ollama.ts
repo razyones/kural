@@ -11,6 +11,8 @@ import type { CatalogEntry, PricePerMillionTokens } from "./http.ts";
 import type { GatewayAdapter } from "./registry.ts";
 
 const OLLAMA_ID = "ollama";
+const DEFAULT_BASE_URL = "http://localhost:11434/v1";
+const DEFAULT_EMBEDDING_MODEL = "qwen3-embedding:latest";
 const FREE = 0;
 
 /** Per-million USD rates pinned at zero across every billable line. */
@@ -29,7 +31,6 @@ const STATIC_ENTRY: CatalogEntry = { price: FREE_PRICES };
  * and no API key is consulted.
  * @returns Canonical CatalogEntry with all-zero prices
  * @kuralPure
- * @kuralHelper
  */
 async function fetchCatalog(): Promise<CatalogEntry> {
   await Promise.resolve();
@@ -39,9 +40,10 @@ async function fetchCatalog(): Promise<CatalogEntry> {
 /** Ollama adapter — registers under id "ollama" with kind "local" and a no-op fetchCatalog. */
 const ollama: GatewayAdapter = {
   id: OLLAMA_ID,
+  baseURL: DEFAULT_BASE_URL,
+  defaultEmbeddingModel: DEFAULT_EMBEDDING_MODEL,
   defaultApiKeyEnv: undefined,
   kind: "local",
-  catalogRequiresAuth: false,
   fetchCatalog,
 };
 

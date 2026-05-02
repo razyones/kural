@@ -34,14 +34,14 @@ describe("resolvePricing", () => {
   it("throws PricingResolutionError(unknown-gateway) when no adapter is registered", async () => {
     await expect(
       resolvePricing({
-        gateway: "openai",
-        baseURL: "https://api.openai.com/v1",
-        modelId: "gpt-4o",
+        gateway: "anthropic",
+        baseURL: "https://api.anthropic.com/v1",
+        modelId: "claude-sonnet-4-7",
       }),
     ).rejects.toMatchObject({
       name: "PricingResolutionError",
       reason: "unknown-gateway",
-      gateway: "openai",
+      gateway: "anthropic",
     });
     expect(fetchMock).not.toHaveBeenCalled();
   });

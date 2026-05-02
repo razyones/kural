@@ -96,10 +96,11 @@ function toResolution(adapter: GatewayAdapter, entry: CatalogEntry): PriceResolu
 
 /**
  * Resolves prices + optional throughput by looking up a gateway adapter and
- * calling its catalog fetch. Throws UnknownGatewayError when no adapter is
- * registered, CatalogUnavailableError when the catalog call fails transiently,
- * and ModelNotFoundError when the catalog is reachable but doesn't list the
- * requested model id.
+ * calling its catalog fetch. Throws PricingResolutionError(unknown-gateway)
+ * when no adapter is registered, PricingResolutionError(catalog-unavailable)
+ * when the catalog call fails transiently or the matched record has no
+ * pricing sub-record, and ModelNotFoundError when the catalog is reachable
+ * but doesn't list the requested model id.
  * @param input - Resolved gateway id, base URL, and model id
  * @returns Canonical PriceResolution with provenance label
  * @kuralCauses calls the gateway adapter's fetchCatalog (which may open a network connection)

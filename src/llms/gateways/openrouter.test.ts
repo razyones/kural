@@ -1,4 +1,4 @@
-import { adaptPrice, adaptThroughput, openrouter } from "./openrouter.ts";
+import { adaptPrice, openrouter } from "./openrouter.ts";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
 import { ModelNotFoundError } from "./http.ts";
 import { jsonResponse } from "../../../tests/helpers/http.ts";
@@ -26,17 +26,6 @@ describe("adaptPrice", () => {
     expect(price.output).toBeCloseTo(MINIMAX_OUTPUT);
     expect(price.cacheRead).toBeCloseTo(MINIMAX_CACHE_READ);
     expect(price.cacheWrite).toBe(NONE);
-  });
-});
-
-describe("adaptThroughput", () => {
-  it("reads latency_last_30m.p50 (ms) and throughput_last_30m.p50 into canonical units", () => {
-    const throughput = adaptThroughput({
-      latency_last_30m: { p50: MS_TTFT },
-      throughput_last_30m: { p50: EXPECTED_TPS },
-    });
-    expect(throughput?.ttftSeconds).toBeCloseTo(EXPECTED_TTFT);
-    expect(throughput?.tokensPerSecond).toBeCloseTo(EXPECTED_TPS);
   });
 });
 
@@ -166,17 +155,6 @@ describe("openrouter.fetchCatalog", () => {
       API_KEY,
     );
     expect(entry?.throughput).toBeUndefined();
-  });
-});
-
-describe("adaptThroughput edge cases", () => {
-  it("returns undefined when latency or throughput fields are non-numeric", () => {
-    expect(
-      adaptThroughput({
-        latency_last_30m: { p50: "nope" },
-        throughput_last_30m: { p50: EXPECTED_TPS },
-      }),
-    ).toBeUndefined();
   });
 });
 

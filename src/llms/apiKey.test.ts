@@ -1,14 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
-import { resolveGatewayApiKey, resolveLLMApiKey } from "./apiKey.ts";
 import type { CatalogEntry } from "./gateways/http.ts";
 import type { GatewayAdapter } from "./gateways/registry.ts";
+import { resolveGatewayApiKey } from "./apiKey.ts";
 
 const OVERRIDE_ENV = "MY_CUSTOM_KEY";
 const OVERRIDE_VALUE = "sk-override";
 const ADAPTER_ENV = "ADAPTER_DEFAULT";
 const ADAPTER_VALUE = "sk-adapter";
 const FALLBACK_ENV = "AI_GATEWAY_API_KEY";
-const FALLBACK_VALUE = "sk-fallback";
 const VERCEL_KEY_ENV = "VERCEL_KEY";
 
 async function stubFetchCatalog(): Promise<CatalogEntry | undefined> {
@@ -19,9 +18,10 @@ async function stubFetchCatalog(): Promise<CatalogEntry | undefined> {
 function makeAdapter(defaultApiKeyEnv: string | undefined): GatewayAdapter {
   return {
     id: "fake",
+    baseURL: "https://example.test/v1",
+    defaultEmbeddingModel: "fake-embedding",
     defaultApiKeyEnv,
     kind: "live",
-    catalogRequiresAuth: false,
     fetchCatalog: stubFetchCatalog,
   };
 }
@@ -70,43 +70,5 @@ describe("resolveGatewayApiKey", () => {
     const resolved = resolveGatewayApiKey(makeAdapter(ADAPTER_ENV));
     expect(resolved.envName).toBe(ADAPTER_ENV);
     expect(resolved.apiKey).toBeUndefined();
-  });
-});
-
-describe("resolveLLMApiKey", () => {
-  afterEach(() => {
-    vi.unstubAllEnvs();
-  });
-
-  it("dispatches through the gateway registry when an adapter is registered", () => {
-    clearAllEnv();
-    vi.stubEnv(FALLBACK_ENV, FALLBACK_VALUE);
-    const resolved = resolveLLMApiKey("vercel");
-    expect(resolved.envName).toBe(FALLBACK_ENV);
-    expect(resolved.apiKey).toBe(FALLBACK_VALUE);
-  });
-
-  it("applies a per-gateway override for a registered adapter", () => {
-    clearAllEnv();
-    vi.stubEnv(VERCEL_KEY_ENV, OVERRIDE_VALUE);
-    const resolved = resolveLLMApiKey("vercel", { vercel: { apiKeyEnv: VERCEL_KEY_ENV } });
-    expect(resolved.envName).toBe(VERCEL_KEY_ENV);
-    expect(resolved.apiKey).toBe(OVERRIDE_VALUE);
-  });
-
-  it("uses AI_GATEWAY_API_KEY as the universal fallback for unregistered gateways", () => {
-    clearAllEnv();
-    vi.stubEnv(FALLBACK_ENV, FALLBACK_VALUE);
-    const resolved = resolveLLMApiKey("openai");
-    expect(resolved.envName).toBe(FALLBACK_ENV);
-    expect(resolved.apiKey).toBe(FALLBACK_VALUE);
-  });
-
-  it("lets the per-gateway override win for unregistered gateways too", () => {
-    clearAllEnv();
-    vi.stubEnv(OVERRIDE_ENV, OVERRIDE_VALUE);
-    const resolved = resolveLLMApiKey("openai", { openai: { apiKeyEnv: OVERRIDE_ENV } });
-    expect(resolved.envName).toBe(OVERRIDE_ENV);
-    expect(resolved.apiKey).toBe(OVERRIDE_VALUE);
   });
 });

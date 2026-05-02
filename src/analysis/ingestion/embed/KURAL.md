@@ -1,1 +1,1 @@
-Turns descriptive inputs into numerical vectors through weighted blending and batched API calls. It is the only module that crosses the network to produce vectors — no other part of the system calls external model APIs or blends numerical representations.
+Turns parsed code units into numerical vectors through facet-text assembly, weighted blending, content-hashed caching, and bounded-concurrency batching. It is the only module that decides what to embed, how to combine signals, what to skip when nothing changed, and how many calls to issue in parallel.

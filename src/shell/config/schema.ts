@@ -6,17 +6,17 @@
  * defines the combined configuration shape.
  */
 
-import type { EmbeddingsConfig, LLMConfig } from "./models.ts";
 import type { AuditsConfig } from "./audits.ts";
 import type { BriefCaps } from "../../analysis/brief/types.ts";
+import type { GatewayConfig } from "../../llms/config.ts";
 import type { GatewayOverride } from "../../llms/apiKey.ts";
 
 /** Top-level application configuration — joins audit, embedding, LLM, keyword, and dictionary settings. */
 type KuralConfig = {
   /** Embedding gateway and model settings */
-  embeddings: EmbeddingsConfig;
+  embeddings: GatewayConfig;
   /** LLM gateway settings for translation (used with --llm-organize / --llm-query) */
-  llm?: LLMConfig;
+  llm?: GatewayConfig;
   /** Per-id env-var overrides applied to both embeddings and llm — keyed by gateway id. */
   gateways?: Record<string, GatewayOverride>;
   /** Domain keywords for path signal context (top 3 auto-selected) */

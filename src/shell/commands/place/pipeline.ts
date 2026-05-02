@@ -8,7 +8,7 @@
 import { activePath, closeSnapshot, currentBranch, openSnapshot } from "../../../db/snapshot.ts";
 import type { PlacementResult } from "../../../analysis/place/types.ts";
 import { buildTree } from "../../../analysis/tree/tree.ts";
-import { createEmbeddingModel } from "../../../analysis/ingestion/embed/model.ts";
+import { createEmbeddingModel } from "../../../llms/embedding.ts";
 import { existsSync } from "node:fs";
 import { loadProjectConfig } from "../../config/loader.ts";
 import { place } from "../../../analysis/place/engine.ts";
